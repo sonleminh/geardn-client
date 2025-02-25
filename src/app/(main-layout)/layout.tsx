@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 // import { ColorModeProvider } from '@/contexts/ColorModeContext';
 import { AuthStoreProvider } from '@/providers/auth-store-provider';
 import Layout from '@/components/common/sharing/layout';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
 import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
@@ -13,6 +13,8 @@ import 'swiper/css/free-mode';
 import 'swiper/css/scrollbar';
 import 'swiper/css/thumbs';
 import 'swiper/css';
+import { useColorModeStore } from '@/stores/color-mode-store';
+import ColorModeProvider from '@/providers/color-mode-store-provider';
 // import { NotificationContextProvider } from '@/contexts/NotificationContext';
 
 const inter = Inter({
@@ -32,12 +34,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <CssBaseline />
-      <body className={inter.className}>
-        {/* <AuthStoreProvider> */}
-        <Layout>{children}</Layout>
-        {/* </AuthStoreProvider> */}
-      </body>
+      <ColorModeProvider>
+        <CssBaseline />
+        <body className={inter.className}>
+          <Layout>{children}</Layout>
+        </body>
+      </ColorModeProvider>
     </html>
   );
 }

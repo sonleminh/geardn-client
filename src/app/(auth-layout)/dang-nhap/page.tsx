@@ -1,6 +1,5 @@
 'use client';
 
-import bg from '@/../../public/setup-backgroud.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { BASE_API_URL } from '@/constants/env';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -26,6 +25,7 @@ import Cookies from 'js-cookie';
 import { useAuthStore } from '@/providers/auth-store-provider';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { loginAPI } from '@/services/auth/api';
+import { bg } from '@/../public/setup-backgroud.jpg';
 
 export default function Login() {
   const router = useRouter();

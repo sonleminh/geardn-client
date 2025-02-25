@@ -9,8 +9,8 @@ import Explore from './components/explore';
 import { useColorModeStore } from '@/stores/color-mode-store';
 
 export default function Homepage() {
-  //   const bears = useColorModeStore((state) => state.mode);
-  //   console.log('bears', bears);
+  const bears = useColorModeStore((state) => state.mode);
+  console.log('bears', bears);
   return (
     <Box sx={{ pb: 10 }}>
       <Box

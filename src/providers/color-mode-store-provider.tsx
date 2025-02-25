@@ -1,41 +1,26 @@
-// // src/providers/counter-store-provider.tsx
-// 'use client';
+'use client';
 
-// import { type ReactNode, createContext, useRef, useContext } from 'react';
-// import { useStore } from 'zustand';
-// import { ColorModeStore } from '@/stores/color-mode-store';
+import { useColorModeStore } from '@/stores/color-mode-store';
+import { ThemeProvider, createTheme } from '@mui/material';
+import { ReactNode } from 'react';
 
-// export type ColorModeStoreApi = ReturnType<typeof colorModeStore>;
-
-// export const ColorModeStoreContext = createContext<
-//   ColorModeStoreApi | undefined
-// >(undefined);
-
-// export interface ColorModeStoreProviderProps {
-//   children?: ReactNode;
-// }
-
-// export const ColorModeStoreProvider = ({
-//   children,
-// }: ColorModeStoreProviderProps) => {
-//   const storeRef = useRef<ColorModeStoreApi>();
-//   if (!storeRef.current) {
-//     storeRef.current = colorModeStore();
-//   }
-
-//   return (
-//     <ColorModeStoreContext.Provider value={storeRef.current}>
-//       {children}
-//     </ColorModeStoreContext.Provider>
-//   );
-// };
-
-// export const useAuthStore = <T,>(selector: (store: ColorModeStore) => T): T => {
-//   const colorModeStoreContext = useContext(ColorModeStoreContext);
-
-//   if (!ColorModeStoreContext) {
-//     throw new Error(`useCounterStore must be used within CounterStoreProvider`);
-//   }
-
-//   return useStore(colorModeStoreContext, selector);
-// };
+export default function ColorModeProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const { mode } = useColorModeStore();
+  const darkTheme = createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: '#000',
+        light: '#3d55ef',
+      },
+    },
+    typography: {
+      fontFamily: 'unset',
+    },
+  });
+  return <ThemeProvider theme={darkTheme}>{children}</ThemeProvider>;
+}

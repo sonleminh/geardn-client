@@ -1,12 +1,11 @@
-import React, { useContext } from 'react';
+import { useColorModeStore } from '@/stores/color-mode-store';
 import { Box, useTheme } from '@mui/material';
 import Brightness3Icon from '@mui/icons-material/Brightness3';
 import LightModeIcon from '@mui/icons-material/LightMode';
-// import { ColorModeContext } from '@/contexts/ColorModeContext';
 
 const DarkModeBtn = () => {
   const theme = useTheme();
-  // const context = useContext(ColorModeContext);
+  const { toggleColorMode } = useColorModeStore();
   return (
     <Box
       sx={{
@@ -25,8 +24,7 @@ const DarkModeBtn = () => {
         cursor: 'pointer',
         zIndex: 69,
       }}
-      // onClick={context.toggleColorMode}
-    >
+      onClick={toggleColorMode}>
       {theme.palette.mode === 'light' ? (
         <Brightness3Icon sx={{ fontSize: 13 }} />
       ) : (

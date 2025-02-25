@@ -21,10 +21,10 @@ const Layout = ({ children }: LayoutType) => {
   const [showHeader, setShowHeader] = useState(true);
   const [showFullWidthHeader, setShowFullWidthHeader] = useState(false);
 
-  // useEffect(() => {
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => window.removeEventListener('scroll', handleScroll);
-  // }, []);
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -55,7 +55,6 @@ const Layout = ({ children }: LayoutType) => {
       <DarkModeBtn />
       <Box
         sx={{
-          // minHeight: 'calc(100vh - 241.23px)',
           pt: pathname !== '/' ? '80px' : '0',
         }}>
         {children}
