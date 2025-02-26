@@ -1,6 +1,11 @@
 'use client';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { signUpAPI } from '@/services/auth/api';
+import { useNotificationStore } from '@/stores/notification-store';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import LockIcon from '@mui/icons-material/Lock';
+import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import {
   Box,
   Button,
@@ -11,23 +16,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { ChangeEvent, useState } from 'react';
-import bg from '@/../../public/setup-backgroud.jpg';
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
-import * as yup from 'yup';
 import { useFormik } from 'formik';
-import LockIcon from '@mui/icons-material/Lock';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import useSWR from 'swr';
-import { useGetFake } from '@/services/queries';
-import { fetcher } from '@/services/fetcher';
 import Link from 'next/link';
-import { BASE_API_URL } from '@/constants/env';
 import { useRouter } from 'next/navigation';
-import { signUpAPI } from '@/services/auth/api';
+import { ChangeEvent, useState } from 'react';
 
 export default function SignUp() {
   const router = useRouter();
+  const { showNotification } = useNotificationStore();
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const formik = useFormik({
@@ -35,11 +31,10 @@ export default function SignUp() {
     // validationSchema: schema,
     validateOnChange: false,
     async onSubmit(values) {
-      // signInMutation.mutate(values);
       const result = await signUpAPI(values);
-      console.log('result', result);
       if (result.id) {
-        router.push('/tai-khoan');
+        router.push('/dang-nhap');
+        showNotification('Tạo tài khoản thành công', 'success');
       }
     },
   });
@@ -58,8 +53,7 @@ export default function SignUp() {
         height: '100vh',
         bgcolor: '#D7D6D9',
       }}>
-      c
-      {/* <Box
+      <Box
         sx={{
           width: 1000,
           mx: 'auto',
@@ -79,7 +73,7 @@ export default function SignUp() {
                   objectFit: 'cover',
                 },
               }}>
-              <SkeletonImage src={bg} alt='cc' />
+              <SkeletonImage src={'/setup-background.jpg'} alt='geardn' />
             </Box>
           </Grid2>
           <Grid2
@@ -231,13 +225,13 @@ export default function SignUp() {
             </Box>
             <Typography sx={{ mb: 2 }}>
               Already have an account?{' '}
-              <Link href={'/tai-khoan'}>
+              <Link href={'/dang-nhap'}>
                 <Typography component={'span'}>Login</Typography>
               </Link>
             </Typography>
           </Grid2>
         </Grid2>
-      </Box> */}
+      </Box>
     </Box>
   );
 }

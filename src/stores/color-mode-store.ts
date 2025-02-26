@@ -1,15 +1,12 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
-export type ColorModeState = {
+import { devtools, persist } from "zustand/middleware";
+type ColorModeState = {
   mode: 'light' | 'dark';
   toggleColorMode: () => void;
 }
 
-export type ColorModeStore = ColorModeState
-
 export const useColorModeStore = create<ColorModeState>()(
-  persist(
+  devtools(persist(
     (set) => ({
       mode: 'light',
       toggleColorMode: () =>
@@ -18,5 +15,5 @@ export const useColorModeStore = create<ColorModeState>()(
         }),
     }),
     { name: 'color-mode-storage' } // 🛒 Persists cart for guest users
-  )
+  ))
 );

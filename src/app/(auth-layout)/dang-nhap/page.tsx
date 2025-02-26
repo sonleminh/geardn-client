@@ -22,14 +22,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 import Cookies from 'js-cookie';
-import { useAuthStore } from '@/providers/auth-store-provider';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { loginAPI } from '@/services/auth/api';
-import { bg } from '@/../public/setup-backgroud.jpg';
+import { useAuthStore } from '@/stores/auth-store';
+import { useNotificationStore } from '@/stores/notification-store';
 
 export default function Login() {
   const router = useRouter();
-  // const { login } = useAuthStore((state) => state);
+  const { login } = useAuthStore((state) => state);
+  const { showNotification } = useNotificationStore();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -39,16 +40,16 @@ export default function Login() {
     validateOnChange: false,
     async onSubmit(values) {
       const userData = await loginAPI(values);
-      // mutate(userData, false);
-      // login({
-      //   id: userData?.id,
-      //   email: userData?.email,
-      //   name: userData?.name,
-      // });
-      // console.log('userData', userData);
-      // if (userData?.id) {
-      //   router.push('/tai-khoan');
-      // }
+
+      login({
+        id: userData?.id,
+        email: userData?.email,
+        name: userData?.name,
+      });
+      if (userData?.id) {
+        router.push('/tai-khoan');
+        showNotification('Đăng nhập thành công', 'success');
+      }
     },
   });
 
@@ -105,7 +106,7 @@ export default function Login() {
                   objectFit: 'cover',
                 },
               }}>
-              <SkeletonImage src={bg} alt='geardn' />
+              <SkeletonImage src={'/setup-background.jpg'} alt='geardn' />
             </Box>
           </Grid2>
           <Grid2
@@ -121,7 +122,6 @@ export default function Login() {
                 <Typography
                   sx={{
                     mb: 1,
-                    textTransform: 'uppercase',
                     fontSize: 20,
                     fontWeight: 600,
                   }}>

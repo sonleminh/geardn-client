@@ -10,6 +10,7 @@ import FullWidthHeader from '../fullwidth-header';
 import ScrollToTopBtn from '../scroll-to-top-btn';
 
 import { Box } from '@mui/material';
+import { Notification } from '../notification';
 
 type LayoutType = {
   children?: React.ReactNode;
@@ -59,6 +60,7 @@ const Layout = ({ children }: LayoutType) => {
         }}>
         {children}
       </Box>
+      <Notification />
       <Footer />
     </>
   );

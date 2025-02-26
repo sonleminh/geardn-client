@@ -1,7 +1,6 @@
 'use client';
 
 import LOGO from '@/assets/geardn-logo.png';
-import { useAuthStore } from '@/providers/auth-store-provider';
 import { logoutAPI } from '@/services/auth/api';
 // import { useGetCart } from '@/services/cart/api';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -26,6 +25,7 @@ import { FullWidthHeaderStyle } from './style';
 import { ROUTES } from '@/constants/route';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import { useAuthStore } from '@/stores/auth-store';
 
 const FullWidthHeader = ({
   showFullWidthHeader,
@@ -35,9 +35,10 @@ const FullWidthHeader = ({
   const router = useRouter();
   // const { cart, isLoading } = useGetCart();
   const pathname = usePathname();
-  // const { user, logout } = useAuthStore((state) => state);
+  const { user, logout } = useAuthStore((state) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  console.log(anchorEl);
   // useEffect(() => {
   //   const at = Cookies.get('at');
   //   if (user?.id && !at) {
@@ -61,21 +62,21 @@ const FullWidthHeader = ({
     setAnchorEl(null);
   };
 
-  // const handleLogout = async () => {
-  //   const result = await logoutAPI();
-  //   if (result?.statusCode === 200) {
-  //     logout();
-  //     router.push(ROUTES.LOGIN);
-  //   }
-  // };
+  const handleLogout = async () => {
+    const result = await logoutAPI();
+    if (result?.statusCode === 200) {
+      logout();
+      router.push(ROUTES.LOGIN);
+    }
+  };
 
-  // const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   if (user === null) {
-  //     router.push(ROUTES.LOGIN);
-  //   } else {
-  //     setAnchorEl(event.currentTarget);
-  //   }
-  // };
+  const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (user === null) {
+      router.push(ROUTES.LOGIN);
+    } else {
+      setAnchorEl(event.currentTarget);
+    }
+  };
   return (
     <Box sx={FullWidthHeaderStyle(pathname, showFullWidthHeader)}>
       <LayoutContainer>
@@ -172,7 +173,7 @@ const FullWidthHeader = ({
                   {cart?.items ? cart.items.length : isLoading ? '' : 0}
                 </Typography> */}
               </Button>
-              {/* {user !== null ? (
+              {user !== null ? (
                 user?.picture ? (
                   <Button
                     sx={{
@@ -209,7 +210,7 @@ const FullWidthHeader = ({
                   onClick={handleUserClick}>
                   <AccountCircleIcon sx={{ fontSize: 30 }} />
                 </Button>
-              )} */}
+              )}
               <Menu
                 id='basic-menu'
                 anchorEl={anchorEl}
@@ -223,7 +224,7 @@ const FullWidthHeader = ({
                 <MenuItem component={Link} href={ROUTES.PURCHASE}>
                   Đơn mua
                 </MenuItem>
-                {/* <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem> */}
+                <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
               </Menu>
             </Box>
           </Grid2>

@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
-import { AuthStoreProvider } from '@/providers/auth-store-provider';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { CssBaseline } from '@mui/material';
 
 const inter = Inter({
@@ -22,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <GoogleOAuthProvider clientId='74957006221-6mm4u0inm5drqgrt1hpoiagugbuhoav6.apps.googleusercontent.com'>
-      <html lang='en'>
+      <html lang='en' suppressHydrationWarning>
         <CssBaseline />
         <body className={inter.className}>
           {children}

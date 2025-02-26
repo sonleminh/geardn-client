@@ -19,7 +19,6 @@ import {
   Typography,
 } from '@mui/material';
 
-import { useAuthStore } from '@/providers/auth-store-provider';
 // import { useGetCart } from '@/services/cart/api';
 import { logoutAPI } from '@/services/auth/api';
 import { ROUTES } from '@/constants/route';
@@ -27,11 +26,12 @@ import { ROUTES } from '@/constants/route';
 import SkeletonImage from '../../SkeletonImage';
 import LOGO from '@/assets/geardn-logo.png';
 import { HeaderStyle } from './style';
+import { useAuthStore } from '@/stores/auth-store';
 
 const Header = ({ showHeader }: { showHeader: boolean }) => {
   const router = useRouter();
   // const { cart, isLoading } = useGetCart();
-  // const { user, logout } = useAuthStore((state) => state);
+  const { user, logout } = useAuthStore((state) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // useEffect(() => {
@@ -57,21 +57,21 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
     setAnchorEl(null);
   };
 
-  // const handleLogout = async () => {
-  //   const result = await logoutAPI();
-  //   if (result?.statusCode === 200) {
-  //     logout();
-  //     router.push('/dang-nhap');
-  //   }
-  // };
-
-  // const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   if (user === null) {
-  //     router.push('/dang-nhap');
-  //   } else {
-  //     setAnchorEl(event.currentTarget);
-  //   }
-  // };
+  const handleLogout = async () => {
+    const result = await logoutAPI();
+    if (result?.statusCode === 200) {
+      logout();
+      router.push(ROUTES.LOGIN);
+    }
+  };
+  console.log('user', user);
+  const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (user === null) {
+      router.push(ROUTES.LOGIN);
+    } else {
+      setAnchorEl(event.currentTarget);
+    }
+  };
   return (
     <Box sx={HeaderStyle(showHeader)}>
       <Grid2 container height={80}>
@@ -163,7 +163,7 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
                 {cart?.items ? cart.items.length : isLoading ? '' : 0}
               </Typography> */}
             </Button>
-            {/* {user !== null ? (
+            {user !== null ? (
               user?.picture ? (
                 <Button
                   sx={{
@@ -198,7 +198,7 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
                 onClick={handleUserClick}>
                 <AccountCircleIcon sx={{ fontSize: 30 }} />
               </Button>
-            )} */}
+            )}
             <Menu
               id='basic-menu'
               anchorEl={anchorEl}
@@ -210,7 +210,7 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
               disableScrollLock={true}>
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
-              {/* <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem> */}
+              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
           </Box>
         </Grid2>

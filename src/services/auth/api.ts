@@ -1,9 +1,5 @@
-// import { QueryKeys } from '@/components/constants/query-key';
-// import { useQuery } from '@tanstack/react-query';
-
 import { postRequest } from '@/utils/fetch-client';
-import { BASE_API_URL } from '@/constants/env';
-import { ILogInResponse, ILogoutResponse, ISignUpPayload, ISignUpResponse } from '@/interfaces/IAuth';
+import { ILogInResponse, ILogoutResponse, ISignUpResponse } from '@/interfaces/IAuth';
 
 export async function loginAPI(payload: {email: string, password: string}) {
   try {
