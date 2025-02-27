@@ -1,16 +1,21 @@
-'use client';
-
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/common/sharing/layout-container';
 import { Box, Button, InputBase, Typography } from '@mui/material';
 import ProductList from './components/product-list';
-import Explore from './components/explore';
-import { useColorModeStore } from '@/stores/color-mode-store';
+import { getProductListApi } from '@/services/product/api';
+import { getCategoryListApi } from '@/services/category/api';
 
-export default function Homepage() {
-  const bears = useColorModeStore((state) => state.mode);
-  console.log('bears', bears);
+export default async function Homepage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const params = await searchParams;
+  const page = params?.page ?? '1';
+  const productsData = await getProductListApi(page);
+  const categoriesData = await getCategoryListApi();
+
   return (
     <Box sx={{ pb: 10 }}>
       <Box
@@ -42,7 +47,13 @@ export default function Homepage() {
           priority
         />
       </Box>
-      <section id='shop'>{/* <ProductList /> */}</section>
+      <section id='shop'>
+        <ProductList
+          productsData={productsData}
+          categoriesData={categoriesData}
+          currentPage={Number(page)}
+        />
+      </section>
       {/* <Explore /> */}
       <LayoutContainer>
         <Box

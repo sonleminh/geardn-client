@@ -53,10 +53,10 @@ export async function middleware(request: NextRequest) {
           googleCredentials?.value
         ) as ICustomJwtPayload;
         if (credentialDecoded) {
-          user = { _id: credentialDecoded?.sub, email: credentialDecoded?.email, name: credentialDecoded?.name || '' }; 
+          user = { id: credentialDecoded?.sub, email: credentialDecoded?.email, name: credentialDecoded?.name || '' }; 
         }
     }
-  if(!googleCredentials)
+  if(!googleCredentials && accessToken)
     {
     user = await whoami(accessToken)
     if (!user?.id && refreshToken) {

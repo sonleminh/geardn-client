@@ -27,7 +27,6 @@ export const useCartStore = create<CartState>()(
       addToCart: (item) =>
         set((state) => {
           const existingItem = state.cartItems.find((i) => i.skuId === item.skuId);
-          console.log('cc', existingItem)
           if (existingItem) {
             return {
               cartItems: state.cartItems.map((i) =>

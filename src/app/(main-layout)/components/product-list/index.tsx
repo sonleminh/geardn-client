@@ -1,10 +1,8 @@
 'use client';
 
-import AppLink from '@/components/common/AppLink';
 import ProductCard from '@/components/common/ProductCard';
-import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/common/sharing/layout-container';
-import { useGetCategories, useGetProducts } from '@/services/product/api';
+import { TProductsRes } from '@/services/product/api';
 import {
   Box,
   FormControl,
@@ -14,21 +12,32 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductListStyle } from './style';
-import { useState } from 'react';
-import { IQuery } from '@/interfaces/IQuery';
+import { TCategoriesRes } from '@/services/category/api';
+import AppLink from '@/components/common/AppLink';
+import SkeletonImage from '@/components/common/SkeletonImage';
 
-const ProductList = () => {
-  const [query, setQuery] = useState<IQuery>({
-    limit: 4,
-    page: 1,
-  });
-  console.log('query:', query);
-  const { products } = useGetProducts(query);
-  const { categories } = useGetCategories();
+const ProductList = ({
+  productsData,
+  categoriesData,
+  currentPage,
+}: {
+  productsData: TProductsRes;
+  categoriesData: TCategoriesRes;
+  currentPage: number;
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  console.log('categories', categoriesData);
 
-  const handleChangeQuery = (object: Partial<IQuery>) => {
-    setQuery((prev) => ({ ...prev, ...object }));
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    router.push(`?${params.toString()}`, { scroll: false });
   };
   return (
     <LayoutContainer>
@@ -47,7 +56,7 @@ const ProductList = () => {
               }}>
               <Typography className='category-heading'>Danh mục</Typography>
               <List>
-                {categories?.categories.map((item) => (
+                {categoriesData?.categories?.map((item) => (
                   <AppLink
                     href={item?.slug}
                     key={item.id}
@@ -86,7 +95,7 @@ const ProductList = () => {
                   width: '100%',
                   mb: 1,
                 }}>
-                <Typography>Tìm thấy {products?.total} kết quả</Typography>
+                {/* <Typography>Tìm thấy {products?.total} kết quả</Typography> */}
                 <FormControl sx={{ width: '120px' }} size='small'>
                   {/* <InputLabel variant='standard' htmlFor='uncontrolled-native'>
                     Age
@@ -131,20 +140,29 @@ const ProductList = () => {
                 </FormControl>
               </Box>
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                {products?.products?.map((item, index) => (
+                {productsData?.products?.map((item, index) => (
                   <Grid2 key={index} size={4}>
                     <ProductCard data={item} />
                   </Grid2>
                 ))}
               </Grid2>
-              <Pagination
+
+              {/* <Pagination
                 sx={{ display: 'flex', justifyContent: 'center' }}
-                count={Math.ceil((products?.total ?? 0) / query.limit!)}
+                count={Math.ceil((data?.total ?? 0) / 1!)}
                 page={query.page ?? 0}
                 onChange={(_: React.ChangeEvent<unknown>, newPage) => {
                   handleChangeQuery({ page: newPage });
                 }}
                 defaultPage={query.page ?? 1}
+                showFirstButton
+                showLastButton
+              /> */}
+              <Pagination
+                sx={{ display: 'flex', justifyContent: 'center' }}
+                count={Math.ceil((productsData?.total ?? 0) / 9)} // Số trang
+                page={currentPage}
+                onChange={handlePageChange}
                 showFirstButton
                 showLastButton
               />

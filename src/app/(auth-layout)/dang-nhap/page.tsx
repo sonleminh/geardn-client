@@ -1,7 +1,10 @@
 'use client';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
-import { BASE_API_URL } from '@/constants/env';
+import { ICustomJwtPayload } from '@/interfaces/IAuth';
+import { loginAPI } from '@/services/auth/api';
+import { useAuthStore } from '@/stores/auth-store';
+import { useNotificationStore } from '@/stores/notification-store';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import LockIcon from '@mui/icons-material/Lock';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
@@ -17,15 +20,11 @@ import {
 } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
-import Cookies from 'js-cookie';
-import { ICustomJwtPayload } from '@/interfaces/IAuth';
-import { loginAPI } from '@/services/auth/api';
-import { useAuthStore } from '@/stores/auth-store';
-import { useNotificationStore } from '@/stores/notification-store';
 
 export default function Login() {
   const router = useRouter();
@@ -40,7 +39,6 @@ export default function Login() {
     validateOnChange: false,
     async onSubmit(values) {
       const userData = await loginAPI(values);
-
       login({
         id: userData?.id,
         email: userData?.email,

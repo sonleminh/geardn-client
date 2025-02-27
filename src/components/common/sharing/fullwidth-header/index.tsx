@@ -37,8 +37,6 @@ const FullWidthHeader = ({
   const pathname = usePathname();
   const { user, logout } = useAuthStore((state) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  console.log(anchorEl);
   // useEffect(() => {
   //   const at = Cookies.get('at');
   //   if (user?.id && !at) {

@@ -64,7 +64,6 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
       router.push(ROUTES.LOGIN);
     }
   };
-  console.log('user', user);
   const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (user === null) {
       router.push(ROUTES.LOGIN);

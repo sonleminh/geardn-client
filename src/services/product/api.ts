@@ -10,66 +10,46 @@ import { ISku } from '@/interfaces/ISku';
 import { IQuery } from '@/interfaces/IQuery';
 import queryString from 'query-string';
 
-type TProductsRes = {
+export type TProductsRes = {
   products: IProduct[];
-  categories: {
-    id: string;
-    label: string;
-  }[];
   total: number;
 };
 
-type TCategoriesRes = {
-  categories: {
-    id: string;
-    name: string;
-    icon: string;
-    slug: string;
-  }[];
-  total: number;
+const productUrl = 'products'
+
+export async function getProductListApi (page?: string) {
+  const res: TProductsRes = await getRequest(`/${productUrl}?${page ? `page=${page}` : ''}&limit=9`);
+  return res;
 };
 
+export const useGetProductBySlug = (slug: string) => {
+  const res = getRequest(`/${productUrl}/slug/${slug}`);
+  // return {
+  //   product: data as IProduct,
+  //   isLoading,
+  //   isError: error,
+  // };
+};
 
-// export const useGetProducts = (query?: IQuery) => {
-//   const newParams = { ...query };
-//   const queryParams = queryString.stringify(newParams ?? {});
-//   console.log('qr:', queryParams)
-//   const { data, error, isLoading } = useSWR(`${BASE_API_URL}/products?${queryParams}`, fetcher);
-//   return {
-//     products: data as TProductsRes,
-//     isLoading,
-//     isError: error,
-//   };
-// };
+export const useGetSKUByPrdId = (id: string) => {
+  const res = getRequest(`/product-sku/product/${id}`);
+  // return {
+  //   skuList: data as ISku[],
+  //   isLoading,
+  //   isError: error,
+  // };
+};
 
-// export const useGetProductBySlug = (slug: string) => {
-//   const { data, error, isLoading } = useSWR(`${BASE_API_URL}/products/slug/${slug}`, fetcher);
-//   return {
-//     product: data as IProduct,
-//     isLoading,
-//     isError: error,
-//   };
-// };
+export const useGetCategories = () => {
+  const res = getRequest(`/categories`);
+  // return {
+  //   categories: data as TCategoriesRes,
+  //   isLoading,
+  //   isError: error,
+  // };
+};
 
-// export const useGetSKUByPrdId = (id: string) => {
-//   const { data, error, isLoading } = useSWR(`${BASE_API_URL}/product-sku/product/${id}`, fetcher);
-//   return {
-//     skuList: data as ISku[],
-//     isLoading,
-//     isError: error,
-//   };
-// };
-
-// export const useGetCategories = () => {
-//   const { data, error, isLoading } = useSWR(`${BASE_API_URL}/categories`, fetcher);
-//   return {
-//     categories: data as TCategoriesRes,
-//     isLoading,
-//     isError: error,
-//   };
-// };
-
-// export const getPrdByCateSlug = async (slug:string) => {
+export const getPrdByCateSlug = async (slug:string) => {
 //   try {
 //     // console.log(slug)
 //     // const result = await fetch(
@@ -83,4 +63,4 @@ type TCategoriesRes = {
 // } catch (error) {
 //    throw new Error('Failed to fetch article list by ID API') 
 //   }
-// };
+};
