@@ -1,18 +1,17 @@
 'use client';
 
-import ProductCard from '@/components/common/ProductCard';
 import LayoutContainer from '@/components/common/sharing/layout-container';
-import { IProduct } from '@/interfaces/IProduct';
-import { useGetProducts } from '@/services/product/api';
+import ProductCard from '@/components/common/ProductCard';
+import { TProductsRes } from '@/services/product/api';
+
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { Box, Typography } from '@mui/material';
-import { Navigation } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
 
-const Explore = () => {
-  const { products } = useGetProducts();
-  console.log('products', products);
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+
+const Explore = ({ productsData }: { productsData: TProductsRes }) => {
   return (
     <Box sx={{ mb: 10 }}>
       <LayoutContainer>
@@ -64,7 +63,7 @@ const Explore = () => {
             },
           }}
           className='mySwiper'>
-          {products?.products?.map((item, index) => (
+          {productsData?.products?.map((item, index) => (
             <SwiperSlide key={index}>
               <Box
                 sx={{

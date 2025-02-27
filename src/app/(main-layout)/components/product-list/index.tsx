@@ -1,7 +1,12 @@
 'use client';
 
-import ProductCard from '@/components/common/ProductCard';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LayoutContainer from '@/components/common/sharing/layout-container';
+import SkeletonImage from '@/components/common/SkeletonImage';
+import ProductCard from '@/components/common/ProductCard';
+import AppLink from '@/components/common/AppLink';
+
+import { TCategoriesRes } from '@/services/category/api';
 import { TProductsRes } from '@/services/product/api';
 import {
   Box,
@@ -9,14 +14,11 @@ import {
   Grid2,
   List,
   ListItem,
+  NativeSelect,
   Pagination,
   Typography,
 } from '@mui/material';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductListStyle } from './style';
-import { TCategoriesRes } from '@/services/category/api';
-import AppLink from '@/components/common/AppLink';
-import SkeletonImage from '@/components/common/SkeletonImage';
 
 const ProductList = ({
   productsData,
@@ -92,52 +94,65 @@ const ProductList = ({
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   width: '100%',
-                  mb: 1,
+                  mb: 2,
                 }}>
-                {/* <Typography>Tìm thấy {products?.total} kết quả</Typography> */}
-                <FormControl sx={{ width: '120px' }} size='small'>
-                  {/* <InputLabel variant='standard' htmlFor='uncontrolled-native'>
-                    Age
-                  </InputLabel> */}
-                  {/* <NativeSelect
-                    defaultValue={30}
-                    // inputProps={{
-                    //   name: 'age',
-                    //   id: 'uncontrolled-native',
-                    // }}
-                    disableUnderline
-                    // variant='filled'
-                    sx={{
-                      p: 0,
-                      border: '1px solid #000',
-                      borderRadius: 1.5,
-                      fontSize: 14,
-                      '.MuiNativeSelect-select': {
-                        p: '4px 8px',
-                      },
-                      '& select': {
-                        backgroundColor: '#f5f5f5',
-                        color: '#000',
-                        borderRadius: '4px',
-                        padding: '8px',
-                      },
-                      '& option': {
-                        backgroundColor: '#fff',
-                        color: '#333',
-                        padding: '8px',
-                      },
-                    }}>
-                    <option value={'latest'}>Mới nhất</option>
-                    <option value={'20'}>Giá thấp đến cao</option>
-                    <option value={30}>Giá cao đến thấp</option>
-                  </NativeSelect> */}
-                  <select>
-                    <option>cc</option>
-                    <option>cc</option>
-                    <option>cc</option>
-                  </select>
-                </FormControl>
+                <Typography sx={{ fontSize: 15 }}>
+                  Tìm thấy <b>{productsData?.total} </b>kết quả
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography sx={{ mr: 1, fontSize: 14 }}>
+                    Sắp xếp theo:
+                  </Typography>
+                  <FormControl sx={{ width: '120px' }} size='small'>
+                    <NativeSelect
+                      defaultValue={''}
+                      // inputProps={{
+                      //   name: 'age',
+                      //   id: 'uncontrolled-native',
+                      // }}
+                      disableUnderline
+                      onChange={(e) => {
+                        const params = new URLSearchParams(
+                          searchParams.toString()
+                        );
+                        params.set('sort', e.target.value);
+                        console.log('params', params.toString());
+                        router.push(
+                          e.target.value?.length
+                            ? `?${params.toString()}`
+                            : '/',
+                          { scroll: false }
+                        );
+                      }}
+                      // variant='filled'
+                      sx={{
+                        p: 0,
+                        border: '1px solid #000',
+                        borderRadius: 1.5,
+                        fontSize: 14,
+                        '.MuiNativeSelect-select': {
+                          p: '4px 8px',
+                        },
+                        '& select': {
+                          backgroundColor: '#f5f5f5',
+                          color: '#000',
+                          borderRadius: '4px',
+                          padding: '8px',
+                        },
+                        '& option': {
+                          backgroundColor: '#fff',
+                          color: '#333',
+                          padding: '8px',
+                        },
+                      }}>
+                      <option value={''}>Mới nhất</option>
+                      <option value={'asc'}>Giá thấp đến cao</option>
+                      <option value={'desc'}>Giá cao đến thấp</option>
+                    </NativeSelect>
+                  </FormControl>
+                </Box>
               </Box>
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
                 {productsData?.products?.map((item, index) => (
@@ -146,21 +161,9 @@ const ProductList = ({
                   </Grid2>
                 ))}
               </Grid2>
-
-              {/* <Pagination
-                sx={{ display: 'flex', justifyContent: 'center' }}
-                count={Math.ceil((data?.total ?? 0) / 1!)}
-                page={query.page ?? 0}
-                onChange={(_: React.ChangeEvent<unknown>, newPage) => {
-                  handleChangeQuery({ page: newPage });
-                }}
-                defaultPage={query.page ?? 1}
-                showFirstButton
-                showLastButton
-              /> */}
               <Pagination
                 sx={{ display: 'flex', justifyContent: 'center' }}
-                count={Math.ceil((productsData?.total ?? 0) / 9)} // Số trang
+                count={Math.ceil((productsData?.total ?? 0) / 9)}
                 page={currentPage}
                 onChange={handlePageChange}
                 showFirstButton

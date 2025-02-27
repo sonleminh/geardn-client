@@ -1,10 +1,13 @@
-import BANNER_BG from '@/assets/geardn.jpg';
-import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/common/sharing/layout-container';
-import { Box, Button, InputBase, Typography } from '@mui/material';
+import SkeletonImage from '@/components/common/SkeletonImage';
 import ProductList from './components/product-list';
+import Explore from './components/explore';
+
 import { getProductListApi } from '@/services/product/api';
 import { getCategoryListApi } from '@/services/category/api';
+
+import { Box, Button, InputBase, Typography } from '@mui/material';
+import BANNER_BG from '@/assets/geardn.jpg';
 
 export default async function Homepage({
   searchParams,
@@ -13,7 +16,8 @@ export default async function Homepage({
 }) {
   const params = await searchParams;
   const page = params?.page ?? '1';
-  const productsData = await getProductListApi(page);
+  const sort = params?.sort ?? '';
+  const productsData = await getProductListApi(page, sort);
   const categoriesData = await getCategoryListApi();
 
   return (
@@ -54,7 +58,7 @@ export default async function Homepage({
           currentPage={Number(page)}
         />
       </section>
-      {/* <Explore /> */}
+      <Explore productsData={productsData} />
       <LayoutContainer>
         <Box
           sx={{

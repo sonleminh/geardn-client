@@ -1,14 +1,5 @@
-// import { QueryKeys } from '@/components/constants/query-key';
-// import { useQuery } from '@tanstack/react-query';
-
-import { BASE_API_URL, SERVER_API_URL } from '@/constants/env';
-import { ILogInResponse, ILogoutResponse, ISignUpPayload, ISignUpResponse } from '@/interfaces/IAuth';
-import { getRequest, postRequest } from '@/utils/fetch-client';
-import { fetcher } from '../fetcher';
+import { getRequest } from '@/utils/fetch-client';
 import { IProduct } from '@/interfaces/IProduct';
-import { ISku } from '@/interfaces/ISku';
-import { IQuery } from '@/interfaces/IQuery';
-import queryString from 'query-string';
 
 export type TProductsRes = {
   products: IProduct[];
@@ -17,8 +8,8 @@ export type TProductsRes = {
 
 const productUrl = 'products'
 
-export async function getProductListApi (page?: string) {
-  const res: TProductsRes = await getRequest(`/${productUrl}?${page ? `page=${page}` : ''}&limit=9`);
+export async function getProductListApi (page?: string, sort?: string) {
+  const res: TProductsRes = await getRequest(`/${productUrl}?${page ? `page=${page}` : ''}&limit=9${sort ? `&sort=${sort}` : ''}`);
   return res;
 };
 
