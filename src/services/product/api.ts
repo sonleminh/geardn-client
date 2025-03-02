@@ -4,6 +4,14 @@ import { IProduct } from '@/interfaces/IProduct';
 export type TProductsRes = {
   products: IProduct[];
   total: number;
+  status: boolean;
+  message: string;
+};
+
+export type TProductRes = {
+  data: IProduct;
+  status: boolean;
+  message: string;
 };
 
 const productUrl = 'products'
@@ -13,22 +21,9 @@ export async function getProductListApi (page?: string, sort?: string) {
   return res;
 };
 
-export const useGetProductBySlug = (slug: string) => {
-  const res = getRequest(`/${productUrl}/slug/${slug}`);
-  // return {
-  //   product: data as IProduct,
-  //   isLoading,
-  //   isError: error,
-  // };
-};
-
-export const useGetSKUByPrdId = (id: string) => {
-  const res = getRequest(`/product-sku/product/${id}`);
-  // return {
-  //   skuList: data as ISku[],
-  //   isLoading,
-  //   isError: error,
-  // };
+export async function useGetProductBySlug(slug: string) {
+  const res: TProductRes = await getRequest(`/${productUrl}/slug/${slug}`);
+  return res;
 };
 
 export const useGetCategories = () => {
@@ -40,18 +35,7 @@ export const useGetCategories = () => {
   // };
 };
 
-export const getPrdByCateSlug = async (slug:string) => {
-//   try {
-//     // console.log(slug)
-//     // const result = await fetch(
-//     //   `http://localhost:3000/gia-treo-man-hinh/api`
-//     //   // `${SERVER_API_URL}/${slug}/api`
-//     // ).then((res) => res.json());
-//     const result = await getRequest(
-//       `${SERVER_API_URL}/${slug}/api`
-//     )
-//   return result as IProduct[];
-// } catch (error) {
-//    throw new Error('Failed to fetch article list by ID API') 
-//   }
+export async function getPrdByCateSlug(slug:string, page?: string, sort?: string) {
+  const res: TProductsRes = await getRequest(`/${productUrl}/category/${slug}?${page ? `page=${page}` : ''}${sort ? `&sort=${sort}` : ''}`);
+  return res;
 };

@@ -57,6 +57,7 @@ const Layout = ({ children }: LayoutType) => {
       <Box
         sx={{
           pt: pathname !== '/' ? '80px' : '0',
+          bgcolor: '#F3F4F6',
         }}>
         {children}
       </Box>

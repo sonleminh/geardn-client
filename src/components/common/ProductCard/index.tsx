@@ -28,7 +28,6 @@ const ProductCard = ({ data }: { data: IProduct }) => {
             position: 'relative',
             width: '100%',
             height: { xs: '250px' },
-            borderRadius: '8px',
             overflow: 'hidden',
             '& img': {
               objectFit: 'cover',
@@ -41,10 +40,11 @@ const ProductCard = ({ data }: { data: IProduct }) => {
         <Box sx={{ p: '12px 12px 0' }}>
           <Typography
             sx={{
+              minHeight: 32,
               mb: 1,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 500,
-              ...truncateTextByLine(1),
+              ...truncateTextByLine(2),
             }}>
             {data?.name}
           </Typography>

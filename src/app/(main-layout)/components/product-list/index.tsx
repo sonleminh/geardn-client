@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ProductListStyle } from './style';
+import Heading from '@/components/common/sharing/heading';
 
 const ProductList = ({
   productsData,
@@ -31,7 +32,6 @@ const ProductList = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  console.log('categories', categoriesData);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -44,11 +44,16 @@ const ProductList = ({
   return (
     <LayoutContainer>
       <Box sx={ProductListStyle}>
-        <Grid2 container spacing={4} sx={{}}>
+        <Grid2 container spacing={3} sx={{}}>
           <Grid2
             size={3}
             className='category'
-            sx={{ position: 'sticky', top: 100, height: '100%' }}>
+            sx={{
+              position: 'sticky',
+              top: 100,
+              height: '100%',
+              bgcolor: '#fff',
+            }}>
             <Box
               sx={{
                 p: '12px 16px',
@@ -90,70 +95,7 @@ const ProductList = ({
           </Grid2>
           <Grid2 size={9}>
             <Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  width: '100%',
-                  mb: 2,
-                }}>
-                <Typography sx={{ fontSize: 15 }}>
-                  Tìm thấy <b>{productsData?.total} </b>kết quả
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography sx={{ mr: 1, fontSize: 14 }}>
-                    Sắp xếp theo:
-                  </Typography>
-                  <FormControl sx={{ width: '120px' }} size='small'>
-                    <NativeSelect
-                      defaultValue={''}
-                      // inputProps={{
-                      //   name: 'age',
-                      //   id: 'uncontrolled-native',
-                      // }}
-                      disableUnderline
-                      onChange={(e) => {
-                        const params = new URLSearchParams(
-                          searchParams.toString()
-                        );
-                        params.set('sort', e.target.value);
-                        console.log('params', params.toString());
-                        router.push(
-                          e.target.value?.length
-                            ? `?${params.toString()}`
-                            : '/',
-                          { scroll: false }
-                        );
-                      }}
-                      // variant='filled'
-                      sx={{
-                        p: 0,
-                        border: '1px solid #000',
-                        borderRadius: 1.5,
-                        fontSize: 14,
-                        '.MuiNativeSelect-select': {
-                          p: '4px 8px',
-                        },
-                        '& select': {
-                          backgroundColor: '#f5f5f5',
-                          color: '#000',
-                          borderRadius: '4px',
-                          padding: '8px',
-                        },
-                        '& option': {
-                          backgroundColor: '#fff',
-                          color: '#333',
-                          padding: '8px',
-                        },
-                      }}>
-                      <option value={''}>Mới nhất</option>
-                      <option value={'asc'}>Giá thấp đến cao</option>
-                      <option value={'desc'}>Giá cao đến thấp</option>
-                    </NativeSelect>
-                  </FormControl>
-                </Box>
-              </Box>
+              <Heading total={productsData?.total ?? 0} />
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
                 {productsData?.products?.map((item, index) => (
                   <Grid2 key={index} size={4}>
