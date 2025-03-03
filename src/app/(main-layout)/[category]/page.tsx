@@ -28,14 +28,14 @@ const Category = async ({
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
       <LayoutContainer>
-        <Heading total={data?.total ?? 0} params={category} />
+        {/* <Heading total={data?.total ?? 0} params={category} />
         <Grid2 container spacing={2}>
-          {data?.products?.map((item) => (
+          {data?.data?.map((item) => (
             <Grid2 size={3} key={item.id}>
               <ProductCard data={item} />
             </Grid2>
           ))}
-        </Grid2>
+        </Grid2> */}
       </LayoutContainer>
     </Box>
   );

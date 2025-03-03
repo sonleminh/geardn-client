@@ -97,7 +97,7 @@ const ProductList = ({
             <Box>
               <Heading total={productsData?.total ?? 0} />
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                {productsData?.products?.map((item, index) => (
+                {productsData?.data?.map((item, index) => (
                   <Grid2 key={index} size={4}>
                     <ProductCard data={item} />
                   </Grid2>

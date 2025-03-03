@@ -2,7 +2,7 @@ import { getRequest } from '@/utils/fetch-client';
 import { IProduct } from '@/interfaces/IProduct';
 
 export type TProductsRes = {
-  products: IProduct[];
+  data: IProduct[];
   total: number;
   status: boolean;
   message: string;
@@ -21,7 +21,7 @@ export async function getProductListApi (page?: string, sort?: string) {
   return res;
 };
 
-export async function useGetProductBySlug(slug: string) {
+export async function getProductBySlug(slug: string) {
   const res: TProductRes = await getRequest(`/${productUrl}/slug/${slug}`);
   return res;
 };
