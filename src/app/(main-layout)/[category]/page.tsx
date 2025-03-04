@@ -22,9 +22,7 @@ const Category = async ({
   const paramsQuery = await searchParams;
   const page = paramsQuery?.page ?? '1';
   const sort = paramsQuery?.sort ?? '';
-  console.log('category', category);
-  console.log('paramsQuery', paramsQuery);
-  const data = await getPrdByCateSlug(category, page, sort);
+  // const data = await getPrdByCateSlug(category, page, sort);
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
       <LayoutContainer>

@@ -6,7 +6,7 @@ import { Skeleton } from '@mui/material';
 
 const SkeletonImage: React.FC<ImageProps> = (props) => {
   const [isError, setIsError] = useState(false);
-  let srcImg = props.src;
+  const srcImg = props.src;
 
   return isError ? (
     <Skeleton

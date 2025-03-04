@@ -26,15 +26,6 @@ export async function getProductBySlug(slug: string) {
   return res;
 };
 
-export const useGetCategories = () => {
-  const res = getRequest(`/categories`);
-  // return {
-  //   categories: data as TCategoriesRes,
-  //   isLoading,
-  //   isError: error,
-  // };
-};
-
 export async function getPrdByCateSlug(slug:string, page?: string, sort?: string) {
   const res: TProductsRes = await getRequest(`/${productUrl}/category/${slug}?${page ? `page=${page}` : ''}${sort ? `&sort=${sort}` : ''}`);
   return res;

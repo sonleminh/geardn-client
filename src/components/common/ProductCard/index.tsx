@@ -40,7 +40,7 @@ const ProductCard = ({ data }: { data: IProduct }) => {
         <Box sx={{ p: '12px 12px 0' }}>
           <Typography
             sx={{
-              minHeight: 32,
+              height: 42,
               mb: 1,
               fontSize: 14,
               fontWeight: 500,

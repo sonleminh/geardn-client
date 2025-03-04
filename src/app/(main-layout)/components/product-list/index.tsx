@@ -63,7 +63,7 @@ const ProductList = ({
               }}>
               <Typography className='category-heading'>Danh mục</Typography>
               <List>
-                {categoriesData?.categories?.map((item) => (
+                {categoriesData?.data?.map((item) => (
                   <AppLink
                     href={item?.slug}
                     key={item.id}
