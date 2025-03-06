@@ -11,14 +11,15 @@ export default async function Homepage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const params = await searchParams;
-  const page = params?.page ?? '1';
-  const productsData = await getProductListApi(page);
-  const categoriesData = await getCategoryListApi();
+  // const params = await searchParams;
+  // const page = params?.page ?? '1';
+  // const productsData = await getProductListApi(page);
+  // const categoriesData = await getCategoryListApi();
 
   return (
     <Box sx={{ pb: 10 }}>
-      <Box
+      cc
+      {/* <Box
         sx={{
           position: 'relative',
           width: '100%',
@@ -46,16 +47,16 @@ export default async function Homepage({
           quality={90}
           priority
         />
-      </Box>
-      <section id='shop'>
+      </Box> */}
+      {/* <section id='shop'>
         <ProductList
           productsData={productsData}
           categoriesData={categoriesData}
           currentPage={Number(page)}
         />
-      </section>
+      </section> */}
       {/* <Explore /> */}
-      <LayoutContainer>
+      {/* <LayoutContainer>
         <Box
           sx={{
             display: 'flex',
@@ -97,7 +98,7 @@ export default async function Homepage({
             <Typography>asf asfas fasf as</Typography>
           </Box>
         </Box>
-      </LayoutContainer>
+      </LayoutContainer> */}
     </Box>
   );
 }

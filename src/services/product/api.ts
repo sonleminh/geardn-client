@@ -27,6 +27,8 @@ export async function getProductBySlug(slug: string) {
 };
 
 export async function getPrdByCateSlug(slug:string, page?: string, sort?: string) {
-  const res: TProductsRes = await getRequest(`/${productUrl}/category/${slug}?${page ? `page=${page}` : ''}${sort ? `&sort=${sort}` : ''}`);
+  // const res: TProductsRes = await getRequest(`/${productUrl}/category/${slug}`);
+  const res: TProductRes = await getRequest(`/${productUrl}/slug/${slug}`);
+  // const res: TProductsRes = await getRequest(`/${productUrl}/category/${slug}?${page ? `page=${page}` : ''}${sort ? `&sort=${sort}` : ''}`);
   return res;
 };

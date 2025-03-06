@@ -27,7 +27,7 @@ export async function generateMetadata({
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { product: string };
+  params: Promise<{ product: string }>;
 }) {
   const { product } = await params;
   const productData = await getProductBySlug(product);

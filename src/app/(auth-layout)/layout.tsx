@@ -19,15 +19,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <GoogleOAuthProvider clientId='74957006221-6mm4u0inm5drqgrt1hpoiagugbuhoav6.apps.googleusercontent.com'>
-      <html lang='en' suppressHydrationWarning>
-        <CssBaseline />
-        <body className={inter.className}>
-          {children}
-          {/* <AuthStoreProvider>{children}</AuthStoreProvider> */}
-        </body>
-      </html>
-    </GoogleOAuthProvider>
-  );
+  return <>children</>;
+  // return <>{children}</>;
 }

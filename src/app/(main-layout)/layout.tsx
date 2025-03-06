@@ -32,14 +32,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang='en' suppressHydrationWarning>
-      <ColorModeProvider>
-        <CssBaseline />
-        <body className={inter.className}>
-          <Layout>{children}</Layout>
-        </body>
-      </ColorModeProvider>
-    </html>
-  );
+  return <div>{children}</div>;
+  // return <Layout>{children}</Layout>;
 }
