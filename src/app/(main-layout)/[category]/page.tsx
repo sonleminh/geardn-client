@@ -41,7 +41,7 @@
 //   );
 // }
 
-import LayoutContainer from '@/components/common/sharing/layout-container';
+import LayoutContainer from '@/components/layout-container';
 import { getProductBySlug } from '@/services/product/api';
 import { Box, Grid2 } from '@mui/material';
 import { Metadata } from 'next';

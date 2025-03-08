@@ -20,7 +20,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import XIcon from '@mui/icons-material/X';
 import LOGO from '@/assets/geardn-logo.png';
 import { FooterStyle } from './style';
-import SkeletonImage from '../../SkeletonImage';
+import SkeletonImage from '../common/SkeletonImage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 const Footer = () => {
   return (

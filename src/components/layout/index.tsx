@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 
 import Header from '../header';
 import Footer from '../footer';
-import DarkModeBtn from '../dark-mode-btn';
+import DarkModeBtn from '../common/dark-mode-btn';
 import FullWidthHeader from '../fullwidth-header';
-import ScrollToTopBtn from '../scroll-to-top-btn';
+import ScrollToTopBtn from '../common/scroll-to-top-btn';
 
 import { Box } from '@mui/material';
-import { Notification } from '../notification';
+import { Notification } from '../common/notification';
 
 type LayoutType = {
   children?: React.ReactNode;

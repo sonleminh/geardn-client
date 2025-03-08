@@ -1,25 +1,25 @@
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
-import LayoutContainer from '@/components/common/sharing/layout-container';
+import LayoutContainer from '@/components/layout-container';
 import { Box, Button, InputBase, Typography } from '@mui/material';
 import ProductList from './components/product-list';
 import { getProductListApi } from '@/services/product/api';
 import { getCategoryListApi } from '@/services/category/api';
+import Explore from './components/explore';
 
 export default async function Homepage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  // const params = await searchParams;
-  // const page = params?.page ?? '1';
-  // const productsData = await getProductListApi(page);
-  // const categoriesData = await getCategoryListApi();
+  const params = await searchParams;
+  const page = params?.page ?? '1';
+  const productsData = await getProductListApi(page);
+  const categoriesData = await getCategoryListApi();
 
   return (
     <Box sx={{ pb: 10 }}>
-      cc
-      {/* <Box
+      <Box
         sx={{
           position: 'relative',
           width: '100%',
@@ -47,16 +47,16 @@ export default async function Homepage({
           quality={90}
           priority
         />
-      </Box> */}
-      {/* <section id='shop'>
+      </Box>
+      <section id='shop'>
         <ProductList
           productsData={productsData}
           categoriesData={categoriesData}
           currentPage={Number(page)}
         />
-      </section> */}
-      {/* <Explore /> */}
-      {/* <LayoutContainer>
+      </section>
+      <Explore productsData={productsData} />
+      <LayoutContainer>
         <Box
           sx={{
             display: 'flex',
@@ -98,7 +98,7 @@ export default async function Homepage({
             <Typography>asf asfas fasf as</Typography>
           </Box>
         </Box>
-      </LayoutContainer> */}
+      </LayoutContainer>
     </Box>
   );
 }

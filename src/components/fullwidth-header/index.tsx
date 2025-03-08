@@ -18,8 +18,8 @@ import {
 } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import AppLink from '../../AppLink';
-import SkeletonImage from '../../SkeletonImage';
+import AppLink from '../common/AppLink';
+import SkeletonImage from '../common/SkeletonImage';
 import LayoutContainer from '../layout-container';
 import { FullWidthHeaderStyle } from './style';
 import { ROUTES } from '@/constants/route';

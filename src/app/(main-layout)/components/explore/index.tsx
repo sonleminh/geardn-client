@@ -1,6 +1,6 @@
 'use client';
 
-import LayoutContainer from '@/components/common/sharing/layout-container';
+import LayoutContainer from '@/components/layout-container';
 import ProductCard from '@/components/common/ProductCard';
 import { TProductsRes } from '@/services/product/api';
 

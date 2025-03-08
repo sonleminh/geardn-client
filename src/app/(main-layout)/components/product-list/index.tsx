@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import LayoutContainer from '@/components/common/sharing/layout-container';
+import LayoutContainer from '@/components/layout-container';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import ProductCard from '@/components/common/ProductCard';
 import AppLink from '@/components/common/AppLink';
@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ProductListStyle } from './style';
-import Heading from '@/components/common/sharing/heading';
+import Heading from '@/components/common/heading';
 
 const ProductList = ({
   productsData,

@@ -23,7 +23,7 @@ import {
 import { logoutAPI } from '@/services/auth/api';
 import { ROUTES } from '@/constants/route';
 
-import SkeletonImage from '../../SkeletonImage';
+import SkeletonImage from '../common/SkeletonImage';
 import LOGO from '@/assets/geardn-logo.png';
 import { HeaderStyle } from './style';
 import { useAuthStore } from '@/stores/auth-store';

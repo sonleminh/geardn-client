@@ -1,26 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 
 // import { ColorModeProvider } from '@/contexts/ColorModeContext';
-import { AuthStoreProvider } from '@/providers/auth-store-provider';
-import Layout from '@/components/common/sharing/layout';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import Layout from '@/components/layout';
 
+import 'swiper/css';
 import 'swiper/css/effect-fade';
+import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/free-mode';
 import 'swiper/css/scrollbar';
 import 'swiper/css/thumbs';
-import 'swiper/css';
-import { useColorModeStore } from '@/stores/color-mode-store';
-import ColorModeProvider from '@/providers/color-mode-store-provider';
-// import { NotificationContextProvider } from '@/contexts/NotificationContext';
-
-const inter = Inter({
-  weight: ['400', '500', '600', '700', '800', '900'],
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'GearDN',
@@ -32,6 +21,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div>{children}</div>;
-  // return <Layout>{children}</Layout>;
+  return <Layout>{children}</Layout>;
 }

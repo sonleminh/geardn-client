@@ -1,6 +1,6 @@
 'use client';
 
-import LayoutContainer from '@/components/common/sharing/layout-container';
+import LayoutContainer from '@/components/layout-container';
 import { Box, Grid2 } from '@mui/material';
 import React, { useMemo, useRef, useState } from 'react';
 import MainSwiper from '../main-swiper';
