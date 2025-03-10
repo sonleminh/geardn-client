@@ -1,7 +1,7 @@
 'use client';
+import { useLoginWithEmailPwd } from '@/apis/auth';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
-import { loginAPI } from '@/services/auth/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNotificationStore } from '@/stores/notification-store';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -18,6 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
@@ -27,8 +28,14 @@ import { ChangeEvent, useState } from 'react';
 
 const LoginPage = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
+  const {
+    mutateAsync: onLoginWithEmailPwd,
+    isPending: isLoginWithEmailPwd,
+    status: loginWithEmailPwdStatus,
+  } = useLoginWithEmailPwd();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
@@ -36,7 +43,14 @@ const LoginPage = () => {
     // validationSchema: schema,
     validateOnChange: false,
     async onSubmit(values) {
-      const userData = await loginAPI(values);
+      const userData = await onLoginWithEmailPwd(values, {
+        onError: () => {
+          showNotification(
+            'The system is overloaded, please wait a moment...',
+            'error'
+          );
+        },
+      });
       login({
         id: userData?.id,
         email: userData?.email,
