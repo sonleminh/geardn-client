@@ -6,6 +6,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 const baseURL = process.env.BACKEND_API_URL;
+
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
@@ -93,8 +94,6 @@ axiosInstance.interceptors.response.use(
       // If originalRequest is undefined, reject the promise immediately
       return Promise.reject(error);
     }
-    console.log('failedQueue', failedQueue)
-
     if (error?.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       isRefreshing = true;

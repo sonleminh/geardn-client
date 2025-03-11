@@ -1,3 +1,5 @@
+'use client';
+
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
@@ -6,17 +8,16 @@ import ProductList from './components/product-list';
 import { getProductListApi } from '@/services/product/api';
 import { getCategoryListApi } from '@/services/category/api';
 import Explore from './components/explore';
+import { useGetProducts } from '@/apis/product';
+import { useGetCategories } from '@/apis/category';
 
-export default async function Homepage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
-}) {
-  const params = await searchParams;
-  const page = params?.page ?? '1';
-  const productsData = await getProductListApi(page);
-  const categoriesData = await getCategoryListApi();
-
+const Homepage: React.FC = () => {
+  // const params = await searchParams;
+  // const page = params?.page ?? '1';
+  // const productsData = await getProductListApi(page);
+  // const categoriesData = await getCategoryListApi();
+  const { data: productsData } = useGetProducts({});
+  const { data: categoriesData } = useGetCategories();
   return (
     <Box sx={{ pb: 10 }}>
       <Box
@@ -52,12 +53,12 @@ export default async function Homepage({
         <ProductList
           productsData={productsData}
           categoriesData={categoriesData}
-          currentPage={Number(page)}
+          // currentPage={Number(page)}
         />
       </section>
-      <Explore productsData={productsData} />
+      {/* <Explore productsData={productsData} /> */}
       <LayoutContainer>
-        <Box
+        {/* <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -97,8 +98,10 @@ export default async function Homepage({
             <Typography>asf asfas fasf as</Typography>
             <Typography>asf asfas fasf as</Typography>
           </Box>
-        </Box>
+        </Box> */}
       </LayoutContainer>
     </Box>
   );
-}
+};
+
+export default Homepage;

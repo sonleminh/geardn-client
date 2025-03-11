@@ -24,11 +24,11 @@ import Heading from '@/components/common/heading';
 const ProductList = ({
   productsData,
   categoriesData,
-  currentPage,
-}: {
+}: // currentPage,
+{
   productsData: TProductsRes;
   categoriesData: TCategoriesRes;
-  currentPage: number;
+  // currentPage: number;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,14 +103,14 @@ const ProductList = ({
                   </Grid2>
                 ))}
               </Grid2>
-              <Pagination
+              {/* <Pagination
                 sx={{ display: 'flex', justifyContent: 'center' }}
                 count={Math.ceil((productsData?.total ?? 0) / 9)}
                 page={currentPage}
                 onChange={handlePageChange}
                 showFirstButton
                 showLastButton
-              />
+              /> */}
             </Box>
           </Grid2>
         </Grid2>
