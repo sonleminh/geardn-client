@@ -26,6 +26,7 @@ import { ROUTES } from '@/constants/route';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLogout } from '@/apis/auth';
 
 const FullWidthHeader = ({
   showFullWidthHeader,
@@ -35,6 +36,7 @@ const FullWidthHeader = ({
   const router = useRouter();
   // const { cart, isLoading } = useGetCart();
   const pathname = usePathname();
+  const { mutateAsync: onLogout } = useLogout();
   const { user, logout } = useAuthStore((state) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   // useEffect(() => {
@@ -61,8 +63,8 @@ const FullWidthHeader = ({
   };
 
   const handleLogout = async () => {
-    const result = await logoutAPI();
-    if (result?.statusCode === 200) {
+    const result = await onLogout();
+    if (result?.success === true) {
       logout();
       router.push(ROUTES.LOGIN);
     }
@@ -218,7 +220,9 @@ const FullWidthHeader = ({
                   'aria-labelledby': 'basic-button',
                 }}
                 disableScrollLock={true}>
-                <MenuItem onClick={handleClose}>Tài khoản</MenuItem>
+                <MenuItem onClick={() => router.push('tai-khoan')}>
+                  Tài khoản
+                </MenuItem>
                 <MenuItem component={Link} href={ROUTES.PURCHASE}>
                   Đơn mua
                 </MenuItem>

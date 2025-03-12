@@ -23,3 +23,15 @@ const logout = async () => {
         mutationFn: logout,
      })
  }
+
+ const whoAmI = async () => {
+    const res = await axiosInstance.get(`/auth/whoami`)
+    return res.data
+ }
+ 
+ export const useWhoAmI = () => {
+     return useQuery({
+        queryKey: ["user"],
+        queryFn: () => whoAmI(),
+     })
+ }

@@ -51,14 +51,12 @@ const LoginPage = () => {
           );
         },
       });
-      console.log('userData', userData);
       login({
         id: userData?.data?.id,
         email: userData?.data?.email,
         name: userData?.data?.name,
       });
       if (userData?.data?.id) {
-        console.log('c');
         router.push('/');
         // router.push('/tai-khoan');
         showNotification('Đăng nhập thành công', 'success');
