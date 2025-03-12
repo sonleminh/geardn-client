@@ -8,8 +8,6 @@ const Heading = ({ total, params }: { total: number; params?: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  console.log('pathname', pathname);
-
   return (
     <Box
       sx={{

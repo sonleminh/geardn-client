@@ -24,8 +24,7 @@ export default function RootLayout({
           <Providers>
             <GoogleOAuthProvider clientId='74957006221-6mm4u0inm5drqgrt1hpoiagugbuhoav6.apps.googleusercontent.com'>
               <ColorModeProvider>
-                {/* <CssBaseLineClient /> */}
-                {/* <CssBaseline /> */}
+                <CssBaseline />
                 {children}
               </ColorModeProvider>
             </GoogleOAuthProvider>

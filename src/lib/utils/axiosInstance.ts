@@ -14,11 +14,13 @@ let failedQueue: any[] = [];
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: baseURL, // Set your API base URL
   timeout: 60000, // Set request timeout if needed
+  withCredentials: true,
 });
 
 const axiosExtend: AxiosInstance = axios.create({
   baseURL: baseURL, // Set your API base URL
   timeout: 60000, // Set request timeout if needed
+  withCredentials: true,
 });
 
 // Helper function to process failed requests after token refresh
@@ -88,8 +90,6 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
-    console.log('originalRequest', originalRequest)
-    console.log('error', error)
     if (!originalRequest) {
       // If originalRequest is undefined, reject the promise immediately
       return Promise.reject(error);
@@ -105,10 +105,9 @@ axiosInstance.interceptors.response.use(
           .then(async (token) => {
             // Retry the original request with the new token
             originalRequest.headers.Authorization = `Bearer ${token}`;
-            const response = await axiosInstance.get("/api/v1/user/users/me");
-            console.log('response', response)
+            const response = await axiosInstance.get("/auth/me");
             if (!!response.data?.data) {
-              // window.location.reload();
+              window.location.reload();
               axiosInstance(originalRequest);
               return;
             } else {
@@ -136,19 +135,15 @@ axiosInstance.interceptors.response.use(
           },
         });
 
-        const response = await newAxiosInstance.post(`/api/v1/user/auth/refresh-token`);
+        const response = await newAxiosInstance.post(`/auth/refresh-token`);
 
         const newAccessToken = response.data?.data?.accessToken;
-        const newRefreshToken = response.data?.data?.refreshToken;
 
         // Save the new access and refresh token
-        await setSession(newAccessToken);
-        await setRefreshToken(newRefreshToken);
-
         axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        processQueue(null, newAccessToken);``
+        processQueue(null, newAccessToken);
 
         return axiosInstance(originalRequest); // Retry the original request with the new token
       } catch (refreshError: any) {

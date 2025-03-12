@@ -51,13 +51,16 @@ const LoginPage = () => {
           );
         },
       });
+      console.log('userData', userData);
       login({
-        id: userData?.id,
-        email: userData?.email,
-        name: userData?.name,
+        id: userData?.data?.id,
+        email: userData?.data?.email,
+        name: userData?.data?.name,
       });
-      if (userData?.id) {
-        router.push('/tai-khoan');
+      if (userData?.data?.id) {
+        console.log('c');
+        router.push('/');
+        // router.push('/tai-khoan');
         showNotification('Đăng nhập thành công', 'success');
       }
     },
@@ -73,17 +76,19 @@ const LoginPage = () => {
       credentialResponse?.credential as string
     );
 
+    console.log('cre:', credentialDecoded);
+
     if (credentialResponse) {
       Cookies.set('GC', credentialResponse?.credential as string, {
         expires: credentialDecoded?.exp,
       });
-      // login({
-      //   id: credentialDecoded?.sub,
-      //   email: credentialDecoded?.email as string,
-      //   name: credentialDecoded?.name as string,
-      //   picture: credentialDecoded?.picture,
-      // });
-      router.push('/tai-khoan');
+      login({
+        id: credentialDecoded?.sub,
+        email: credentialDecoded?.email as string,
+        name: credentialDecoded?.name as string,
+        picture: credentialDecoded?.picture,
+      });
+      router.push('/');
     }
   };
   return (

@@ -27,9 +27,12 @@ import SkeletonImage from '../common/SkeletonImage';
 import LOGO from '@/assets/geardn-logo.png';
 import { HeaderStyle } from './style';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLogout } from '@/apis/auth';
 
 const Header = ({ showHeader }: { showHeader: boolean }) => {
   const router = useRouter();
+  const { mutateAsync: onLogout } = useLogout();
+
   // const { cart, isLoading } = useGetCart();
   const { user, logout } = useAuthStore((state) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -58,8 +61,8 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
   };
 
   const handleLogout = async () => {
-    const result = await logoutAPI();
-    if (result?.statusCode === 200) {
+    const result = await onLogout();
+    if (result?.success === true) {
       logout();
       router.push(ROUTES.LOGIN);
     }
@@ -165,19 +168,27 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
             {user !== null ? (
               user?.picture ? (
                 <Button
-                  sx={{
-                    width: 40,
-                    minWidth: 40,
-                    height: 40,
-                    ml: 1,
-                    textAlign: 'center',
-                  }}
+                  sx={{}}
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                     handleUserClick(e)
                   }>
-                  <Box className='user-avatar'>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '30px',
+                      height: '30px',
+                      mr: 1,
+                      overflow: 'hidden',
+                      borderRadius: 20,
+                      '& img': {
+                        objectFit: 'cover',
+                      },
+                    }}>
                     <SkeletonImage src={user?.picture} alt='geardn' fill />
                   </Box>
+                  <Typography sx={{ fontSize: 14, textTransform: 'none' }}>
+                    {user?.name}
+                  </Typography>
                 </Button>
               ) : (
                 <Button
@@ -207,7 +218,9 @@ const Header = ({ showHeader }: { showHeader: boolean }) => {
                 'aria-labelledby': 'basic-button',
               }}
               disableScrollLock={true}>
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={() => router.push('tai-khoan')}>
+                Profile
+              </MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
               <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>

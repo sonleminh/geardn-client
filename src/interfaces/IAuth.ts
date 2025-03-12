@@ -13,12 +13,15 @@ export interface ISignUpPayload {
 }
 
 export interface ILogInResponse {
-  email: string;
-  name: string;
-  role: string;
-  id: string;
-  statusCode: number;
+  success: boolean;
   message: string;
+  data: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    message?: string;
+  };
 }
 
 export interface ILogoutResponse {

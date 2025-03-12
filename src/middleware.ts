@@ -42,8 +42,8 @@ async function refreshAccessToken(refreshToken: RequestCookie | undefined): Prom
 
 export async function middleware(request: NextRequest) {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get('at');
-  const refreshToken = cookieStore.get('rt');
+  const accessToken = cookieStore.get('access_token');
+  const refreshToken = cookieStore.get('refresh_token');
   const googleCredentials = cookieStore.get('GC');
   
   let user: IWhoIAmResponse | null = null;
@@ -53,44 +53,55 @@ export async function middleware(request: NextRequest) {
           googleCredentials?.value
         ) as ICustomJwtPayload;
         if (credentialDecoded) {
+          console.log('cre:', credentialDecoded)
           user = { id: credentialDecoded?.sub, email: credentialDecoded?.email, name: credentialDecoded?.name || '' }; 
         }
     }
-  if(!googleCredentials && accessToken)
-    {
-    user = await whoami(accessToken)
-    if (!user?.id && refreshToken) {
-      const response = NextResponse.next();
-      const newTokenResponse = await refreshAccessToken(refreshToken);
+  // if(!googleCredentials && accessToken)
+  //   {
+  //   user = await whoami(accessToken)
+  //   if (!user?.id && refreshToken) {
+  //     const response = NextResponse.next();
+  //     const newTokenResponse = await refreshAccessToken(refreshToken);
 
-        if (newTokenResponse?.accessToken) {
-          const expires = new Date();
-          expires.setHours(expires.getHours() + newTokenResponse.expires);
-          response.cookies.set('at', newTokenResponse?.accessToken,  {
-            path: '/',
-            expires: expires,
-          });
-        return response;
-      } else {
-        const response = NextResponse.redirect(new URL('/tai-khoan', request.url));
+  //       if (newTokenResponse?.accessToken) {
+  //         const expires = new Date();
+  //         expires.setHours(expires.getHours() + newTokenResponse.expires);
+  //         response.cookies.set('at', newTokenResponse?.accessToken,  {
+  //           path: '/',
+  //           expires: expires,
+  //         });
+  //       return response;
+  //     } else {
+  //       const response = NextResponse.redirect(new URL('/tai-khoan', request.url));
   
-        response.cookies.set('at', '', { maxAge: 0 });
-        response.cookies.set('rt', '', { maxAge: 0 });
-        return response;
-      }
-    }
-  }
+  //       response.cookies.set('at', '', { maxAge: 0 });
+  //       response.cookies.set('rt', '', { maxAge: 0 });
+  //       return response;
+  //     }
+  //   }
+  // }
 
   const path = request.nextUrl.pathname;
   const isProtectedRoute = protectedRoute.includes(path);
   const isPublicRoute = publicRoute.includes(path);
 
-  if (isProtectedRoute && !user?.id) {
-    return NextResponse.redirect(new URL('/dang-nhap', request.url));
+   // Ignore requests for static files
+   if (path.startsWith('/_next/') || path.startsWith('/static/') || path.includes('.')) {
+    return NextResponse.next();
   }
 
-  if (isPublicRoute && user?.id) {
-    return NextResponse.redirect(new URL('/tai-khoan', request.url));
-  }
+
+  // if (isProtectedRoute && !accessToken) {
+  //   return NextResponse.redirect(new URL('/dang-nhap', request.url));
+  // }
+
+  // if ((accessToken || googleCredentials ) && path === "/dang-nhap" || (accessToken || googleCredentials ) && path === "/dang-ky") {
+  //   return NextResponse.redirect(new URL("/", request.url)); // Redirect to homepage or dashboard
+  // }
+
+  // if (isPublicRoute && accessToken) {
+  //   return NextResponse.redirect(new URL('/', request.url));
+  // }
   return NextResponse.next();
 }
