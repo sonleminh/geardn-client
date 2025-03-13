@@ -18,3 +18,15 @@ export const useGetProducts = (filter?: getProductsPayload) => {
     queryFn: () => getProducts(filter),
 })
 }
+
+const getProductsByCategory = async (filter?: getProductsPayload) => {
+    const res = await axiosInstance.get(`/products`, { params: filter})
+    return res.data
+ }
+ 
+ export const useGetProductsByCategory = (filter?: getProductsPayload) => {
+     return useQuery({
+        queryKey: ["get-products", JSON.stringify(filter || {})],
+        queryFn: () => getProductsByCategory(filter),
+ })
+ }

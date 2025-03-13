@@ -11,9 +11,7 @@ export default async function AccountLayout({
 }>) {
   return (
     <Suspense fallback={<LoadingCircle />}>
-      {/* <AuthProvider> */}
       <Layout>{children}</Layout>
-      {/* </AuthProvider> */}
     </Suspense>
   );
 }

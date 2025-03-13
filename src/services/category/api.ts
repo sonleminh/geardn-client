@@ -10,5 +10,5 @@ const categoryUrl = 'categories'
 
 export async function getCategoryListApi () {
   const res: TCategoriesRes = await getRequest(`/${categoryUrl}`);
-  return res;
+  return res.data;
 };
