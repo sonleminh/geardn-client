@@ -4,7 +4,7 @@ import { Box, FormControl, NativeSelect, Typography } from '@mui/material';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
-const Heading = ({ total, params }: { total: number; params?: string }) => {
+const Heading = ({ total, params }: { total: number; params?: number }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();

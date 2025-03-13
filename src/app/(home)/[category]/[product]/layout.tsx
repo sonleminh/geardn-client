@@ -10,7 +10,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  const { category } = await params;
   // const productData = await getProductBySlug(category);
   return {
     // title: productData?.data?.name,
@@ -23,7 +22,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function CategoryLayout({
+export default async function ProductDetailLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

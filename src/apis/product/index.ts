@@ -1,3 +1,4 @@
+import { IProduct } from "@/interfaces/IProduct";
 import { axiosInstance } from "@/lib/utils/axiosInstance"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
@@ -6,10 +7,22 @@ interface getProductsPayload {
     page?: number;
   }
   
+interface IGetProductsResponse {
+    success: boolean;
+    message: string;
+    data: IProduct[];
+    total: number;
+}
+
+interface IGetProductResponse {
+    success: boolean;
+    message: string;
+    data: IProduct;
+}
 
 const getProducts = async (filter?: getProductsPayload) => {
    const res = await axiosInstance.get(`/products`, { params: filter})
-   return res.data
+   return res.data  as IGetProductsResponse
 }
 
 export const useGetProducts = (filter?: getProductsPayload) => {
@@ -19,14 +32,26 @@ export const useGetProducts = (filter?: getProductsPayload) => {
 })
 }
 
-const getProductsByCategory = async (filter?: getProductsPayload) => {
-    const res = await axiosInstance.get(`/products`, { params: filter})
-    return res.data
+const getProductsByCategory = async (slug: string, filter?: getProductsPayload) => {
+    const res = await axiosInstance.get(`/products/category/${slug}`, { params: filter})
+    return res.data as IGetProductsResponse
  }
  
- export const useGetProductsByCategory = (filter?: getProductsPayload) => {
+ export const useGetProductsByCategory = (slug:string, filter?: getProductsPayload) => {
      return useQuery({
         queryKey: ["get-products", JSON.stringify(filter || {})],
-        queryFn: () => getProductsByCategory(filter),
+        queryFn: () => getProductsByCategory(slug,filter),
+ })
+ }
+
+ const getProduct = async (slug: string) => {
+    const res = await axiosInstance.get(`/products/slug/${slug}`)
+    return res.data as IGetProductResponse
+ }
+ 
+ export const useGetProduct = (slug:string) => {
+     return useQuery({
+        queryKey: ["product"],
+        queryFn: () => getProduct(slug),
  })
  }

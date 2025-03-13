@@ -4,14 +4,16 @@ import { useGetProductsByCategory } from '@/apis/product';
 import Heading from '@/components/common/heading';
 import ProductCard from '@/components/common/ProductCard';
 import { Box, Grid2 } from '@mui/material';
+import { useParams } from 'next/navigation';
 
 export default function CategoryPage() {
-  // console.log('data', data);
-  const { data } = useGetProductsByCategory();
+  const params = useParams();
+  const category = params.category as string;
+  const { data } = useGetProductsByCategory(category);
   console.log('data', data);
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
-      <Heading total={data?.total ?? 0} params={data} />
+      <Heading total={data?.total ?? 0} params={data?.total ?? 0} />
       <Grid2 container spacing={2}>
         {data?.data?.map((item) => (
           <Grid2 size={3} key={item.id}>
