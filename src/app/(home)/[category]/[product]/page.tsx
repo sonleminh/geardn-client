@@ -28,10 +28,15 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import HtmlRenderBox from '@/components/common/HtmlRenderBox';
 import { useNotificationStore } from '@/stores/notification-store';
 import { useAddToCart } from '@/apis/cart';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCartStore } from '@/stores/cart-store';
 
 const ProductDetailPage = () => {
   const params = useParams();
   const product = params.product as string;
+  const { user } = useAuthStore();
+  const { cartItems, addToCart } = useCartStore();
+  console.log('cartItems', cartItems);
   const { data } = useGetProduct(product);
   const { mutateAsync: onAddToCart } = useAddToCart();
   const { showNotification } = useNotificationStore();
@@ -151,6 +156,14 @@ const ProductDetailPage = () => {
   const handleAddCartItem = async () => {
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
+    }
+
+    if (!user) {
+      return addToCart({
+        productId: selectedSku?.productId,
+        skuId: selectedSku?.id,
+        quantity: count ?? 1,
+      });
     }
     const res = await onAddToCart(
       {

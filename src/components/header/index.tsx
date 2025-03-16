@@ -16,7 +16,6 @@ import {
   Menu,
   MenuItem,
   Typography,
-  keyframes,
 } from '@mui/material';
 
 // import { useGetCart } from '@/services/cart/api';
@@ -27,13 +26,15 @@ import LOGO from '@/assets/geardn-logo.png';
 import { useAuthStore } from '@/stores/auth-store';
 import SkeletonImage from '../common/SkeletonImage';
 import { HeaderStyle } from './style';
+import { useGetCart } from '@/apis/cart';
 
 const Header = () => {
   const router = useRouter();
+  const { user, logout } = useAuthStore((state) => state);
   const { mutateAsync: onLogout } = useLogout();
 
-  // const { cart, isLoading } = useGetCart();
-  const { user, logout } = useAuthStore((state) => state);
+  const { data: cartData, isLoading } = useGetCart(user);
+  console.log('cartData', cartData);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const [isExpanded, setIsExpanded] = useState(false);

@@ -3,11 +3,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface CartItem {
-  productId: string;
-  skuId: string;
-  price: number;
+  productId: number;
+  skuId: number;
   quantity: number;
-  imageUrl: string;
 }
 
 export type CartState = {

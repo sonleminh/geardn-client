@@ -1,4 +1,5 @@
 import { IProduct } from "@/interfaces/IProduct";
+import { IUser } from "@/interfaces/IUser";
 import { axiosInstance } from "@/lib/utils/axiosInstance"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
@@ -7,19 +8,6 @@ interface IAddToCartPayload {
     skuId: number;
     quantity: number;
   }
-  
-interface IGetProductsResponse {
-    success: boolean;
-    message: string;
-    data: IProduct[];
-    total: number;
-}
-
-interface IGetProductResponse {
-    success: boolean;
-    message: string;
-    data: IProduct;
-}
 
 const addToCart = async (payload: IAddToCartPayload) => {
    const res = await axiosInstance.post(`/carts/add`, payload)
@@ -37,9 +25,10 @@ const getCart = async () => {
     return res.data
  }
  
- export const useGetCart = () => {
+ export const useGetCart = (user: IUser | null) => {
     return useQuery({
         queryKey: ["cart"],
     queryFn: () => getCart(),
+    enabled: !!user
 })
  }
