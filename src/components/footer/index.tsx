@@ -1,27 +1,13 @@
-import AppLink from '@/components/common/AppLink';
 import LayoutContainer from '../layout-container';
 
-import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Grid2,
-  List,
-  ListItem,
-  SxProps,
-  Theme,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import XIcon from '@mui/icons-material/X';
 import LOGO from '@/assets/geardn-logo.png';
-import { FooterStyle } from './style';
-import SkeletonImage from '../common/SkeletonImage';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import XIcon from '@mui/icons-material/X';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import { Box, Grid2, List, ListItem, Typography } from '@mui/material';
+import SkeletonImage from '../common/SkeletonImage';
+import { FooterStyle } from './style';
 const Footer = () => {
   return (
     <Box sx={FooterStyle}>

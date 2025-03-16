@@ -51,7 +51,7 @@ const getProductsByCategory = async (slug: string, filter?: getProductsPayload) 
  
  export const useGetProduct = (slug:string) => {
      return useQuery({
-        queryKey: ["product"],
+        queryKey: ["product", slug],
         queryFn: () => getProduct(slug),
  })
  }

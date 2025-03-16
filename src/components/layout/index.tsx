@@ -19,8 +19,6 @@ type LayoutType = {
 const Layout = ({ children }: LayoutType) => {
   const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showHeader, setShowHeader] = useState(true);
-  const [showFullWidthHeader, setShowFullWidthHeader] = useState(false);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -37,18 +35,10 @@ const Layout = ({ children }: LayoutType) => {
     } else {
       setShowScrollTop(false);
     }
-    if (window.scrollY > 720) {
-      setShowHeader(false);
-      setShowFullWidthHeader(true);
-    } else {
-      setShowHeader(true);
-      setShowFullWidthHeader(false);
-    }
   };
   return (
     <>
-      {pathname === '/' && <Header showHeader={showHeader} />}
-      <FullWidthHeader showFullWidthHeader={showFullWidthHeader} />
+      <Header />
       <ScrollToTopBtn
         showScrollTop={showScrollTop}
         handleScrollToTop={handleScrollToTop}
