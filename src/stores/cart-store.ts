@@ -5,15 +5,18 @@ import { persist } from 'zustand/middleware';
 interface CartItem {
   productId: number;
   skuId: number;
+  name: string;
+  image: string;
+  price: number;
   quantity: number;
 }
 
 export type CartState = {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (skuId: string) => void;
+  removeFromCart: (skuId: number) => void;
   clearCart: () => void;
-  updateQuantity: (skuId: string, quantity: number) => void;
+  updateQuantity: (skuId: number, quantity: number) => void;
 }
 
 export type CartStore = CartState

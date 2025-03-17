@@ -1,6 +1,8 @@
 'use client';
 
-import LayoutContainer from '@/components/layout-container';
+import React, { useMemo, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
+
 import {
   Box,
   Button,
@@ -11,35 +13,39 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import React, { useMemo, useRef, useState } from 'react';
-import { TProductRes } from '@/services/product/api';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import StarRateIcon from '@mui/icons-material/StarRate';
 import { SwiperClass } from 'swiper/react';
+
 import { useGetProduct } from '@/apis/product';
-import { useParams } from 'next/navigation';
+import { useAddToCart } from '@/apis/cart';
+
+import LayoutContainer from '@/components/layout-container';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
+import AppLink from '@/components/common/AppLink';
+import HtmlRenderBox from '@/components/common/HtmlRenderBox';
+
 import MainSwiper from './components/main-swiper';
 import ThumbSwiper from './components/thumb-swiper';
-import StarRateIcon from '@mui/icons-material/StarRate';
-import AppLink from '@/components/common/AppLink';
+
 import { ISku } from '@/interfaces/ISku';
 import { formatPrice } from '@/utils/format-price';
 import { attributeLabels } from '@/constants/attributeLabels';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import HtmlRenderBox from '@/components/common/HtmlRenderBox';
+
 import { useNotificationStore } from '@/stores/notification-store';
-import { useAddToCart } from '@/apis/cart';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
+import { ATTRIBUTE_ORDER } from '@/constants/attributeOrder';
 
 const ProductDetailPage = () => {
   const params = useParams();
   const product = params.product as string;
   const { user } = useAuthStore();
   const { cartItems, addToCart } = useCartStore();
-  console.log('cartItems', cartItems);
   const { data } = useGetProduct(product);
   const { mutateAsync: onAddToCart } = useAddToCart();
   const { showNotification } = useNotificationStore();
+  console.log('cartItems', cartItems);
 
   const [count, setCount] = useState<number | null>(1);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -58,6 +64,8 @@ const ProductDetailPage = () => {
   }, [data?.data?.images, data?.data?.skus]);
 
   const attributeOptions = useMemo(() => {
+    if (!data?.data) return {};
+
     const options: Record<string, string[]> = {};
     data?.data?.skus?.forEach((sku) => {
       sku?.productSkuAttributes?.forEach(({ attribute }) => {
@@ -69,13 +77,19 @@ const ProductDetailPage = () => {
         }
       });
     });
-    return options;
-  }, [data?.data?.skus]);
 
-  const breadcrumbsOptions = [
-    { href: '/', label: 'Home' },
-    { href: `/product/${product}`, label: data?.data?.name as string },
-  ];
+    const order =
+      ATTRIBUTE_ORDER[data?.data?.category?.name] ?? Object.keys(options);
+
+    const sortedOptions: Record<string, string[]> = {};
+    order.forEach((key) => {
+      if (options[key]) {
+        sortedOptions[key] = options[key];
+      }
+    });
+
+    return sortedOptions;
+  }, [data?.data]);
 
   const selectedSku = useMemo<ISku | null>(() => {
     const hasNullValue = Object.values(selectedAttributes).some(
@@ -101,6 +115,13 @@ const ProductDetailPage = () => {
     );
   }, [selectedAttributes, data?.data?.skus]);
 
+  const availableCombinations = data?.data?.skus?.map((sku) =>
+    sku.productSkuAttributes.reduce((acc, attr) => {
+      acc[attr.attribute.type] = attr.attribute.value;
+      return acc;
+    }, {} as Record<string, string>)
+  );
+
   const handleAttributeChange = (type: string, value: string) => {
     setSelectedAttributes((prev) => {
       const newAttributes = { ...prev };
@@ -114,13 +135,6 @@ const ProductDetailPage = () => {
       return newAttributes;
     });
   };
-
-  const availableCombinations = data?.data?.skus?.map((sku) =>
-    sku.productSkuAttributes.reduce((acc, attr) => {
-      acc[attr.attribute.type] = attr.attribute.value;
-      return acc;
-    }, {} as Record<string, string>)
-  );
 
   const handleDisableAttribute = useMemo(() => {
     return (type: string, value: string) => {
@@ -158,10 +172,26 @@ const ProductDetailPage = () => {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
     }
 
-    if (!user) {
+    if (!user && data) {
+      const itemAdded = cartItems?.find(
+        (item) => item.productId === selectedSku?.productId
+      );
+      if (
+        itemAdded &&
+        itemAdded?.quantity + (count ?? 1) > selectedSku?.quantity
+      ) {
+        return showNotification(
+          `Bạn đã có ${itemAdded?.quantity} trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá số lượng trong kho.`,
+          'error'
+        );
+      }
+
       return addToCart({
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
+        name: data?.data?.name,
+        image: selectedSku?.imageUrl,
+        price: selectedSku?.price,
         quantity: count ?? 1,
       });
     }
@@ -177,7 +207,6 @@ const ProductDetailPage = () => {
         },
       }
     );
-    console.log('res:', res);
     // await addCartItemAPI({
     //   productId: selectedSku?.productId,
     //   skuId: selectedSku?.id,
@@ -220,6 +249,11 @@ const ProductDetailPage = () => {
     }
   };
 
+  const breadcrumbsOptions = [
+    { href: '/', label: 'Home' },
+    { href: `/product/${product}`, label: data?.data?.name as string },
+  ];
+
   const getLowestPrice = () => {
     if (!data?.data?.skus || data?.data?.skus.length === 0) return null;
 
@@ -230,6 +264,7 @@ const ProductDetailPage = () => {
     (acc, sku) => acc + (sku.quantity || 0),
     0
   );
+
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
