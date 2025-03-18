@@ -36,21 +36,30 @@ import LayoutContainer from '@/components/layout-container';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNotificationStore } from '@/stores/notification-store';
+import { useGetCartStock } from '@/apis/cart';
+import CustomDialog from '@/components/common/CustomDialog';
 
 const Cart = () => {
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
-  const { cartItems, addToCart } = useCartStore();
+  const { cartItems, addToCart, updateQuantity, removeFromCart } =
+    useCartStore();
 
   const { user } = useAuthStore((state) => state);
+  const { data: cartStock } = useGetCartStock(
+    cartItems?.map((item) => item.skuId)
+  );
   const router = useRouter();
   const { showNotification } = useNotificationStore();
+  const [openDialog, setOpenDialog] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [quantityInputs, setQuantityInputs] = useState<{
-    [key: string]: string;
+    [key: string]: number;
   }>({});
+
+  console.log('cartItems', cartItems);
 
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
@@ -90,6 +99,9 @@ const Cart = () => {
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity + 1;
+
+    updateQuantity(itemId, newQuantity);
+
     const optimisticCart = {
       ...cartItems,
       items: cartItems?.map((item) =>
@@ -113,52 +125,59 @@ const Cart = () => {
     // }
   };
 
-  // const handleSubtractItem = async (itemid: string) => {
-  //   const itemToUpdate = cartItems?.find((item) => item.modelid === itemid);
-  //   if (!itemToUpdate) return;
+  const handleSubtractItem = async (itemId: number) => {
+    const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
 
-  //   const newQuantity = itemToUpdate.quantity - 1;
+    if (!itemToUpdate) return;
 
-  //   const optimisticCart = {
-  //     ...    const itemToUpdate = cartItems?.find((item) => item.modelid === itemid);
-  //     ,
-  //     items:
-  //       newQuantity > 0
-  //         ? cart?.items?.map((item) =>
-  //             item.modelid === itemid
-  //               ? { ...item, quantity: newQuantity }
-  //               : item
-  //           )
-  //         : cart?.items?.filter(
-  //             (item) => item?.modelid !== itemToUpdate?.modelid
-  //           ),
-  //   };
-  //   mutate(optimisticCart, false);
+    const newQuantity = itemToUpdate.quantity - 1;
+    console.log('newQuantity', newQuantity);
+    if (newQuantity === 0) {
+      setOpenDialog(true);
+      return removeFromCart(itemId);
+    }
+    updateQuantity(itemId, newQuantity);
 
-  //   try {
-  //     const updatedCartData = await subtractCartAPI({
-  //       userid: user?.id ? user?.id : null,
-  //       model: itemid,
-  //       quantity: 1,
-  //     });
+    // const optimisticCart = {
+    //   ...    const itemToUpdate = cartItems?.find((item) => item.modelid === itemid);
+    //   ,
+    //   items:
+    //     newQuantity > 0
+    //       ? cart?.items?.map((item) =>
+    //           item.modelid === itemid
+    //             ? { ...item, quantity: newQuantity }
+    //             : item
+    //         )
+    //       : cart?.items?.filter(
+    //           (item) => item?.modelid !== itemToUpdate?.modelid
+    //         ),
+    // };
+    // mutate(optimisticCart, false);
 
-  //     mutateCart(updatedCartData, false);
-  //     globalMutate('/api/cart');
-  //   } catch (error: any) {
-  //     mutate(cart, false);
-  //     showNotification(error?.message, 'error');
-  //   }
-  // };
+    // try {
+    //   const updatedCartData = await subtractCartAPI({
+    //     userid: user?.id ? user?.id : null,
+    //     model: itemid,
+    //     quantity: 1,
+    //   });
+
+    //   mutateCart(updatedCartData, false);
+    //   globalMutate('/api/cart');
+    // } catch (error: any) {
+    //   mutate(cart, false);
+    //   showNotification(error?.message, 'error');
+    // }
+  };
 
   const handleQuantityInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    itemid: string
+    itemId: number
   ) => {
     const newQuantity = e.target.value;
 
     setQuantityInputs((prev) => ({
       ...prev,
-      [itemid]: newQuantity,
+      [itemId]: newQuantity,
     }));
   };
 
@@ -260,6 +279,10 @@ const Cart = () => {
   //   router.push(ROUTES.CHECKOUT);
   // };
 
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
+
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -316,7 +339,7 @@ const Cart = () => {
                               sx={{ display: 'flex', alignItems: 'center' }}
                               component='th'
                               scope='row'>
-                              {/* <Box
+                              <Box
                                 sx={{
                                   position: 'relative',
                                   width: 68,
@@ -328,16 +351,16 @@ const Cart = () => {
                                 }}>
                                 <SkeletonImage
                                   src={row?.image}
-                                  alt={row?.product_name}
+                                  alt={row?.name}
                                   fill
                                   className='product-image'
                                 />
-                              </Box> */}
+                              </Box>
                               <Box>
-                                {/* <Typography fontSize={15}>
-                                  {row?.product_name}
+                                <Typography fontSize={15} mb={0.5}>
+                                  {row?.name}
                                 </Typography>
-                                {row?.name && (
+                                {row?.attributes && (
                                   <Typography
                                     sx={{
                                       display: 'inline-block',
@@ -347,10 +370,11 @@ const Cart = () => {
                                       fontSize: 11,
                                       borderRadius: 0.5,
                                     }}>
-                                    {row?.name}
+                                    {row?.attributes
+                                      ?.map((item) => item?.value)
+                                      .join(', ')}
                                   </Typography>
                                 )}
-                                  */}
                               </Box>
                             </TableCell>
                             <TableCell
@@ -358,7 +382,7 @@ const Cart = () => {
                               component='th'
                               scope='row'
                               align='center'>
-                              {/* {formatPrice(row?.)} */}
+                              {formatPrice(row?.price)}
                             </TableCell>
                             <TableCell
                               component='th'
@@ -380,13 +404,12 @@ const Cart = () => {
                                     borderTopRightRadius: 0,
                                     borderBottomRightRadius: 0,
                                   }}
-                                  // onClick={() =>
-                                  //   handleSubtractItem(row?.modelid)
-                                  // }
-                                >
+                                  onClick={() =>
+                                    handleSubtractItem(row?.skuId)
+                                  }>
                                   -
                                 </Button>
-                                {/* <TextField
+                                <TextField
                                   sx={{
                                     width: '36px',
                                     height: 28,
@@ -420,28 +443,32 @@ const Cart = () => {
                                   type='number'
                                   size='small'
                                   value={
-                                    quantityInputs[row.modelid] ?? row.quantity
+                                    quantityInputs[row.skuId] ?? row.quantity
                                   }
                                   onChange={(e) =>
-                                    handleQuantityInputChange(e, row?.modelid)
+                                    handleQuantityInputChange(e, row?.skuId)
                                   }
-                                  onBlur={() =>
-                                    handleQuantityInputBlur(row?.modelid)
-                                  }
-                                  onKeyDown={(e) =>
-                                    handleKeyDown(e, row?.modelid)
-                                  }
-                                  inputRef={(ref) =>
-                                    (inputRefs.current[row.modelid] = ref)
-                                  }
-                                /> */}
+                                  // onBlur={() =>
+                                  //   handleQuantityInputBlur(row?.modelid)
+                                  // }
+                                  // onKeyDown={(e) =>
+                                  //   handleKeyDown(e, row?.modelid)
+                                  // }
+                                  // inputRef={(ref) =>
+                                  //   (inputRefs.current[row.modelid] = ref)
+                                  // }
+                                />
                                 <Button
                                   sx={{
                                     borderTopLeftRadius: 0,
                                     borderBottomLeftRadius: 0,
                                   }}
-                                  // onClick={() => handleAddItem(row?.modelid)}
-                                >
+                                  onClick={() => handleAddItem(row?.skuId)}
+                                  disabled={
+                                    (cartStock?.data?.find(
+                                      (item) => item.id === row?.skuId
+                                    )?.quantity ?? 0) <= (row?.quantity ?? 0)
+                                  }>
                                   +
                                 </Button>
                               </Box>
@@ -554,6 +581,7 @@ const Cart = () => {
           )}
         </Box>
       </LayoutContainer>
+      <CustomDialog open={openDialog} handleClose={handleClose} />
     </Box>
   );
 };

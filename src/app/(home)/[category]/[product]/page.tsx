@@ -193,6 +193,10 @@ const ProductDetailPage = () => {
         image: selectedSku?.imageUrl,
         price: selectedSku?.price,
         quantity: count ?? 1,
+        attributes: selectedSku?.productSkuAttributes.map((attr) => ({
+          type: attr.attribute.type,
+          value: attr.attribute.value,
+        })),
       });
     }
     const res = await onAddToCart(

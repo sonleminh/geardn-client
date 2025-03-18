@@ -9,6 +9,10 @@ interface CartItem {
   image: string;
   price: number;
   quantity: number;
+  attributes: {
+    type: string;
+    value: string;
+  }[]
 }
 
 export type CartState = {
