@@ -1,13 +1,14 @@
 import { keyframes, SxProps, Theme } from "@mui/material";
+import { usePathname } from 'next/navigation';
 
-export const HeaderStyle: ( isExpanded: boolean) => SxProps<Theme> = ( isExpanded: boolean) => ({
+export const HeaderStyle: ( isExpanded: boolean, pathname: string) => SxProps<Theme> = ( isExpanded: boolean, pathname: string) => ({
   position: 'fixed',
   left: '50%',
   transform: 'translateX(-50%)',
   zIndex: 1000,
-  width: isExpanded ? '100%' : '1070px',
+  width: isExpanded || pathname !== '/' ? '100%' : '1070px',
   height: '80px',
-  bgcolor: isExpanded ? '#fff' : 'none',
+  bgcolor: isExpanded || pathname !== '/' ? '#fff' : 'none',
   boxShadow:
     '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
   animation: isExpanded ? `${slideDown} 0.2s ease-out` : 'none',
@@ -26,7 +27,6 @@ export const HeaderStyle: ( isExpanded: boolean) => SxProps<Theme> = ( isExpande
     bgcolor: 'white',
     borderBottomLeftRadius: '8px',
     borderBottomRightRadius: '8px',
-    border:  isExpanded ? 'none' : '1px solid #cccccc',
     '.header-logo': {
       position: 'relative',
       width: '145px',

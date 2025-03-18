@@ -53,6 +53,7 @@ const ProductDetailPage = () => {
     Record<string, string>
   >({});
   const mainSwiperRef = useRef<SwiperClass | null>(null);
+  console.log('count', count);
 
   const productImageList = useMemo(() => {
     return [
@@ -398,7 +399,8 @@ const ProductDetailPage = () => {
                       // disabled={isOutOfStock || selectedSku === null}
                       sx={{ mr: 2, height: 32 }}>
                       <Button
-                        onClick={() => handleCountChange((count ?? 0) - 1)}>
+                        onClick={() => handleCountChange((count ?? 0) - 1)}
+                        disabled={!selectedSku}>
                         -
                       </Button>
                       <TextField
@@ -439,11 +441,14 @@ const ProductDetailPage = () => {
                             e.preventDefault();
                           }
                         }}
+                        disabled={!selectedSku}
                         size='small'
                       />
                       <Button
                         onClick={() => handleCountChange((count ?? 0) + 1)}
-                        disabled={count === selectedSku?.quantity}
+                        disabled={
+                          count === selectedSku?.quantity || !selectedSku
+                        }
                         // disabled={isOutOfStock || selectedSku === null}
                       >
                         +

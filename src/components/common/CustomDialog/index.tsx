@@ -7,24 +7,32 @@ import {
 } from '@mui/material';
 
 export default function CustomDialog({
+  title,
+  content,
+  okContent,
+  cancelContent,
   open,
+  handleConfirm,
   handleClose,
 }: {
+  title: string;
+  content?: string;
+  okContent: string;
+  cancelContent: string;
   open: boolean;
+  handleConfirm: () => void;
   handleClose: () => void;
 }) {
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Confirm Action</DialogTitle>
-      <DialogContent>
-        Do you really want to proceed with this action?
-      </DialogContent>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>{content}</DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color='primary'>
-          Cancel
+        <Button onClick={handleConfirm} color='primary' variant='contained'>
+          {okContent}
         </Button>
-        <Button onClick={handleClose} color='secondary' variant='contained'>
-          Confirm
+        <Button onClick={handleClose} color='inherit'>
+          {cancelContent}
         </Button>
       </DialogActions>
     </Dialog>

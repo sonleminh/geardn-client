@@ -58,8 +58,13 @@ const Cart = () => {
   const [quantityInputs, setQuantityInputs] = useState<{
     [key: string]: number;
   }>({});
+  const [subtractItem, setSubtractItem] = useState<{
+    itemId: number;
+    name: string;
+  }>();
 
   console.log('cartItems', cartItems);
+  console.log('quantityInputs', quantityInputs);
 
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
@@ -125,7 +130,7 @@ const Cart = () => {
     // }
   };
 
-  const handleSubtractItem = async (itemId: number) => {
+  const handleSubtractItem = async (itemId: number, name: string) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
 
     if (!itemToUpdate) return;
@@ -134,25 +139,10 @@ const Cart = () => {
     console.log('newQuantity', newQuantity);
     if (newQuantity === 0) {
       setOpenDialog(true);
-      return removeFromCart(itemId);
+      setSubtractItem({ itemId, name });
+      return;
     }
     updateQuantity(itemId, newQuantity);
-
-    // const optimisticCart = {
-    //   ...    const itemToUpdate = cartItems?.find((item) => item.modelid === itemid);
-    //   ,
-    //   items:
-    //     newQuantity > 0
-    //       ? cart?.items?.map((item) =>
-    //           item.modelid === itemid
-    //             ? { ...item, quantity: newQuantity }
-    //             : item
-    //         )
-    //       : cart?.items?.filter(
-    //           (item) => item?.modelid !== itemToUpdate?.modelid
-    //         ),
-    // };
-    // mutate(optimisticCart, false);
 
     // try {
     //   const updatedCartData = await subtractCartAPI({
@@ -174,71 +164,106 @@ const Cart = () => {
     itemId: number
   ) => {
     const newQuantity = e.target.value;
-
+    console.log('newQuantity1:', newQuantity);
+    if (!newQuantity) {
+      console.log('null');
+      return setQuantityInputs((prev) => ({
+        ...prev,
+        [itemId]: null,
+      }));
+    }
     setQuantityInputs((prev) => ({
       ...prev,
-      [itemId]: newQuantity,
+      [itemId]: +newQuantity,
     }));
   };
 
-  // const handleQuantityInputBlur = async (itemid: string) => {
-  //   const inputQuantity = quantityInputs[itemid];
-  //   const newQuantity = parseInt(inputQuantity, 10);
+  const handleQuantityInputBlur = async (itemId: number) => {
+    const inputQuantity = quantityInputs[itemId];
+    const newQuantity = inputQuantity;
+    console.log('newQuantity2:', newQuantity);
+    const currentItem = cartItems?.find((item) => item.skuId === itemId);
+    const currentItemStock = cartStock?.data?.find(
+      (item) => item.id === itemId
+    );
+    console.log('currentItemStock', currentItemStock);
+    console.log(
+      'newQuantity <= currentItemStock?.quantity',
+      newQuantity <= (currentItemStock?.quantity ?? 0)
+    );
+    if (!newQuantity) {
+      return setQuantityInputs((prev) => ({
+        ...prev,
+        [itemId]: currentItem?.quantity,
+      }));
+    }
+    if (currentItemStock && newQuantity > currentItemStock?.quantity) {
+      console.log('casdada');
+      return handleShowNoti();
+    }
+    // If the input is not a valid number or is empty, reset it to the current cart quantity
+    // if (currentItemStock && !(newQuantity <= currentItemStock?.quantity)) {
+    //   console.log('ok');
+    //   // showNotification('Giá trị không hợp lệ', 'error');
+    //   return setQuantityInputs((prev) => ({
+    //     ...prev,
+    //     [itemId]: currentItem?.quantity,
+    //   }));
+    // }
+    // if (newQuantity || newQuantity < 1) {
+    //   console.log('in');
+    //   const originalQuantity = cartItems?.find(
+    //     (item) => item.skuId === itemId
+    //   )?.quantity;
+    //   setQuantityInputs((prev) => ({
+    //     ...prev,
+    //     [itemId]: originalQuantity ?? 1,
+    //   }));
+    //   return;
+    // }
 
-  //   // If the input is not a valid number or is empty, reset it to the current cart quantity
-  //   if (isNaN(newQuantity) || newQuantity < 1) {
-  //     const originalQuantity = cart?.items?.find(
-  //       (item) => item.modelid === itemid
-  //     )?.quantity;
-  //     setQuantityInputs((prev) => ({
-  //       ...prev,
-  //       [itemid]: originalQuantity?.toString() ?? '1',
-  //     }));
-  //     return;
-  //   }
+    // const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
 
-  //   const itemToUpdate = cart?.items?.find((item) => item.modelid === itemid);
+    // if (!itemToUpdate || newQuantity === itemToUpdate.quantity) return;
 
-  //   if (!itemToUpdate || newQuantity === itemToUpdate.quantity) return;
+    // const optimisticCart = {
+    //   ...cart,
+    //   items: cart?.items?.map((item) =>
+    //     item.modelid === itemid ? { ...item, quantity: newQuantity } : item
+    //   ),
+    // };
 
-  //   const optimisticCart = {
-  //     ...cart,
-  //     items: cart?.items?.map((item) =>
-  //       item.modelid === itemid ? { ...item, quantity: newQuantity } : item
-  //     ),
-  //   };
+    // mutate(optimisticCart, false);
 
-  //   mutate(optimisticCart, false);
+    // try {
+    //   const updatedCartData = await updateCartQuantityAPI({
+    //     userid: user?.id ? user?.id : null,
+    //     model: itemid,
+    //     quantity: newQuantity,
+    //   });
+    //   mutateCart(updatedCartData, false);
 
-  //   try {
-  //     const updatedCartData = await updateCartQuantityAPI({
-  //       userid: user?.id ? user?.id : null,
-  //       model: itemid,
-  //       quantity: newQuantity,
-  //     });
-  //     mutateCart(updatedCartData, false);
+    //   globalMutate('/api/cart');
+    // } catch (error: any) {
+    //   showNotification(error?.message, 'error');
+    //   mutate(cart, false);
+    // }
+    // setQuantityInputs({});
+  };
 
-  //     globalMutate('/api/cart');
-  //   } catch (error: any) {
-  //     showNotification(error?.message, 'error');
-  //     mutate(cart, false);
-  //   }
-  //   setQuantityInputs({});
-  // };
+  const handleKeyDown = (e: React.KeyboardEvent, itemId: number) => {
+    const target = e.currentTarget as HTMLInputElement;
 
-  // const handleKeyDown = (e: React.KeyboardEvent, itemId: string) => {
-  //   const target = e.currentTarget as HTMLInputElement;
-
-  //   if (e.key === '0' && target.value === '') {
-  //     e.preventDefault();
-  //   }
-  //   if (e.key === 'Enter') {
-  //     handleQuantityInputBlur(itemId);
-  //     if (inputRefs.current[itemId]) {
-  //       inputRefs.current[itemId]?.blur();
-  //     }
-  //   }
-  // };
+    if (e.key === '0' && target.value === '') {
+      e.preventDefault();
+    }
+    if (e.key === 'Enter') {
+      handleQuantityInputBlur(itemId);
+      if (inputRefs.current[itemId]) {
+        inputRefs.current[itemId]?.blur();
+      }
+    }
+  };
 
   // const handleDeleteItem = async (itemid: string) => {
   //   const optimisticCart = {
@@ -279,10 +304,20 @@ const Cart = () => {
   //   router.push(ROUTES.CHECKOUT);
   // };
 
-  const handleClose = () => {
-    setOpenDialog(false);
+  const handleConfirmDialog = () => {
+    if (subtractItem) {
+      removeFromCart(subtractItem.itemId);
+    }
+    handleCloseDialog();
   };
 
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+  const handleShowNoti = () => {
+    console.log('cccc');
+    return showNotification('cc', 'error');
+  };
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -393,6 +428,7 @@ const Cart = () => {
                                   display: 'flex',
                                   justifyContent: 'center',
                                   alignItems: 'center',
+                                  mb: 0.5,
                                   '& .MuiButtonBase-root': {
                                     minWidth: 28,
                                     height: 28,
@@ -405,7 +441,7 @@ const Cart = () => {
                                     borderBottomRightRadius: 0,
                                   }}
                                   onClick={() =>
-                                    handleSubtractItem(row?.skuId)
+                                    handleSubtractItem(row?.skuId, row?.name)
                                   }>
                                   -
                                 </Button>
@@ -443,17 +479,20 @@ const Cart = () => {
                                   type='number'
                                   size='small'
                                   value={
-                                    quantityInputs[row.skuId] ?? row.quantity
+                                    (quantityInputs[row?.skuId] === null
+                                      ? ''
+                                      : quantityInputs[row?.skuId]) ??
+                                    row?.quantity
                                   }
                                   onChange={(e) =>
                                     handleQuantityInputChange(e, row?.skuId)
                                   }
-                                  // onBlur={() =>
-                                  //   handleQuantityInputBlur(row?.modelid)
-                                  // }
-                                  // onKeyDown={(e) =>
-                                  //   handleKeyDown(e, row?.modelid)
-                                  // }
+                                  onBlur={() =>
+                                    handleQuantityInputBlur(row?.skuId)
+                                  }
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, row?.skuId)
+                                  }
                                   // inputRef={(ref) =>
                                   //   (inputRefs.current[row.modelid] = ref)
                                   // }
@@ -472,6 +511,20 @@ const Cart = () => {
                                   +
                                 </Button>
                               </Box>
+                              {cartStock?.data &&
+                                (cartStock?.data?.find(
+                                  (item) => item.id === row?.skuId
+                                )?.quantity ?? 0) < 10 && (
+                                  <Typography sx={{ fontSize: 13 }}>
+                                    Còn{' '}
+                                    {
+                                      cartStock?.data?.find(
+                                        (item) => item.id === row?.skuId
+                                      )?.quantity
+                                    }{' '}
+                                    sản phẩm
+                                  </Typography>
+                                )}
                             </TableCell>
 
                             <TableCell
@@ -581,7 +634,14 @@ const Cart = () => {
           )}
         </Box>
       </LayoutContainer>
-      <CustomDialog open={openDialog} handleClose={handleClose} />
+      <CustomDialog
+        title='Bạn chắc chắn muốn bỏ sản phẩm này?'
+        okContent='Có'
+        cancelContent='Không'
+        open={openDialog}
+        handleConfirm={handleConfirmDialog}
+        handleClose={handleCloseDialog}
+      />
     </Box>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -30,6 +30,8 @@ import { useGetCart } from '@/apis/cart';
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  console.log('pathname', pathname);
   const { user, logout } = useAuthStore((state) => state);
   const { mutateAsync: onLogout } = useLogout();
 
@@ -78,7 +80,7 @@ const Header = () => {
     }
   };
   return (
-    <Box sx={HeaderStyle(isExpanded)}>
+    <Box sx={HeaderStyle(isExpanded, pathname)}>
       <Box className='header-main'>
         <Grid2 container height={80}>
           <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
