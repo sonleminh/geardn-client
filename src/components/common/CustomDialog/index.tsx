@@ -7,33 +7,41 @@ import {
 } from '@mui/material';
 
 export default function CustomDialog({
-  title,
-  content,
-  okContent,
-  cancelContent,
+  title = 'Default Title',
+  content = 'Default Content',
+  okContent = 'Có',
+  cancelContent = 'Không',
+  showOkButton = true,
+  showCancelButton = true,
   open,
-  handleConfirm,
+  handleOk,
   handleClose,
 }: {
-  title: string;
+  title?: string;
   content?: string;
-  okContent: string;
-  cancelContent: string;
+  showOkButton?: boolean;
+  showCancelButton?: boolean;
+  okContent?: string;
+  cancelContent?: string;
   open: boolean;
-  handleConfirm: () => void;
-  handleClose: () => void;
+  handleOk: () => void;
+  handleClose?: () => void;
 }) {
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{content}</DialogContent>
       <DialogActions>
-        <Button onClick={handleConfirm} color='primary' variant='contained'>
-          {okContent}
-        </Button>
-        <Button onClick={handleClose} color='inherit'>
-          {cancelContent}
-        </Button>
+        {showOkButton && (
+          <Button onClick={handleOk} color='primary' variant='contained'>
+            {okContent}
+          </Button>
+        )}
+        {showCancelButton && (
+          <Button onClick={handleClose} color='inherit'>
+            {cancelContent}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

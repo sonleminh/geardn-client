@@ -1,7 +1,7 @@
-import { IProduct } from "@/interfaces/IProduct";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { axiosInstance } from "@/lib/utils/axiosInstance";
+import { ISyncCartPayload } from "@/interfaces/ICart";
 import { IUser } from "@/interfaces/IUser";
-import { axiosInstance } from "@/lib/utils/axiosInstance"
-import { useMutation, useQuery } from "@tanstack/react-query"
 
 interface IAddToCartPayload {
     productId: number;
@@ -27,6 +27,17 @@ export const useAddToCart = () => {
         mutationFn: addToCart
     })
 }
+
+const syncCart = async (payload: ISyncCartPayload[]) => {
+    const res = await axiosInstance.post(`/carts/sync`, payload)
+    return res.data
+ }
+ 
+ export const useSyncCart = () => {
+     return useMutation({
+         mutationFn: syncCart
+     })
+ }
 
 const getCart = async () => {
     const res = await axiosInstance.get(`/carts`)

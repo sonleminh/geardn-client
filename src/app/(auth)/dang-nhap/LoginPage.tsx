@@ -1,12 +1,14 @@
 'use client';
-import { useLoginWithEmailPwd } from '@/apis/auth';
-import SkeletonImage from '@/components/common/SkeletonImage';
-import { ICustomJwtPayload } from '@/interfaces/IAuth';
-import { useAuthStore } from '@/stores/auth-store';
-import { useNotificationStore } from '@/stores/notification-store';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import LockIcon from '@mui/icons-material/Lock';
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
+
+import { ChangeEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { useQueryClient } from '@tanstack/react-query';
+import { jwtDecode } from 'jwt-decode';
+import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
 import {
   Box,
   Button,
@@ -17,25 +19,30 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { useQueryClient } from '@tanstack/react-query';
-import { useFormik } from 'formik';
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ChangeEvent, useState } from 'react';
+import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import LockIcon from '@mui/icons-material/Lock';
+
+import SkeletonImage from '@/components/common/SkeletonImage';
+import { useLoginWithEmailPwd } from '@/apis/auth';
+import { useSyncCart } from '@/apis/cart';
+import { ICustomJwtPayload } from '@/interfaces/IAuth';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCartStore } from '@/stores/cart-store';
+import { useNotificationStore } from '@/stores/notification-store';
 
 const LoginPage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { login } = useAuthStore((state) => state);
+  const { login } = useAuthStore();
+  const { cartItems } = useCartStore();
   const { showNotification } = useNotificationStore();
   const {
     mutateAsync: onLoginWithEmailPwd,
     isPending: isLoginWithEmailPwd,
     status: loginWithEmailPwdStatus,
   } = useLoginWithEmailPwd();
+  const { mutateAsync: onSyncCart } = useSyncCart();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
@@ -44,6 +51,16 @@ const LoginPage = () => {
     validateOnChange: false,
     async onSubmit(values) {
       const userData = await onLoginWithEmailPwd(values, {
+        onSuccess: async () => {
+          const syncPayload = cartItems.map(
+            ({ productId, skuId, quantity }) => ({
+              productId,
+              skuId,
+              quantity,
+            })
+          );
+          await onSyncCart(syncPayload);
+        },
         onError: () => {
           showNotification(
             'The system is overloaded, please wait a moment...',

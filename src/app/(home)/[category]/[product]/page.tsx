@@ -167,7 +167,6 @@ const ProductDetailPage = () => {
       return !isValid;
     };
   }, [selectedAttributes]);
-
   const handleAddCartItem = async () => {
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
@@ -175,7 +174,7 @@ const ProductDetailPage = () => {
 
     if (!user && data) {
       const itemAdded = cartItems?.find(
-        (item) => item.productId === selectedSku?.productId
+        (item) => item.skuId === selectedSku?.id
       );
       if (
         itemAdded &&
@@ -191,7 +190,10 @@ const ProductDetailPage = () => {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
         name: data?.data?.name,
-        image: selectedSku?.imageUrl,
+        imageUrl:
+          selectedSku?.imageUrl !== ''
+            ? selectedSku?.imageUrl
+            : data?.data?.images?.[0],
         price: selectedSku?.price,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map((attr) => ({

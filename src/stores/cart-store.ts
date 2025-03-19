@@ -1,23 +1,11 @@
 // stores/useCartStore.ts
+import { ICartStoreItem } from '@/interfaces/ICart';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface CartItem {
-  productId: number;
-  skuId: number;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  attributes: {
-    type: string;
-    value: string;
-  }[]
-}
-
 export type CartState = {
-  cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
+  cartItems: ICartStoreItem[];
+  addToCart: (item: ICartStoreItem) => void;
   removeFromCart: (skuId: number) => void;
   clearCart: () => void;
   updateQuantity: (skuId: number, quantity: number) => void;

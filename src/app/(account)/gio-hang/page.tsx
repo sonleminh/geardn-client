@@ -53,7 +53,8 @@ const Cart = () => {
   );
   const router = useRouter();
   const { showNotification } = useNotificationStore();
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
+  const [openOutOfStockDialog, setOpenOutOfStockDialog] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [quantityInputs, setQuantityInputs] = useState<{
     [key: string]: number;
@@ -138,7 +139,7 @@ const Cart = () => {
     const newQuantity = itemToUpdate.quantity - 1;
     console.log('newQuantity', newQuantity);
     if (newQuantity === 0) {
-      setOpenDialog(true);
+      setOpenRemoveItemDialog(true);
       setSubtractItem({ itemId, name });
       return;
     }
@@ -198,29 +199,20 @@ const Cart = () => {
       }));
     }
     if (currentItemStock && newQuantity > currentItemStock?.quantity) {
-      console.log('casdada');
-      return handleShowNoti();
+      updateQuantity(itemId, currentItemStock?.quantity);
+      setQuantityInputs((prev) => ({
+        ...prev,
+        [itemId]: currentItemStock?.quantity,
+      }));
+      setOpenOutOfStockDialog(true);
+      return;
     }
-    // If the input is not a valid number or is empty, reset it to the current cart quantity
-    // if (currentItemStock && !(newQuantity <= currentItemStock?.quantity)) {
-    //   console.log('ok');
-    //   // showNotification('Giá trị không hợp lệ', 'error');
-    //   return setQuantityInputs((prev) => ({
-    //     ...prev,
-    //     [itemId]: currentItem?.quantity,
-    //   }));
-    // }
-    // if (newQuantity || newQuantity < 1) {
-    //   console.log('in');
-    //   const originalQuantity = cartItems?.find(
-    //     (item) => item.skuId === itemId
-    //   )?.quantity;
-    //   setQuantityInputs((prev) => ({
-    //     ...prev,
-    //     [itemId]: originalQuantity ?? 1,
-    //   }));
-    //   return;
-    // }
+    updateQuantity(itemId, newQuantity);
+    setQuantityInputs((prev) => ({
+      ...prev,
+      [itemId]: newQuantity,
+    }));
+    return;
 
     // const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
 
@@ -265,22 +257,9 @@ const Cart = () => {
     }
   };
 
-  // const handleDeleteItem = async (itemid: string) => {
-  //   const optimisticCart = {
-  //     ...cart,
-  //     items: cart?.items.filter((item) => item.modelid !== itemid),
-  //   };
-  //   mutate(optimisticCart, false);
-  //   try {
-  //     const updatedCartData = await deleteCartItem(itemid);
-
-  //     mutateCart(updatedCartData, false);
-  //     globalMutate('/api/cart');
-  //   } catch (error) {
-  //     mutate(cart, false);
-  //     console.error('Failed to update cart:', error);
-  //   }
-  // };
+  const handleDeleteItem = async (itemId: number) => {
+    removeFromCart(itemId);
+  };
 
   // const totalAmount = () => {
   //   const selectedItems = selected
@@ -304,19 +283,19 @@ const Cart = () => {
   //   router.push(ROUTES.CHECKOUT);
   // };
 
-  const handleConfirmDialog = () => {
+  const handleOkRemoveItemDialog = () => {
     if (subtractItem) {
       removeFromCart(subtractItem.itemId);
     }
-    handleCloseDialog();
+    handleCloseRemoveItemDialog();
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseRemoveItemDialog = () => {
+    setOpenRemoveItemDialog(false);
   };
-  const handleShowNoti = () => {
-    console.log('cccc');
-    return showNotification('cc', 'error');
+
+  const handleOkOutOfStockDialog = () => {
+    setOpenOutOfStockDialog(false);
   };
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
@@ -385,7 +364,7 @@ const Cart = () => {
                                   },
                                 }}>
                                 <SkeletonImage
-                                  src={row?.image}
+                                  src={row?.imageUrl}
                                   alt={row?.name}
                                   fill
                                   className='product-image'
@@ -526,7 +505,6 @@ const Cart = () => {
                                   </Typography>
                                 )}
                             </TableCell>
-
                             <TableCell
                               component='th'
                               scope='row'
@@ -539,11 +517,20 @@ const Cart = () => {
                                     cursor: 'pointer',
                                   },
                                 }}
-                                // onClick={() => handleDeleteItem(row?.modelid)}
-                              >
+                                onClick={() => handleDeleteItem(row?.skuId)}>
                                 Xóa
                               </Typography>
                             </TableCell>
+                            <CustomDialog
+                              content={`Rất tiếc, bạn chỉ có thể mua tối đa ${
+                                cartStock?.data?.find(
+                                  (item) => item.id === row?.skuId
+                                )?.quantity ?? 0
+                              } sản phẩm của chương trình giảm giá này`}
+                              showCancelButton={false}
+                              open={openOutOfStockDialog}
+                              handleOk={handleOkOutOfStockDialog}
+                            />
                           </TableRow>
                         );
                       })}
@@ -638,9 +625,9 @@ const Cart = () => {
         title='Bạn chắc chắn muốn bỏ sản phẩm này?'
         okContent='Có'
         cancelContent='Không'
-        open={openDialog}
-        handleConfirm={handleConfirmDialog}
-        handleClose={handleCloseDialog}
+        open={openRemoveItemDialog}
+        handleOk={handleOkRemoveItemDialog}
+        handleClose={handleCloseRemoveItemDialog}
       />
     </Box>
   );

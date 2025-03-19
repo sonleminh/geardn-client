@@ -1,16 +1,14 @@
-import { IModel } from "./IProduct";
+// export interface ICart {
+//     id: string;
+//     userid: string;
+//     items: ICartItem[]
+// }
 
-export interface ICart {
-    id: string;
-    userid: string;
-    items: ICartItem[]
-}
-
-export interface ICart {
-    id: string;
-    userid: string;
-    items: ICartItem[]
-}
+// export interface ICart {
+//     id: string;
+//     userid: string;
+//     items: ICartItem[]
+// }
 
 export interface ICartPayload {
     userid: string | null;
@@ -18,28 +16,34 @@ export interface ICartPayload {
     quantity: number;
 }
 
-export interface ICartItem {
-    // model: {
-    //     id: string;
-    //     name: string;
-    //     image: string;
-    //     price: number;
-    //     extinfo: {
-    //         tier_index: number[];
-    //         is_pre_order: boolean;
-    //     };
-    //     productid: string;
-    //     product_name: string;
-    // };
-    modelid: string;
+export interface ICartStoreItem {
+    productId: number;
+  skuId: number;
+  name: string;
+  imageUrl: string;
+  price: number;
+  quantity: number;
+  attributes: {
+    type: string;
+    value: string;
+  }[]
+}
+
+export interface ICartServerItem {
+    productId: number;
+    skuId: number;
     name: string;
-    image: string;
+    imageUrl: string;
     price: number;
-    extinfo: {
-        tier_index: number[];
-        is_pre_order: boolean;
-    };
-    productid: string;
-    product_name: string;
+    quantity: number;
+    attributes: {
+        type: string;
+        value: string;
+    }[]
+}
+
+export interface ISyncCartPayload {
+    productId: number;
+    skuId: number;
     quantity: number;
 }

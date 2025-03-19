@@ -18,7 +18,6 @@ import {
   Typography,
 } from '@mui/material';
 
-// import { useGetCart } from '@/services/cart/api';
 import { ROUTES } from '@/constants/route';
 
 import { useLogout } from '@/apis/auth';
@@ -27,6 +26,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import SkeletonImage from '../common/SkeletonImage';
 import { HeaderStyle } from './style';
 import { useGetCart } from '@/apis/cart';
+import { useCartStore } from '@/stores/cart-store';
 
 const Header = () => {
   const router = useRouter();
@@ -36,6 +36,7 @@ const Header = () => {
   const { mutateAsync: onLogout } = useLogout();
 
   const { data: cartData, isLoading } = useGetCart(user);
+  const { cartItems } = useCartStore();
   console.log('cartData', cartData);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -157,24 +158,24 @@ const Header = () => {
                     //   : router.push(ROUTES.LOGIN);
                   }}
                 />
-                {/* <Typography
-                        sx={{
-                          position: 'absolute',
-                          top: -2,
-                          right: -2,
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          width: '20px',
-                          height: '20px',
-                          borderRadius: 10,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          bgcolor: isLoading ? 'rgba(0, 0 ,0, 0.3)' : '#000',
-                          color: '#fff',
-                        }}>
-                        {cart?.items ? cart.items.length : isLoading ? '' : 0}
-                      </Typography> */}
+                <Typography
+                  sx={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: 10,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    bgcolor: isLoading ? 'rgba(0, 0 ,0, 0.3)' : '#000',
+                    color: '#fff',
+                  }}>
+                  {cartItems ? cartItems.length : isLoading ? '' : 0}
+                </Typography>
               </Button>
               {user !== null ? (
                 user?.picture ? (
