@@ -35,7 +35,7 @@ const LoginPage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
-  const { cartItems } = useCartStore();
+  const { cartItems, syncCart } = useCartStore();
   const { showNotification } = useNotificationStore();
   const {
     mutateAsync: onLoginWithEmailPwd,
@@ -59,7 +59,23 @@ const LoginPage = () => {
               quantity,
             })
           );
-          await onSyncCart(syncPayload);
+          const updatedCart = await onSyncCart(syncPayload);
+
+          const syncCartData = updatedCart?.data?.items?.map((item) => ({
+            productId: item?.productId,
+            skuId: item?.sku?.id,
+            productName: item?.product?.name,
+            imageUrl: item?.sku?.imageUrl
+              ? item?.sku?.imageUrl
+              : item?.product?.images?.[0],
+            price: item?.sku?.price,
+            quantity: item?.sku?.quantity,
+            attributes: item?.sku?.productSkuAttributes.map((attr) => ({
+              type: attr?.attribute?.type,
+              value: attr?.attribute?.value,
+            })),
+          }));
+          syncCart(syncCartData);
         },
         onError: () => {
           showNotification(

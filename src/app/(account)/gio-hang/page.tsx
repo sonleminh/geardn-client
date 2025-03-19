@@ -365,14 +365,14 @@ const Cart = () => {
                                 }}>
                                 <SkeletonImage
                                   src={row?.imageUrl}
-                                  alt={row?.name}
+                                  alt={row?.productName}
                                   fill
                                   className='product-image'
                                 />
                               </Box>
                               <Box>
                                 <Typography fontSize={15} mb={0.5}>
-                                  {row?.name}
+                                  {row?.productName}
                                 </Typography>
                                 {row?.attributes && (
                                   <Typography
@@ -420,7 +420,10 @@ const Cart = () => {
                                     borderBottomRightRadius: 0,
                                   }}
                                   onClick={() =>
-                                    handleSubtractItem(row?.skuId, row?.name)
+                                    handleSubtractItem(
+                                      row?.skuId,
+                                      row?.productName
+                                    )
                                   }>
                                   -
                                 </Button>

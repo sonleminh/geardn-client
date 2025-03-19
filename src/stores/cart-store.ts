@@ -6,9 +6,10 @@ import { persist } from 'zustand/middleware';
 export type CartState = {
   cartItems: ICartStoreItem[];
   addToCart: (item: ICartStoreItem) => void;
+  updateQuantity: (skuId: number, quantity: number) => void;
   removeFromCart: (skuId: number) => void;
   clearCart: () => void;
-  updateQuantity: (skuId: number, quantity: number) => void;
+  syncCart: (cartItems: ICartStoreItem[]) => void;
 }
 
 export type CartStore = CartState
@@ -31,17 +32,18 @@ export const useCartStore = create<CartState>()(
           }
           return { cartItems: [...state.cartItems, item] };
         }),
-      removeFromCart: (skuId) =>
-        set((state) => ({
-          cartItems: state.cartItems.filter((i) => i.skuId !== skuId),
-        })),
-      clearCart: () => set({ cartItems: [] }),
       updateQuantity: (skuId, quantity) =>
         set((state) => ({
           cartItems: state.cartItems.map((i) =>
             i.skuId === skuId ? { ...i, quantity } : i
           ),
         })),
+        removeFromCart: (skuId) =>
+          set((state) => ({
+            cartItems: state.cartItems.filter((i) => i.skuId !== skuId),
+          })),
+        clearCart: () => set({ cartItems: [] }),
+        syncCart: (cartItems) => set({ cartItems: cartItems }),
     }),
     { name: 'cart-storage' } // 🛒 Persists cart for guest users
   )

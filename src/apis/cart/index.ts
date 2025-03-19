@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils/axiosInstance";
-import { ISyncCartPayload } from "@/interfaces/ICart";
+import { ICartResponse, ISyncCartPayload } from "@/interfaces/ICart";
 import { IUser } from "@/interfaces/IUser";
 
 interface IAddToCartPayload {
@@ -30,7 +30,7 @@ export const useAddToCart = () => {
 
 const syncCart = async (payload: ISyncCartPayload[]) => {
     const res = await axiosInstance.post(`/carts/sync`, payload)
-    return res.data
+    return res.data as ICartResponse
  }
  
  export const useSyncCart = () => {
@@ -41,7 +41,7 @@ const syncCart = async (payload: ISyncCartPayload[]) => {
 
 const getCart = async () => {
     const res = await axiosInstance.get(`/carts`)
-    return res.data
+    return res.data as ICartResponse
 }
  
  export const useGetCart = (user: IUser | null) => {

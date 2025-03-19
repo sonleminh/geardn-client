@@ -189,7 +189,7 @@ const ProductDetailPage = () => {
       return addToCart({
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
-        name: data?.data?.name,
+        productName: data?.data?.name,
         imageUrl:
           selectedSku?.imageUrl !== ''
             ? selectedSku?.imageUrl
