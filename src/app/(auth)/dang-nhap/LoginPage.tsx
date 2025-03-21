@@ -52,7 +52,7 @@ const LoginPage = () => {
     async onSubmit(values) {
       const userData = await onLoginWithEmailPwd(values, {
         onSuccess: async () => {
-          const syncPayload = cartItems.map(
+          const syncPayload = cartItems?.map(
             ({ productId, skuId, quantity }) => ({
               productId,
               skuId,
@@ -69,7 +69,7 @@ const LoginPage = () => {
               ? item?.sku?.imageUrl
               : item?.product?.images?.[0],
             price: item?.sku?.price,
-            quantity: item?.sku?.quantity,
+            quantity: item?.quantity,
             attributes: item?.sku?.productSkuAttributes.map((attr) => ({
               type: attr?.attribute?.type,
               value: attr?.attribute?.value,

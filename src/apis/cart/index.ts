@@ -9,6 +9,11 @@ interface IAddToCartPayload {
     quantity: number;
 }
 
+interface IUpdateQuantityPayload {
+    skuId: number;
+    quantity: number;
+}
+
 interface ICartStockResponse {
     success: boolean;
     message: string;
@@ -27,6 +32,17 @@ export const useAddToCart = () => {
         mutationFn: addToCart
     })
 }
+
+const updateQuantity = async (payload: IUpdateQuantityPayload) => {
+    const res = await axiosInstance.post(`/carts/update-quantity`, payload)
+    return res.data
+ }
+ 
+ export const useUpdateQuantity = () => {
+     return useMutation({
+         mutationFn: updateQuantity
+     })
+ }
 
 const syncCart = async (payload: ISyncCartPayload[]) => {
     const res = await axiosInstance.post(`/carts/sync`, payload)

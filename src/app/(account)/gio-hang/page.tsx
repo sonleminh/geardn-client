@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ChangeEvent, useRef, useState } from 'react';
+import React, { ChangeEvent, useCallback, useRef, useState } from 'react';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
@@ -36,8 +36,9 @@ import LayoutContainer from '@/components/layout-container';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNotificationStore } from '@/stores/notification-store';
-import { useGetCartStock } from '@/apis/cart';
+import { useGetCartStock, useUpdateQuantity } from '@/apis/cart';
 import CustomDialog from '@/components/common/CustomDialog';
+import { truncateTextByLine } from '@/utils/css-helper.util';
 
 const Cart = () => {
   const breadcrumbsOptions = [
@@ -51,6 +52,8 @@ const Cart = () => {
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
+  const { mutateAsync: onUpdateQuantity } = useUpdateQuantity();
+
   const router = useRouter();
   const { showNotification } = useNotificationStore();
   const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
@@ -63,6 +66,7 @@ const Cart = () => {
     itemId: number;
     name: string;
   }>();
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log('cartItems', cartItems);
   console.log('quantityInputs', quantityInputs);
@@ -99,6 +103,18 @@ const Cart = () => {
     setSelected(newSelected);
   };
 
+  const debouncedUpdateQuantity = useCallback(
+    debounce((payload: { skuId: number; quantity: number }) => {
+      onUpdateQuantity(payload, {
+        onError: () => {
+          showNotification('Đã có lỗi xảy ra', 'error');
+          updateQuantity(payload.skuId, payload.quantity - 1); // !!
+        },
+      });
+    }, 1000),
+    []
+  );
+
   const handleAddItem = async (itemId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
 
@@ -108,27 +124,9 @@ const Cart = () => {
 
     updateQuantity(itemId, newQuantity);
 
-    const optimisticCart = {
-      ...cartItems,
-      items: cartItems?.map((item) =>
-        item.skuId === itemId ? { ...item, quantity: newQuantity } : item
-      ),
-    };
-
-    // try {
-    //   const updatedCartData = await addCartAPI({
-    //     userid: user?.id ? user?.id : null,
-    //     model: itemId,
-    //     quantity: 1,
-    //   });
-
-    //   mutateCart(updatedCartData, false);
-
-    //   globalMutate('/api/cart');
-    // } catch (error: any) {
-    //   mutate(cart, false);
-    //   showNotification(error?.message, 'error');
-    // }
+    if (user) {
+      debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
+    }
   };
 
   const handleSubtractItem = async (itemId: number, name: string) => {
@@ -137,13 +135,19 @@ const Cart = () => {
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity - 1;
-    console.log('newQuantity', newQuantity);
-    if (newQuantity === 0) {
+    if (newQuantity === 0 && !user) {
       setOpenRemoveItemDialog(true);
       setSubtractItem({ itemId, name });
       return;
     }
+    if (newQuantity === 0 && user) {
+      setOpenRemoveItemDialog(true);
+      setSubtractItem({ itemId, name });
+      debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
+      return;
+    }
     updateQuantity(itemId, newQuantity);
+    debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
 
     // try {
     //   const updatedCartData = await subtractCartAPI({
@@ -165,9 +169,7 @@ const Cart = () => {
     itemId: number
   ) => {
     const newQuantity = e.target.value;
-    console.log('newQuantity1:', newQuantity);
     if (!newQuantity) {
-      console.log('null');
       return setQuantityInputs((prev) => ({
         ...prev,
         [itemId]: null,
@@ -177,6 +179,16 @@ const Cart = () => {
       ...prev,
       [itemId]: +newQuantity,
     }));
+    onUpdateQuantity(
+      { skuId: itemId, quantity: +newQuantity }
+      // {
+      //   onError: () => {
+      //     showNotification('Đã có lỗi xảy ra', 'error');
+      //     updateQuantity(itemId, payload.quantity - 1);
+      //   },
+      // }
+      // }
+    );
   };
 
   const handleQuantityInputBlur = async (itemId: number) => {
@@ -297,6 +309,18 @@ const Cart = () => {
   const handleOkOutOfStockDialog = () => {
     setOpenOutOfStockDialog(false);
   };
+
+  function debounce<T extends (...args: any[]) => void>(
+    callback: T,
+    delay: number
+  ): (...args: Parameters<T>) => void {
+    let timer: NodeJS.Timeout;
+
+    return (...args: Parameters<T>) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => callback(...args), delay);
+    };
+  }
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -311,7 +335,7 @@ const Cart = () => {
                   <Table sx={{ minWidth: 650 }} aria-label='simple table'>
                     <TableHead>
                       <TableRow>
-                        <TableCell>
+                        <TableCell width={'5%'}>
                           <Checkbox
                             color='primary'
                             checked={
@@ -324,7 +348,7 @@ const Cart = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell>Sản phẩm</TableCell>
+                        <TableCell width={'45%'}>Sản phẩm</TableCell>
                         <TableCell align='center'>Giá</TableCell>
                         <TableCell align='center'>Số lượng</TableCell>
                         <TableCell align='center' width={'13%'}>
@@ -340,6 +364,7 @@ const Cart = () => {
                           <TableRow
                             key={row.skuId}
                             sx={{
+                              height: ' 96px',
                               '&:last-child td, &:last-child th': { border: 0 },
                             }}>
                             <TableCell component='th' scope='row'>
@@ -350,49 +375,68 @@ const Cart = () => {
                               />
                             </TableCell>
                             <TableCell
-                              sx={{ display: 'flex', alignItems: 'center' }}
+                              sx={{
+                                width: '20%',
+                              }}
                               component='th'
                               scope='row'>
                               <Box
                                 sx={{
-                                  position: 'relative',
-                                  width: 68,
-                                  height: 68,
-                                  mr: 2,
-                                  '.product-image': {
-                                    objectFit: 'cover',
-                                  },
+                                  display: 'flex',
+                                  alignItems: 'center',
                                 }}>
-                                <SkeletonImage
-                                  src={row?.imageUrl}
-                                  alt={row?.productName}
-                                  fill
-                                  className='product-image'
-                                />
-                              </Box>
-                              <Box>
-                                <Typography fontSize={15} mb={0.5}>
-                                  {row?.productName}
-                                </Typography>
-                                {row?.attributes && (
+                                <Box
+                                  sx={{
+                                    position: 'relative',
+                                    width: 60,
+                                    height: 60,
+                                    mr: 2,
+                                    flexShrink: 0,
+                                    '.product-image': {
+                                      objectFit: 'cover',
+                                    },
+                                  }}>
+                                  <SkeletonImage
+                                    src={row?.imageUrl}
+                                    alt={row?.productName}
+                                    fill
+                                    className='product-image'
+                                  />
+                                </Box>
+                                <Box>
                                   <Typography
                                     sx={{
-                                      display: 'inline-block',
-                                      px: '6px',
-                                      py: '2px',
-                                      bgcolor: '#f3f4f6',
-                                      fontSize: 11,
-                                      borderRadius: 0.5,
+                                      maxHeight: '32px',
+                                      mb: 0.5,
+                                      fontSize: 14,
+                                      lineHeight: '16px',
+
+                                      ...truncateTextByLine(2),
                                     }}>
-                                    {row?.attributes
-                                      ?.map((item) => item?.value)
-                                      .join(', ')}
+                                    {row?.productName}
                                   </Typography>
-                                )}
+                                  {row?.attributes?.length ? (
+                                    <Typography
+                                      sx={{
+                                        display: 'inline-block',
+                                        px: '5px',
+                                        py: '1.5px',
+                                        bgcolor: '#f3f4f6',
+                                        fontSize: 11,
+                                        borderRadius: 0.5,
+                                      }}>
+                                      {row?.attributes
+                                        ?.map((item) => item?.value)
+                                        .join(', ')}
+                                    </Typography>
+                                  ) : (
+                                    ''
+                                  )}
+                                </Box>
                               </Box>
                             </TableCell>
                             <TableCell
-                              sx={{}}
+                              sx={{ fontSize: 14 }}
                               component='th'
                               scope='row'
                               align='center'>
@@ -497,7 +541,8 @@ const Cart = () => {
                                 (cartStock?.data?.find(
                                   (item) => item.id === row?.skuId
                                 )?.quantity ?? 0) < 10 && (
-                                  <Typography sx={{ fontSize: 13 }}>
+                                  <Typography
+                                    sx={{ fontSize: 12, whiteSpace: 'nowrap' }}>
                                     Còn{' '}
                                     {
                                       cartStock?.data?.find(

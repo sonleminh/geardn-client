@@ -2,6 +2,7 @@
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useAuthStore } from './auth-store';
 
 export type CartState = {
   cartItems: ICartStoreItem[];
@@ -18,7 +19,7 @@ export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       cartItems: [],
-      addToCart: (item) =>
+      addToCart: (item) => {
         set((state) => {
           const existingItem = state.cartItems.find((i) => i.skuId === item.skuId);
           if (existingItem) {
@@ -31,13 +32,17 @@ export const useCartStore = create<CartState>()(
             };
           }
           return { cartItems: [...state.cartItems, item] };
-        }),
-      updateQuantity: (skuId, quantity) =>
+        })
+      },
+      updateQuantity: async (skuId, quantity) =>
+      {
         set((state) => ({
           cartItems: state.cartItems.map((i) =>
             i.skuId === skuId ? { ...i, quantity } : i
           ),
-        })),
+        }))
+      }
+        ,
         removeFromCart: (skuId) =>
           set((state) => ({
             cartItems: state.cartItems.filter((i) => i.skuId !== skuId),
