@@ -11,11 +11,7 @@ import ScrollToTopBtn from '../common/scroll-to-top-btn';
 import { Box } from '@mui/material';
 import { Notification } from '../common/notification';
 
-type LayoutType = {
-  children?: React.ReactNode;
-};
-
-const Layout = ({ children }: LayoutType) => {
+const Layout = ({ children }: { children?: React.ReactNode }) => {
   const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
 

@@ -31,13 +31,11 @@ import { useCartStore } from '@/stores/cart-store';
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  console.log('pathname', pathname);
   const { user, logout } = useAuthStore((state) => state);
   const { mutateAsync: onLogout } = useLogout();
 
   const { data: cartData, isLoading } = useGetCart(user);
   const { cartItems } = useCartStore();
-  console.log('cartData', cartData);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -91,7 +89,8 @@ const Header = () => {
                   src={LOGO}
                   alt='geardn'
                   fill
-                  unoptimized={true}
+                  quality={90}
+                  priority
                 />
               </Box>
             </Link>

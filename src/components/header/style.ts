@@ -5,7 +5,7 @@ export const HeaderStyle: ( isExpanded: boolean, pathname: string) => SxProps<Th
   position: 'fixed',
   left: '50%',
   transform: 'translateX(-50%)',
-  zIndex: 1000,
+  zIndex: 69,
   width: isExpanded || pathname !== '/' ? '100%' : '1070px',
   height: '80px',
   bgcolor: isExpanded || pathname !== '/' ? '#fff' : 'none',

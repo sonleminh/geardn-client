@@ -1,6 +1,13 @@
 'use client';
 
-import React, { ChangeEvent, useCallback, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  startTransition,
+  useCallback,
+  useOptimistic,
+  useRef,
+  useState,
+} from 'react';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
@@ -29,7 +36,7 @@ import {
 } from '@mui/material';
 import EMPTY_CART from '@/assets/empty-cart.png';
 import Link from 'next/link';
-import { ICartItem } from '@/interfaces/ICart';
+import { ICartItem, ICartStoreItem } from '@/interfaces/ICart';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/route';
 import LayoutContainer from '@/components/layout-container';
@@ -39,39 +46,50 @@ import { useNotificationStore } from '@/stores/notification-store';
 import { useGetCartStock, useUpdateQuantity } from '@/apis/cart';
 import CustomDialog from '@/components/common/CustomDialog';
 import { truncateTextByLine } from '@/utils/css-helper.util';
+import { LoadingCircle } from '@/components/common/LoadingCircle';
+import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 
 const Cart = () => {
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
-  const { cartItems, addToCart, updateQuantity, removeFromCart } =
-    useCartStore();
+  const { cartItems, updateQuantity, removeFromCart } = useCartStore();
 
   const { user } = useAuthStore((state) => state);
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
-  const { mutateAsync: onUpdateQuantity } = useUpdateQuantity();
+  const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
+    useUpdateQuantity();
 
-  const router = useRouter();
   const { showNotification } = useNotificationStore();
+
+  const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
+    cartItems,
+    (state, { skuId, newQuantity }) => {
+      return state.map((item) =>
+        item?.skuId === skuId ? { ...item, newQuantity } : item
+      );
+    }
+  );
+
   const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
   const [openOutOfStockDialog, setOpenOutOfStockDialog] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
-  const [quantityInputs, setQuantityInputs] = useState<{
-    [key: string]: number;
-  }>({});
   const [subtractItem, setSubtractItem] = useState<{
-    itemId: number;
+    skuId: number;
     name: string;
   }>();
-  const [isLoading, setIsLoading] = useState(false);
 
-  console.log('cartItems', cartItems);
-  console.log('quantityInputs', quantityInputs);
-
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  console.log(
+    'cartItems',
+    cartItems?.map((item) => item.quantity)
+  );
+  console.log(
+    'cartItemsOptimistic',
+    cartItemsOptimistic?.map((item) => item.quantity)
+  );
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -103,56 +121,79 @@ const Cart = () => {
     setSelected(newSelected);
   };
 
-  const debouncedUpdateQuantity = useCallback(
+  const debouncedIncreaseQuantity = useCallback(
     debounce((payload: { skuId: number; quantity: number }) => {
       onUpdateQuantity(payload, {
         onError: () => {
           showNotification('Đã có lỗi xảy ra', 'error');
           updateQuantity(payload.skuId, payload.quantity - 1); // !!
         },
+        onSuccess: () => {
+          updateQuantity(payload.skuId, payload.quantity); // !!
+        },
       });
     }, 1000),
     []
   );
 
-  const handleAddItem = async (itemId: number) => {
-    const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
+  const debouncedReduceQuantity = useCallback(
+    debounce((payload: { skuId: number; quantity: number }) => {
+      onUpdateQuantity(payload, {
+        onError: () => {
+          showNotification('Đã có lỗi xảy ra', 'error');
+          updateQuantity(payload.skuId, payload.quantity + 1); // !!
+        },
+        onSuccess: () => {
+          updateQuantity(payload.skuId, payload.quantity); // !!
+        },
+      });
+    }, 1000),
+    []
+  );
+
+  const handleAddItem = async (skuId: number) => {
+    const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
 
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity + 1;
 
-    updateQuantity(itemId, newQuantity);
+    startTransition(() => {
+      console.log('opt');
+      updateCartItemsOptimistic({ skuId, newQuantity });
+      console.log('opt-end');
+    });
+    updateQuantity(skuId, newQuantity);
 
     if (user) {
-      debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
+      debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
     }
   };
 
-  const handleSubtractItem = async (itemId: number, name: string) => {
-    const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
+  const handleSubtractItem = async (skuId: number, name: string) => {
+    const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
 
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity - 1;
     if (newQuantity === 0 && !user) {
       setOpenRemoveItemDialog(true);
-      setSubtractItem({ itemId, name });
+      setSubtractItem({ skuId, name });
       return;
     }
     if (newQuantity === 0 && user) {
       setOpenRemoveItemDialog(true);
-      setSubtractItem({ itemId, name });
-      debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
+      setSubtractItem({ skuId, name });
+      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
       return;
     }
-    updateQuantity(itemId, newQuantity);
-    debouncedUpdateQuantity({ skuId: itemId, quantity: newQuantity });
+    updateQuantity(skuId, newQuantity);
+    debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
 
     // try {
     //   const updatedCartData = await subtractCartAPI({
     //     userid: user?.id ? user?.id : null,
-    //     model: itemid,
+    //     model: skuId,
     //     quantity: 1,
     //   });
 
@@ -164,118 +205,13 @@ const Cart = () => {
     // }
   };
 
-  const handleQuantityInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    itemId: number
-  ) => {
-    const newQuantity = e.target.value;
-    if (!newQuantity) {
-      return setQuantityInputs((prev) => ({
-        ...prev,
-        [itemId]: null,
-      }));
-    }
-    setQuantityInputs((prev) => ({
-      ...prev,
-      [itemId]: +newQuantity,
-    }));
-    onUpdateQuantity(
-      { skuId: itemId, quantity: +newQuantity }
-      // {
-      //   onError: () => {
-      //     showNotification('Đã có lỗi xảy ra', 'error');
-      //     updateQuantity(itemId, payload.quantity - 1);
-      //   },
-      // }
-      // }
-    );
-  };
-
-  const handleQuantityInputBlur = async (itemId: number) => {
-    const inputQuantity = quantityInputs[itemId];
-    const newQuantity = inputQuantity;
-    console.log('newQuantity2:', newQuantity);
-    const currentItem = cartItems?.find((item) => item.skuId === itemId);
-    const currentItemStock = cartStock?.data?.find(
-      (item) => item.id === itemId
-    );
-    console.log('currentItemStock', currentItemStock);
-    console.log(
-      'newQuantity <= currentItemStock?.quantity',
-      newQuantity <= (currentItemStock?.quantity ?? 0)
-    );
-    if (!newQuantity) {
-      return setQuantityInputs((prev) => ({
-        ...prev,
-        [itemId]: currentItem?.quantity,
-      }));
-    }
-    if (currentItemStock && newQuantity > currentItemStock?.quantity) {
-      updateQuantity(itemId, currentItemStock?.quantity);
-      setQuantityInputs((prev) => ({
-        ...prev,
-        [itemId]: currentItemStock?.quantity,
-      }));
-      setOpenOutOfStockDialog(true);
-      return;
-    }
-    updateQuantity(itemId, newQuantity);
-    setQuantityInputs((prev) => ({
-      ...prev,
-      [itemId]: newQuantity,
-    }));
-    return;
-
-    // const itemToUpdate = cartItems?.find((item) => item.skuId === itemId);
-
-    // if (!itemToUpdate || newQuantity === itemToUpdate.quantity) return;
-
-    // const optimisticCart = {
-    //   ...cart,
-    //   items: cart?.items?.map((item) =>
-    //     item.modelid === itemid ? { ...item, quantity: newQuantity } : item
-    //   ),
-    // };
-
-    // mutate(optimisticCart, false);
-
-    // try {
-    //   const updatedCartData = await updateCartQuantityAPI({
-    //     userid: user?.id ? user?.id : null,
-    //     model: itemid,
-    //     quantity: newQuantity,
-    //   });
-    //   mutateCart(updatedCartData, false);
-
-    //   globalMutate('/api/cart');
-    // } catch (error: any) {
-    //   showNotification(error?.message, 'error');
-    //   mutate(cart, false);
-    // }
-    // setQuantityInputs({});
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, itemId: number) => {
-    const target = e.currentTarget as HTMLInputElement;
-
-    if (e.key === '0' && target.value === '') {
-      e.preventDefault();
-    }
-    if (e.key === 'Enter') {
-      handleQuantityInputBlur(itemId);
-      if (inputRefs.current[itemId]) {
-        inputRefs.current[itemId]?.blur();
-      }
-    }
-  };
-
-  const handleDeleteItem = async (itemId: number) => {
-    removeFromCart(itemId);
+  const handleDeleteItem = async (skuId: number) => {
+    removeFromCart(skuId);
   };
 
   // const totalAmount = () => {
   //   const selectedItems = selected
-  //     .map((itemid) => cart?.items?.find((item) => item.modelid === itemid))
+  //     .map((skuId) => cart?.items?.find((item) => item.modelid === skuId))
   //     .filter((item) => item !== undefined);
 
   //   return selectedItems?.reduce(
@@ -289,7 +225,7 @@ const Cart = () => {
   //     return showNotification('Vui lòng chọn sản phẩm', 'warning');
   //   }
   //   const selectedItems = selected
-  //     .map((itemid) => cart?.items?.find((item) => item.modelid === itemid))
+  //     .map((skuId) => cart?.items?.find((item) => item.modelid === skuId))
   //     .filter((item): item is ICartItem => item !== undefined);
   //   addProducts(selectedItems);
   //   router.push(ROUTES.CHECKOUT);
@@ -297,7 +233,7 @@ const Cart = () => {
 
   const handleOkRemoveItemDialog = () => {
     if (subtractItem) {
-      removeFromCart(subtractItem.itemId);
+      removeFromCart(subtractItem.skuId);
     }
     handleCloseRemoveItemDialog();
   };
@@ -357,9 +293,8 @@ const Cart = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {cartItems?.map((row) => {
+                      {cartItemsOptimistic?.map((row) => {
                         const isItemSelected = selected.includes(row.skuId);
-
                         return (
                           <TableRow
                             key={row.skuId}
@@ -499,29 +434,17 @@ const Cart = () => {
                                             display: 'none',
                                           },
                                       },
+                                      '& .Mui-disabled': {
+                                        color: '#000',
+                                        WebkitTextFillColor: 'inherit',
+                                      },
                                     },
                                   }}
                                   variant='outlined'
                                   type='number'
                                   size='small'
-                                  value={
-                                    (quantityInputs[row?.skuId] === null
-                                      ? ''
-                                      : quantityInputs[row?.skuId]) ??
-                                    row?.quantity
-                                  }
-                                  onChange={(e) =>
-                                    handleQuantityInputChange(e, row?.skuId)
-                                  }
-                                  onBlur={() =>
-                                    handleQuantityInputBlur(row?.skuId)
-                                  }
-                                  onKeyDown={(e) =>
-                                    handleKeyDown(e, row?.skuId)
-                                  }
-                                  // inputRef={(ref) =>
-                                  //   (inputRefs.current[row.modelid] = ref)
-                                  // }
+                                  value={row?.quantity}
+                                  disabled={true}
                                 />
                                 <Button
                                   sx={{
@@ -677,6 +600,7 @@ const Cart = () => {
         handleOk={handleOkRemoveItemDialog}
         handleClose={handleCloseRemoveItemDialog}
       />
+      {isUpdateQuantityPending && <FullScreenLoader />}
     </Box>
   );
 };
