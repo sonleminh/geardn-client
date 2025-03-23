@@ -68,8 +68,9 @@ const Cart = () => {
   const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
     cartItems,
     (state, { skuId, newQuantity }) => {
+      console.log('newQuantity', newQuantity);
       return state.map((item) =>
-        item?.skuId === skuId ? { ...item, newQuantity } : item
+        item?.skuId === skuId ? { ...item, quantity: newQuantity } : item
       );
     }
   );
@@ -157,17 +158,18 @@ const Cart = () => {
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity + 1;
+    console.log('newQuantity', newQuantity);
 
     startTransition(() => {
       console.log('opt');
       updateCartItemsOptimistic({ skuId, newQuantity });
       console.log('opt-end');
     });
-    updateQuantity(skuId, newQuantity);
+    // updateQuantity(skuId, newQuantity);
 
-    if (user) {
-      debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
-    }
+    // if (user) {
+    //   debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
+    // }
   };
 
   const handleSubtractItem = async (skuId: number, name: string) => {
