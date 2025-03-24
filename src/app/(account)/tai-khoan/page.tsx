@@ -1,59 +1,75 @@
 'use client';
 
-import { useUpdateQuantity } from '@/apis/cart';
+import { useGetCart, useUpdateQuantity } from '@/apis/cart';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { startTransition, useCallback, useOptimistic } from 'react';
+import { startTransition, useCallback, useEffect, useOptimistic } from 'react';
 
 export default function Profile() {
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
   const { user } = useAuthStore((state) => state);
-  const { cartItems, updateQuantity } = useCartStore();
+  const { cartItems, updateQuantity, syncCart } = useCartStore();
+  const { data: cartServer } = useGetCart(user);
 
-  const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
-    cartItems,
-    (state, { skuId, newQuantity }) =>
-      state.map((item) =>
-        item?.skuId === skuId ? { ...item, quantity: newQuantity } : item
-      )
-  );
+  // const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
+  //   cartItems,
+  //   (state, { skuId, newQuantity }) =>
+  //     state.map((item) =>
+  //       item?.skuId === skuId ? { ...item, quantity: newQuantity } : item
+  //     )
+  // );
+  console.log('user', user);
   console.log(
     'cartItems',
     cartItems?.map((item) => item?.quantity)
   );
-  console.log(
-    'cartItemsOptimistic',
-    cartItemsOptimistic?.map((item) => item?.quantity)
-  );
+  // console.log(
+  //   'cartItemsOptimistic',
+  //   cartItemsOptimistic?.map((item) => item?.quantity)
+  // );
+
+  useEffect(() => {
+    if (user && cartServer?.data?.items) {
+      console.log('c');
+      syncCart(
+        cartServer?.data?.items?.map((item) => ({
+          productId: item?.productId,
+          skuId: item?.sku?.id,
+          productName: item?.product?.name,
+          imageUrl: item?.sku?.imageUrl
+            ? item?.sku?.imageUrl
+            : item?.product?.images?.[0],
+          price: item?.sku?.price,
+          quantity: item?.quantity,
+          attributes: item?.sku?.productSkuAttributes?.map((attr) => ({
+            type: attr?.attribute?.type,
+            value: attr?.attribute?.value,
+          })),
+        }))
+      );
+    }
+  }, [cartServer]);
 
   const handleAddItem = async (skuId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
-
     if (!itemToUpdate) return;
-
     const newQuantity = itemToUpdate.quantity + 1;
-
-    startTransition(() => {
-      updateCartItemsOptimistic({ skuId, newQuantity });
-      startTransition(() => {
-        if (user) {
-          debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
-        }
+    if (user) {
+      updateQuantity(skuId, newQuantity);
+      debouncedIncreaseQuantity({
+        skuId: skuId,
+        quantity: newQuantity,
       });
-    });
+    }
   };
 
   const debouncedIncreaseQuantity = useCallback(
     debounce((payload: { skuId: number; quantity: number }) => {
       onUpdateQuantity(payload, {
         onError: () => {
-          // showNotification('Đã có lỗi xảy ra', 'error');
           updateQuantity(payload.skuId, payload.quantity - 1); // !!
-        },
-        onSuccess: () => {
-          updateQuantity(payload.skuId, payload.quantity); // !!
         },
       });
     }, 1000),
@@ -71,9 +87,10 @@ export default function Profile() {
       timer = setTimeout(() => callback(...args), delay);
     };
   }
+
   return (
     <div>
-      {cartItemsOptimistic?.map((row) => {
+      {cartItems?.map((row) => {
         return (
           <Box
             key={row.skuId}

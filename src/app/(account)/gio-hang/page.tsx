@@ -4,6 +4,7 @@ import React, {
   ChangeEvent,
   startTransition,
   useCallback,
+  useEffect,
   useOptimistic,
   useRef,
   useState,
@@ -43,7 +44,7 @@ import LayoutContainer from '@/components/layout-container';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNotificationStore } from '@/stores/notification-store';
-import { useGetCartStock, useUpdateQuantity } from '@/apis/cart';
+import { useGetCart, useGetCartStock, useUpdateQuantity } from '@/apis/cart';
 import CustomDialog from '@/components/common/CustomDialog';
 import { truncateTextByLine } from '@/utils/css-helper.util';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
@@ -55,12 +56,15 @@ const Cart = () => {
     { href: '/', label: 'Home' },
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
-  const { cartItems, updateQuantity, removeFromCart } = useCartStore();
 
+  const { cartItems, updateQuantity, removeFromCart, syncCart } =
+    useCartStore();
   const { user } = useAuthStore((state) => state);
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
+  const { data: cartServer } = useGetCart(user);
+
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
 
@@ -84,14 +88,32 @@ const Cart = () => {
     name: string;
   }>();
 
-  console.log(
-    'cartItems',
-    cartItems?.map((item) => item.quantity)
-  );
+  console.log('cartItems', cartItems);
   console.log(
     'cartItemsOptimistic',
     cartItemsOptimistic?.map((item) => item.quantity)
   );
+
+  useEffect(() => {
+    if (user && cartServer?.data?.items) {
+      syncCart(
+        cartServer?.data?.items?.map((item) => ({
+          productId: item?.productId,
+          skuId: item?.sku?.id,
+          productName: item?.product?.name,
+          imageUrl: item?.sku?.imageUrl
+            ? item?.sku?.imageUrl
+            : item?.product?.images?.[0],
+          price: item?.sku?.price,
+          quantity: item?.quantity,
+          attributes: item?.sku?.productSkuAttributes?.map((attr) => ({
+            type: attr?.attribute?.type,
+            value: attr?.attribute?.value,
+          })),
+        }))
+      );
+    }
+  }, [cartServer]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -130,9 +152,6 @@ const Cart = () => {
           showNotification('Đã có lỗi xảy ra', 'error');
           updateQuantity(payload.skuId, payload.quantity - 1); // !!
         },
-        onSuccess: () => {
-          updateQuantity(payload.skuId, payload.quantity); // !!
-        },
       });
     }, 1000),
     []
@@ -142,11 +161,7 @@ const Cart = () => {
     debounce((payload: { skuId: number; quantity: number }) => {
       onUpdateQuantity(payload, {
         onError: () => {
-          showNotification('Đã có lỗi xảy ra', 'error');
-          updateQuantity(payload.skuId, payload.quantity + 1); // !!
-        },
-        onSuccess: () => {
-          updateQuantity(payload.skuId, payload.quantity); // !!
+          updateQuantity(payload.skuId, payload.quantity - 1); // !!
         },
       });
     }, 1000),
@@ -155,26 +170,15 @@ const Cart = () => {
 
   const handleAddItem = async (skuId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
-
     if (!itemToUpdate) return;
-
     const newQuantity = itemToUpdate.quantity + 1;
-    console.log('newQuantity', newQuantity);
-
-    startTransition(async () => {
-      console.log('opt');
-      updateCartItemsOptimistic({ skuId, newQuantity });
-      console.log('opt-end');
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      startTransition(() => {
-        updateQuantity(skuId, newQuantity);
+    if (user) {
+      updateQuantity(skuId, newQuantity);
+      debouncedIncreaseQuantity({
+        skuId: skuId,
+        quantity: newQuantity,
       });
-      // if (user) {
-      //   startTransition(() => {
-      //     debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
-      //   });
-      // }
-    });
+    }
   };
 
   const handleSubtractItem = async (skuId: number, name: string) => {
@@ -300,7 +304,7 @@ const Cart = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {cartItemsOptimistic?.map((row) => {
+                      {cartItems?.map((row) => {
                         const isItemSelected = selected.includes(row.skuId);
                         return (
                           <TableRow
