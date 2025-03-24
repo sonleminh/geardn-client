@@ -9,13 +9,14 @@ import { startTransition, useCallback, useOptimistic } from 'react';
 export default function Profile() {
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
+  const { user } = useAuthStore((state) => state);
   const { cartItems, updateQuantity } = useCartStore();
 
   const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
     cartItems,
     (state, { skuId, newQuantity }) =>
       state.map((item) =>
-        item?.skuId === skuId ? { ...item, newQuantity } : item
+        item?.skuId === skuId ? { ...item, quantity: newQuantity } : item
       )
   );
   console.log(
@@ -36,8 +37,40 @@ export default function Profile() {
 
     startTransition(() => {
       updateCartItemsOptimistic({ skuId, newQuantity });
+      startTransition(() => {
+        if (user) {
+          debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
+        }
+      });
     });
   };
+
+  const debouncedIncreaseQuantity = useCallback(
+    debounce((payload: { skuId: number; quantity: number }) => {
+      onUpdateQuantity(payload, {
+        onError: () => {
+          // showNotification('Đã có lỗi xảy ra', 'error');
+          updateQuantity(payload.skuId, payload.quantity - 1); // !!
+        },
+        onSuccess: () => {
+          updateQuantity(payload.skuId, payload.quantity); // !!
+        },
+      });
+    }, 1000),
+    []
+  );
+
+  function debounce<T extends (...args: any[]) => void>(
+    callback: T,
+    delay: number
+  ): (...args: Parameters<T>) => void {
+    let timer: NodeJS.Timeout;
+
+    return (...args: Parameters<T>) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => callback(...args), delay);
+    };
+  }
   return (
     <div>
       {cartItemsOptimistic?.map((row) => {

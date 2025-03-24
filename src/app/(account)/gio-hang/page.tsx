@@ -48,6 +48,7 @@ import CustomDialog from '@/components/common/CustomDialog';
 import { truncateTextByLine } from '@/utils/css-helper.util';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
 import { FullScreenLoader } from '@/components/common/FullScreenLoader';
+import { start } from 'repl';
 
 const Cart = () => {
   const breadcrumbsOptions = [
@@ -160,16 +161,20 @@ const Cart = () => {
     const newQuantity = itemToUpdate.quantity + 1;
     console.log('newQuantity', newQuantity);
 
-    startTransition(() => {
+    startTransition(async () => {
       console.log('opt');
       updateCartItemsOptimistic({ skuId, newQuantity });
       console.log('opt-end');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      startTransition(() => {
+        updateQuantity(skuId, newQuantity);
+      });
+      // if (user) {
+      //   startTransition(() => {
+      //     debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
+      //   });
+      // }
     });
-    // updateQuantity(skuId, newQuantity);
-
-    // if (user) {
-    //   debouncedIncreaseQuantity({ skuId: skuId, quantity: newQuantity });
-    // }
   };
 
   const handleSubtractItem = async (skuId: number, name: string) => {
