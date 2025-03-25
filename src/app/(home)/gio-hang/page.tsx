@@ -44,12 +44,16 @@ import LayoutContainer from '@/components/layout-container';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNotificationStore } from '@/stores/notification-store';
-import { useGetCart, useGetCartStock, useUpdateQuantity } from '@/apis/cart';
+import {
+  useDeleteCartItem,
+  useGetCart,
+  useGetCartStock,
+  useUpdateQuantity,
+} from '@/apis/cart';
 import CustomDialog from '@/components/common/CustomDialog';
 import { truncateTextByLine } from '@/utils/css-helper.util';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
 import { FullScreenLoader } from '@/components/common/FullScreenLoader';
-import { start } from 'repl';
 
 const Cart = () => {
   const breadcrumbsOptions = [
@@ -64,21 +68,12 @@ const Cart = () => {
     cartItems?.map((item) => item.skuId)
   );
   const { data: cartServer } = useGetCart(user);
+  const { mutateAsync: deleteCartItem } = useDeleteCartItem();
 
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
 
   const { showNotification } = useNotificationStore();
-
-  const [cartItemsOptimistic, updateCartItemsOptimistic] = useOptimistic(
-    cartItems,
-    (state, { skuId, newQuantity }) => {
-      console.log('newQuantity', newQuantity);
-      return state.map((item) =>
-        item?.skuId === skuId ? { ...item, quantity: newQuantity } : item
-      );
-    }
-  );
 
   const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
   const [openOutOfStockDialog, setOpenOutOfStockDialog] = useState(false);
@@ -89,10 +84,6 @@ const Cart = () => {
   }>();
 
   console.log('cartItems', cartItems);
-  console.log(
-    'cartItemsOptimistic',
-    cartItemsOptimistic?.map((item) => item.quantity)
-  );
 
   useEffect(() => {
     if (user && cartServer?.data?.items) {
@@ -200,36 +191,35 @@ const Cart = () => {
     }
     updateQuantity(skuId, newQuantity);
     debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
-
-    // try {
-    //   const updatedCartData = await subtractCartAPI({
-    //     userid: user?.id ? user?.id : null,
-    //     model: skuId,
-    //     quantity: 1,
-    //   });
-
-    //   mutateCart(updatedCartData, false);
-    //   globalMutate('/api/cart');
-    // } catch (error: any) {
-    //   mutate(cart, false);
-    //   showNotification(error?.message, 'error');
-    // }
   };
 
   const handleDeleteItem = async (skuId: number) => {
     removeFromCart(skuId);
+    if (user) {
+      const backupCartItems = [...cartItems];
+      const cartServerItem = cartServer?.data?.items?.find(
+        (item) => item?.sku?.id === skuId
+      );
+      if (cartServerItem) {
+        await deleteCartItem(cartServerItem?.id, {
+          onError: () => {
+            syncCart(backupCartItems);
+          },
+        });
+      }
+    }
   };
 
-  // const totalAmount = () => {
-  //   const selectedItems = selected
-  //     .map((skuId) => cart?.items?.find((item) => item.modelid === skuId))
-  //     .filter((item) => item !== undefined);
+  const totalAmount = () => {
+    const selectedItems = selected
+      .map((skuId) => cartItems?.find((item) => item.skuId === skuId))
+      .filter((item) => item !== undefined);
 
-  //   return selectedItems?.reduce(
-  //     (acc, item) => acc + (item?.price ?? 0) * (item?.quantity ?? 0),
-  //     0
-  //   );
-  // };
+    return selectedItems?.reduce(
+      (acc, item) => acc + (item?.price ?? 0) * (item?.quantity ?? 0),
+      0
+    );
+  };
 
   // const handlePayBtn = () => {
   //   if (selected.length === 0) {
@@ -522,8 +512,21 @@ const Cart = () => {
               </Grid2>
               <Grid2 sx={{ bgcolor: '#fff', borderRadius: 1 }} size={3.5} p={3}>
                 <Grid2 className='total'>
-                  <Grid2 size={6} mb={2} className='total-price-label'>
-                    Tổng thanh toán ({selected?.length} sản phẩm):
+                  <Grid2
+                    size={12}
+                    mb={2}
+                    className='total-price-label'
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
+                      Tổng cộng:
+                    </Typography>
+                    <Typography sx={{ fontSize: 14 }}>
+                      {selected?.length} sản phẩm
+                    </Typography>
                   </Grid2>
                   <Grid2
                     sx={{
@@ -532,13 +535,13 @@ const Cart = () => {
                       alignItems: 'center',
                       mb: 2,
                     }}
-                    size={6}
+                    size={12}
                     className='total-price-cost'>
                     <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
                       Thành tiền:
                     </Typography>
-                    <Typography sx={{ fontSize: 20, fontWeight: 800 }}>
-                      {/* {formatPrice(totalAmount())} */}
+                    <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
+                      {formatPrice(totalAmount())}
                     </Typography>
                   </Grid2>
                   <Button

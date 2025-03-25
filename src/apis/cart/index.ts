@@ -80,3 +80,14 @@ const getCartStock = async (skuIds: number[]) => {
     enabled: !!skuIds && skuIds?.length > 0
     })
 }
+
+const deleteCartItem = async (skuId: number) => {
+    const res = await axiosInstance.delete(`carts/remove-item/${skuId}`)
+    return res.data
+}
+ 
+ export const useDeleteCartItem = () => {
+    return useMutation({
+        mutationFn: deleteCartItem
+    })
+}
