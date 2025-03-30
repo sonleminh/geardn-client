@@ -4,26 +4,15 @@ import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import SkeletonImage from '@/components/common/SkeletonImage';
-import LayoutContainer from '@/components/common/sharing/layout-container';
-import { addCartAPI, useGetCart } from '@/services/cart/api';
-import { useUpsertCart } from '@/services/cart/mutations';
+
 import { formatPrice } from '@/utils/format-price';
 
 import EMPTY_CART from '@/assets/empty-cart.png';
 import { ROUTES } from '@/constants/route';
-import { useNotificationContext } from '@/contexts/NotificationContext';
-import {
-  IDistrict,
-  IProvince,
-  IWard,
-  createOrder,
-  useGetDistrict,
-  useGetPaymentMethods,
-  useGetProvince,
-  useGetProvinceList,
-} from '@/services/order/api';
+
 import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
 import {
+  Autocomplete,
   Box,
   Button,
   Divider,
@@ -47,11 +36,10 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useFormik } from 'formik';
 import Link from 'next/link';
-import { checkoutSchema } from './utils/schema/checkoutSchema';
+// import { checkoutSchema } from './utils/schema/checkoutSchema';
 import moment from 'moment';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import useConfirmModal from '@/hooks/useModalConfirm';
 import { useRouter } from 'next/navigation';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -60,28 +48,38 @@ import 'react-datepicker/dist/react-datepicker.css';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import { postRequest } from '@/utils/fetch-client';
 import { useAuthStore } from '@/stores/auth-store';
+import { useNotificationStore } from '@/stores/notification-store';
+import {
+  IDistrict,
+  IProvince,
+  useGetDistricts,
+  useGetPaymentMethods,
+  useGetProvince,
+  useGetProvinces,
+} from '@/apis/order';
+import LayoutContainer from '@/components/layout-container';
+import CustomAutocomplete from '@/components/common/Autocomplete';
 
 const Checkout = () => {
   const { user } = useAuthStore();
-  const { user } = useAuthStore();
+  const { showNotification } = useNotificationStore();
 
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CHECKOUT, label: 'Thanh toán' },
   ];
-  const router = useRouter();
-  const { confirmModal, showConfirmModal } = useConfirmModal();
 
-  const { province_list } = useGetProvinceList();
-  const { paymentMethods } = useGetPaymentMethods();
-  const { showNotification } = useNotificationContext();
+  const router = useRouter();
+
+  const { data: provinceList } = useGetProvinces();
+  const { data: paymentMethods } = useGetPaymentMethods();
   const [customerData, setCustomerData] = useState<{
     name: string;
     phone: string;
     email: string;
   }>({ name: '', phone: '', email: '' });
-  const [city, setCity] = useState<string>('');
-  const [district, setDistrict] = useState<string>('');
+  const [province, setProvince] = useState<IProvince | null>(null);
+  const [district, setDistrict] = useState<string | undefined>();
   const [ward, setWard] = useState<string>('');
   const [detailAddress, setDetailAddress] = useState<string>('');
   const [shopAddress, setShopAddress] = useState<string>('');
@@ -92,20 +90,20 @@ const Checkout = () => {
   const handleModalClose = () => {
     setModalOpen(false);
     if (!detailAddress) {
-      setCity('');
+      setProvince(null);
       setDistrict('');
       setWard('');
       setDetailAddress('');
     }
   };
 
-  const { province } = useGetProvince(
-    province_list?.find?.((item) => item?.name === city)?.code
+  const { data: provinceData } = useGetProvince(
+    provinceList?.find?.((item) => item?.code === province?.code)?.code ?? 0
   );
 
-  const { districtData } = useGetDistrict(
-    province?.districts?.find?.((item) => item?.name === district)?.code
-  );
+  // const { districtData } = useGetDistricts(
+  //   province?.districts?.find?.((item) => item?.name === district)?.code
+  // );
 
   const formik = useFormik({
     initialValues: {
@@ -124,7 +122,7 @@ const Checkout = () => {
       },
       note: '',
     },
-    validationSchema: checkoutSchema,
+    // validationSchema: checkoutSchema,
     validateOnChange: false,
     async onSubmit(values) {
       if (
@@ -137,25 +135,25 @@ const Checkout = () => {
       }
       const payload = {
         ...values,
-        items: orderFormData?.products ?? [],
+        // items: orderFormData?.products ?? [],
         shipment: {
           ...values?.shipment,
           method: +values?.shipment?.method,
           address:
             values?.shipment?.method === 1
-              ? `${detailAddress}, ${ward}, ${district}, ${city}`
+              ? `${detailAddress}, ${ward}, ${district}, ${province}`
               : shopAddress,
         },
         userid: user?.id ?? null,
       };
-      try {
-        const res = await createOrder(payload);
-        showNotification('Đặt hàng thành công', 'success');
-        globalMutate(`${BASE_API_URL}/cart`, undefined, { revalidate: true });
-        // router.push(`/dat-hang/thanh-cong/${res.id}`);
-      } catch (error: any) {
-        showNotification(error?.message, 'error');
-      }
+      //   try {
+      //     const res = await createOrder(payload);
+      //     showNotification('Đặt hàng thành công', 'success');
+      //     globalMutate(`${BASE_API_URL}/cart`, undefined, { revalidate: true });
+      //     // router.push(`/dat-hang/thanh-cong/${res.id}`);
+      //   } catch (error: any) {
+      //     showNotification(error?.message, 'error');
+      //   }
     },
   });
 
@@ -192,6 +190,15 @@ const Checkout = () => {
   const handleConfirmAddress = () => {
     setModalOpen(false);
   };
+
+  console.log('City value:', province);
+  console.log(
+    'Options:',
+    (provinceList ?? []).map((province) => ({
+      label: province.name,
+      value: province.code,
+    }))
+  );
 
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
@@ -372,7 +379,7 @@ const Checkout = () => {
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 15, fontWeight: 600 }}>
-                                {ward}, {district}, {city}
+                                {ward}, {district}, {province?.name}
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 14, fontWeight: 500 }}>
@@ -414,7 +421,63 @@ const Checkout = () => {
                         <Typography sx={{ mb: 2, textAlign: 'center' }}>
                           Thêm địa chỉ nhận hàng
                         </Typography>
-                        <FormControl
+                        <FormControl fullWidth margin='dense'>
+                          {/* <CustomAutocomplete
+                            label='Tỉnh/Thành phố'
+                            options={(provinceList ?? []).map((province) => ({
+                              label: province.name,
+                              value: province.code.toString(),
+                            }))}
+                          /> */}
+                          <Autocomplete
+                            disablePortal
+                            options={provinceList ?? []}
+                            // options={(provinceList ?? []).map((province) => ({
+                            //   label: province.name,
+                            //   value: province.code,
+                            // }))}
+                            renderInput={(params) => (
+                              <TextField {...params} label='Tỉnh/Thành phố' />
+                            )}
+                            onChange={(e, value) => setProvince(value)}
+                            value={province}
+                            getOptionLabel={(option) => option?.name}
+                            isOptionEqualToValue={(option, value) =>
+                              option?.code === value?.code
+                            }
+                            defaultValue={province ?? null}
+                          />
+                        </FormControl>
+
+                        <FormControl fullWidth margin='dense'>
+                          {/* <Autocomplete
+                            disablePortal
+                            options={(province?.districts ?? []).map(
+                              (district) => ({
+                                label: district.name,
+                                value: district.code.toString(),
+                              })
+                            )}
+                            renderInput={(params) => (
+                              <TextField {...params} label='Quận/Huyện' />
+                            )}
+                            onChange={
+                              (e) => {
+                                console.log(e?.target);
+                              }
+                              // setDistrict(e?.target?.value)
+                            }
+                            // value={district}
+                          /> */}
+                        </FormControl>
+                        {/* <CustomAutocomplete
+                          label='Phường/Xã'
+                          options={(provinceList ?? []).map((province) => ({
+                            label: province.name,
+                            value: province.code.toString(),
+                          }))}
+                        /> */}
+                        {/* <FormControl
                           sx={selectStyle}
                           margin='dense'
                           variant='filled'
@@ -425,18 +488,18 @@ const Checkout = () => {
                             size='small'
                             onChange={(e) => setCity(e?.target?.value)}
                             value={
-                              province_list?.some((item) => item.name === city)
+                              provinceList?.some((item) => item.name === city)
                                 ? city
                                 : ''
                             }>
-                            {province_list?.map((item) => (
+                            {provinceList?.map((item) => (
                               <MenuItem key={item?.code} value={item?.name}>
                                 {item?.name}
                               </MenuItem>
                             ))}
                           </Select>
-                        </FormControl>
-                        {city && (
+                        </FormControl> */}
+                        {province && (
                           <FormControl
                             sx={selectStyle}
                             margin='dense'
@@ -485,11 +548,11 @@ const Checkout = () => {
                                 ward
                               }
                               disabled={!district}>
-                              {districtData?.wards?.map((item: IWard) => (
+                              {/* {districtData?.wards?.map((item: IWard) => (
                                 <MenuItem key={item?.code} value={item?.name}>
                                   {item?.name}
                                 </MenuItem>
-                              ))}
+                              ))} */}
                             </Select>
                           </FormControl>
                         )}
@@ -524,7 +587,7 @@ const Checkout = () => {
                           sx={{ width: '100%' }}
                           variant='contained'
                           disabled={
-                            !city ||
+                            !province ||
                             !district ||
                             !ward ||
                             !Boolean(detailAddress?.length > 3)
@@ -694,7 +757,7 @@ const Checkout = () => {
                   name='payment.method'
                   onChange={handleChange}
                   value={formik?.values?.payment}>
-                  {paymentMethods?.data?.map((item) => (
+                  {/* {paymentMethods?.data?.map((item) => (
                     <FormControlLabel
                       sx={{ my: 1 }}
                       key={item?.key}
@@ -725,7 +788,7 @@ const Checkout = () => {
                         </Box>
                       }
                     />
-                  ))}
+                  ))} */}
                 </RadioGroup>
                 <FormHelperText sx={helperTextStyle}>
                   {formik?.errors?.payment}
@@ -759,7 +822,7 @@ const Checkout = () => {
                 className='total-price-cost'>
                 <Typography sx={{ fontSize: 13 }}>Tổng tiền:</Typography>
                 <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
-                  {formatPrice(getTotalAmount() ?? 0)}
+                  {/* {formatPrice(getTotalAmount() ?? 0)} */}
                 </Typography>
               </Box>
               <Divider sx={{ mt: 2, mb: 1 }} />

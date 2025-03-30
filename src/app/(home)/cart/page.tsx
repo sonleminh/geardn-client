@@ -56,6 +56,9 @@ import { LoadingCircle } from '@/components/common/LoadingCircle';
 import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 
 const Cart = () => {
+  const { user, setCheckoutCart } = useAuthStore((state) => state);
+  const router = useRouter();
+
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CART, label: 'Giỏ hàng' },
@@ -63,7 +66,6 @@ const Cart = () => {
 
   const { cartItems, updateQuantity, removeFromCart, syncCart } =
     useCartStore();
-  const { user } = useAuthStore((state) => state);
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
@@ -247,6 +249,19 @@ const Cart = () => {
     setOpenOutOfStockDialog(false);
   };
 
+  const handlePayBtn = () => {
+    if (selected.length === 0) {
+      return showNotification('Vui lòng chọn sản phẩm', 'warning');
+    }
+
+    const selectedItems = selected
+      .map((skuId) => cartItems?.find((item) => item.skuId === skuId))
+      ?.filter((item): item is ICartItem => item !== undefined);
+    setCheckoutCart(selectedItems);
+    router.push(ROUTES.CHECKOUT);
+  };
+
+  console.log('selected', selected);
   function debounce<T extends (...args: any[]) => void>(
     callback: T,
     delay: number
@@ -549,8 +564,7 @@ const Cart = () => {
                     variant='contained'
                     size='large'
                     fullWidth
-                    // onClick={handlePayBtn}
-                  >
+                    onClick={handlePayBtn}>
                     Thanh toán
                   </Button>
                   <Button

@@ -20,7 +20,6 @@ const axiosInstance: AxiosInstance = axios.create({
 const axiosExtend: AxiosInstance = axios.create({
   baseURL: baseURL, // Set your API base URL
   timeout: 60000, // Set request timeout if needed
-  withCredentials: true,
 });
 
 // Helper function to process failed requests after token refresh
