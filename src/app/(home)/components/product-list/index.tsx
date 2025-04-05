@@ -20,13 +20,15 @@ import {
 } from '@mui/material';
 import { ProductListStyle } from './style';
 import Heading from '@/components/common/heading';
+import { TPaginatedResponse } from '@/types/response.type';
+import { IProduct } from '@/interfaces/IProduct';
 
 const ProductList = ({
   productsData,
   categoriesData,
 }: // currentPage,
 {
-  productsData: TProductsRes;
+  productsData: TPaginatedResponse<IProduct>;
   categoriesData: TCategoriesRes;
   // currentPage: number;
 }) => {
@@ -95,7 +97,7 @@ const ProductList = ({
           </Grid2>
           <Grid2 size={9}>
             <Box>
-              <Heading total={productsData?.total ?? 0} />
+              <Heading total={productsData?.meta?.total ?? 0} />
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
                 {productsData?.data?.map((item, index) => (
                   <Grid2 key={index} size={4}>

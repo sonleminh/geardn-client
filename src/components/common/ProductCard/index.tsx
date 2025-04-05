@@ -59,21 +59,20 @@ const ProductCard = ({ data }: { data: IProduct }) => {
               <StarRateIcon sx={{ mr: 0.5, color: '#F19B4C', fontSize: 18 }} />
               <Typography sx={{ fontSize: 13 }}>5.0 (2 reviews)</Typography>
             </Box>
-            <Typography sx={{ fontWeight: 600 }}>
+            <Box sx={{ fontWeight: 600 }}>
               {data?.skus?.[0] ? (
-                formatPrice(data?.skus?.[0]?.price)
+                <Typography>{formatPrice(data?.skus?.[0]?.price)}</Typography>
               ) : (
                 <Typography
                   sx={{
                     height: 24,
                     fontSize: 14,
-                    fontWeight: 600,
                     lineHeight: '24px',
                   }}>
                   Đang cập nhật
                 </Typography>
               )}
-            </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>

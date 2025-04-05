@@ -1,6 +1,12 @@
 'use client';
 
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import SkeletonImage from '@/components/common/SkeletonImage';
@@ -52,6 +58,8 @@ import { useNotificationStore } from '@/stores/notification-store';
 import {
   IDistrict,
   IProvince,
+  IWard,
+  useCreateOrder,
   useGetDistricts,
   useGetPaymentMethods,
   useGetProvince,
@@ -59,9 +67,12 @@ import {
 } from '@/apis/order';
 import LayoutContainer from '@/components/layout-container';
 import CustomAutocomplete from '@/components/common/Autocomplete';
+import { useCartStore } from '@/stores/cart-store';
+import { truncateTextByLine } from '@/utils/css-helper.util';
+import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 
 const Checkout = () => {
-  const { user } = useAuthStore();
+  const { user, checkoutCart } = useAuthStore();
   const { showNotification } = useNotificationStore();
 
   const breadcrumbsOptions = [
@@ -73,14 +84,17 @@ const Checkout = () => {
 
   const { data: provinceList } = useGetProvinces();
   const { data: paymentMethods } = useGetPaymentMethods();
+  const { mutateAsync: onCreateOrder, isPending: isCreateOrderPending } =
+    useCreateOrder();
+
   const [customerData, setCustomerData] = useState<{
     name: string;
     phone: string;
     email: string;
   }>({ name: '', phone: '', email: '' });
   const [province, setProvince] = useState<IProvince | null>(null);
-  const [district, setDistrict] = useState<string | undefined>();
-  const [ward, setWard] = useState<string>('');
+  const [district, setDistrict] = useState<IDistrict | null>(null);
+  const [ward, setWard] = useState<IWard | null>(null);
   const [detailAddress, setDetailAddress] = useState<string>('');
   const [shopAddress, setShopAddress] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -91,8 +105,8 @@ const Checkout = () => {
     setModalOpen(false);
     if (!detailAddress) {
       setProvince(null);
-      setDistrict('');
-      setWard('');
+      setDistrict(null);
+      setWard(null);
       setDetailAddress('');
     }
   };
@@ -101,26 +115,27 @@ const Checkout = () => {
     provinceList?.find?.((item) => item?.code === province?.code)?.code ?? 0
   );
 
-  // const { districtData } = useGetDistricts(
-  //   province?.districts?.find?.((item) => item?.name === district)?.code
-  // );
+  const { data: districtData } = useGetDistricts(
+    provinceData?.districts?.find?.((item) => item?.code === district?.code)
+      ?.code ?? 0
+  );
 
   const formik = useFormik({
     initialValues: {
-      customer: {
-        name: '',
-        phone: '',
-        mail: '',
+      totalPrice: 0,
+      fullName: '',
+      phoneNumber: '',
+      email: '',
+      note: '',
+      flag: {
+        isOnlineOrder: true,
       },
       shipment: {
         method: 1,
-        delivery_date: moment().toDate(),
+        address: '',
+        deliveryDate: moment().toDate(),
       },
-      payment: '673c8947d6a67118f380f4ab',
-      flag: {
-        is_online_order: true,
-      },
-      note: '',
+      paymentMethodId: 1,
     },
     // validationSchema: checkoutSchema,
     validateOnChange: false,
@@ -135,34 +150,34 @@ const Checkout = () => {
       }
       const payload = {
         ...values,
-        // items: orderFormData?.products ?? [],
+        items: checkoutCart?.map((item) => ({
+          skuId: item.skuId,
+          quantity: item.quantity,
+        })),
         shipment: {
           ...values?.shipment,
           method: +values?.shipment?.method,
           address:
             values?.shipment?.method === 1
-              ? `${detailAddress}, ${ward}, ${district}, ${province}`
+              ? `${detailAddress}, ${ward?.name}, ${district?.name}, ${province?.name}`
               : shopAddress,
         },
-        userid: user?.id ?? null,
+        userId: user?.id ?? null,
       };
-      //   try {
-      //     const res = await createOrder(payload);
-      //     showNotification('Đặt hàng thành công', 'success');
-      //     globalMutate(`${BASE_API_URL}/cart`, undefined, { revalidate: true });
-      //     // router.push(`/dat-hang/thanh-cong/${res.id}`);
-      //   } catch (error: any) {
-      //     showNotification(error?.message, 'error');
-      //   }
+      onCreateOrder(payload, {
+        onError: () => {
+          showNotification('Đã có lỗi xảy ra', 'error');
+        },
+      });
     },
   });
 
-  //   function getTotalAmount() {
-  //     return orderFormData?.products?.reduce(
-  //       (acc, item) => acc + item.price * item.quantity,
-  //       0
-  //     );
-  //   }
+  const totalAmount = useMemo(() => {
+    return checkoutCart?.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+  }, [checkoutCart]);
 
   //   useEffect(() => {
   //     changeCustomer(customerData);
@@ -190,16 +205,6 @@ const Checkout = () => {
   const handleConfirmAddress = () => {
     setModalOpen(false);
   };
-
-  console.log('City value:', province);
-  console.log(
-    'Options:',
-    (provinceList ?? []).map((province) => ({
-      label: province.name,
-      value: province.code,
-    }))
-  );
-
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -214,11 +219,19 @@ const Checkout = () => {
         <Grid2 container spacing={2}>
           <Grid2 sx={{}} size={8.5}>
             <Box sx={{ p: 2, mb: 2, bgcolor: '#fff', borderRadius: '4px' }}>
-              <Typography sx={{ fontWeight: 600 }}>
-                Sản phẩm trong đơn
-              </Typography>
-
-              {/* {orderFormData?.products?.map((item, index) => (
+              <Box sx={{ display: 'flex' }}>
+                <Typography sx={{ flex: 7 }}>Sản phẩm</Typography>
+                <Typography sx={{ flex: 2, textAlign: 'center', fontSize: 14 }}>
+                  Đơn giá
+                </Typography>
+                <Typography sx={{ flex: 2, textAlign: 'center', fontSize: 14 }}>
+                  Số lượng
+                </Typography>
+                <Typography sx={{ flex: 2, textAlign: 'center', fontSize: 14 }}>
+                  Thành tiền
+                </Typography>
+              </Box>
+              {checkoutCart?.map((item, index) => (
                 <Box
                   sx={{
                     display: 'flex',
@@ -228,8 +241,8 @@ const Checkout = () => {
                     pb: 3,
                     borderTop: index !== 0 ? '1px solid #f3f4f6' : 'none',
                   }}
-                  key={item.modelid}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  key={item.skuId}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', flex: 7 }}>
                     <Box
                       sx={{
                         position: 'relative',
@@ -239,18 +252,28 @@ const Checkout = () => {
                         borderRadius: '4px',
                         border: '1px solid #d1d5db',
                         overflow: 'hidden',
+                        flexShrink: 0,
                         '.cart-item': { objectFit: 'cover' },
                       }}>
                       <SkeletonImage
-                        src={item.image}
-                        alt={''}
+                        src={item?.imageUrl}
+                        alt={item?.productName}
                         fill
                         className='cart-item'
                       />
                     </Box>
                     <Box>
-                      <Typography>{item.product_name}</Typography>
-                      {item?.name && (
+                      <Typography
+                        sx={{
+                          maxHeight: '32px',
+                          mb: 0.5,
+                          fontSize: 14,
+                          lineHeight: '16px',
+                          ...truncateTextByLine(2),
+                        }}>
+                        {item.productName}
+                      </Typography>
+                      {item?.attributes?.length && (
                         <Typography
                           sx={{
                             display: 'inline-block',
@@ -260,26 +283,42 @@ const Checkout = () => {
                             fontSize: 11,
                             borderRadius: 0.5,
                           }}>
-                          {item?.name}
+                          {item?.attributes
+                            ?.map((item) => item?.value)
+                            .join(', ')}
                         </Typography>
                       )}
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex' }}>
-                    <Typography sx={{ width: 88, mr: 4, fontSize: 14 }}>
-                      Số lượng: {item.quantity}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        width: 120,
-                        fontWeight: 600,
-                        textAlign: 'end',
-                      }}>
-                      {formatPrice(item.price)}
-                    </Typography>
-                  </Box>
+                  <Typography
+                    sx={{
+                      flex: 2,
+                      width: 120,
+                      textAlign: 'center',
+                      fontSize: 14,
+                    }}>
+                    {formatPrice(item?.price)}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      flex: 2,
+                      width: 88,
+                      fontSize: 14,
+                      textAlign: 'center',
+                    }}>
+                    {item?.quantity}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      flex: 2,
+                      width: 120,
+                      textAlign: 'center',
+                      fontSize: 14,
+                    }}>
+                    {formatPrice(item?.price) ?? 1 * item.quantity}
+                  </Typography>
                 </Box>
-              ))} */}
+              ))}
             </Box>
             <Box sx={{ p: 2, mb: 2, bgcolor: '#fff', borderRadius: '4px' }}>
               <Typography sx={{ fontWeight: 600 }}>
@@ -289,12 +328,12 @@ const Checkout = () => {
                 fullWidth
                 margin='dense'
                 placeholder='Họ và tên'
-                name='customer.name'
+                name='fullName'
                 onChange={handleChange}
-                value={formik?.values?.customer?.name}
+                value={formik?.values?.fullName}
                 helperText={
                   <Box component={'span'} sx={helperTextStyle}>
-                    {formik?.errors?.customer?.name}
+                    {formik?.errors?.fullName}
                   </Box>
                 }
               />
@@ -302,12 +341,12 @@ const Checkout = () => {
                 margin='dense'
                 fullWidth
                 placeholder='Số điện thoại'
-                name='customer.phone'
+                name='phoneNumber'
                 onChange={handleChange}
-                value={formik?.values?.customer?.phone}
+                value={formik?.values?.phoneNumber}
                 helperText={
                   <Box component={'span'} sx={helperTextStyle}>
-                    {formik?.errors?.customer?.phone}
+                    {formik?.errors?.phoneNumber}
                   </Box>
                 }
               />
@@ -316,12 +355,12 @@ const Checkout = () => {
                 fullWidth
                 placeholder='Email (Không bắt buộc)'
                 type='email'
-                name='customer.mail'
+                name='email'
                 onChange={handleChange}
-                value={formik?.values?.customer?.mail}
+                value={formik?.values?.email}
                 helperText={
                   <Box component={'span'} sx={helperTextStyle}>
-                    {formik?.errors?.customer?.mail}
+                    {formik?.errors?.email}
                   </Box>
                 }
               />
@@ -379,7 +418,7 @@ const Checkout = () => {
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 15, fontWeight: 600 }}>
-                                {ward}, {district}, {province?.name}
+                                {ward?.name}, {district?.name}, {province?.name}
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 14, fontWeight: 500 }}>
@@ -422,140 +461,43 @@ const Checkout = () => {
                           Thêm địa chỉ nhận hàng
                         </Typography>
                         <FormControl fullWidth margin='dense'>
-                          {/* <CustomAutocomplete
-                            label='Tỉnh/Thành phố'
-                            options={(provinceList ?? []).map((province) => ({
-                              label: province.name,
-                              value: province.code.toString(),
-                            }))}
-                          /> */}
                           <Autocomplete
                             disablePortal
                             options={provinceList ?? []}
-                            // options={(provinceList ?? []).map((province) => ({
-                            //   label: province.name,
-                            //   value: province.code,
-                            // }))}
                             renderInput={(params) => (
                               <TextField {...params} label='Tỉnh/Thành phố' />
                             )}
                             onChange={(e, value) => setProvince(value)}
                             value={province}
-                            getOptionLabel={(option) => option?.name}
                             isOptionEqualToValue={(option, value) =>
                               option?.code === value?.code
                             }
-                            defaultValue={province ?? null}
+                            getOptionLabel={(option) => option?.name ?? ''}
                           />
                         </FormControl>
 
                         <FormControl fullWidth margin='dense'>
-                          {/* <Autocomplete
+                          <Autocomplete
                             disablePortal
-                            options={(province?.districts ?? []).map(
-                              (district) => ({
-                                label: district.name,
-                                value: district.code.toString(),
-                              })
-                            )}
+                            options={provinceData?.districts ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Quận/Huyện' />
                             )}
-                            onChange={
-                              (e) => {
-                                console.log(e?.target);
-                              }
-                              // setDistrict(e?.target?.value)
-                            }
-                            // value={district}
-                          /> */}
+                            onChange={(e, value) => setDistrict(value)}
+                            getOptionLabel={(option) => option?.name ?? ''}
+                          />
                         </FormControl>
-                        {/* <CustomAutocomplete
-                          label='Phường/Xã'
-                          options={(provinceList ?? []).map((province) => ({
-                            label: province.name,
-                            value: province.code.toString(),
-                          }))}
-                        /> */}
-                        {/* <FormControl
-                          sx={selectStyle}
-                          margin='dense'
-                          variant='filled'
-                          fullWidth>
-                          <InputLabel>Tỉnh/Thành phố</InputLabel>
-                          <Select
-                            disableUnderline
-                            size='small'
-                            onChange={(e) => setCity(e?.target?.value)}
-                            value={
-                              provinceList?.some((item) => item.name === city)
-                                ? city
-                                : ''
-                            }>
-                            {provinceList?.map((item) => (
-                              <MenuItem key={item?.code} value={item?.name}>
-                                {item?.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl> */}
-                        {province && (
-                          <FormControl
-                            sx={selectStyle}
-                            margin='dense'
-                            variant='filled'
-                            fullWidth>
-                            <InputLabel>Quận/Huyện</InputLabel>
-                            <Select
-                              disableUnderline
-                              size='small'
-                              onChange={(e) => setDistrict(e?.target?.value)}
-                              value={
-                                // province_list?.districts?.some(
-                                //   (item) => item.name === district
-                                // )
-                                //   ? district
-                                //   : ''
-                                district
-                              }
-                              // disabled={!city}
-                            >
-                              {province?.districts?.map((item: IDistrict) => (
-                                <MenuItem key={item?.code} value={item?.name}>
-                                  {item?.name}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        )}
-                        {district && (
-                          <FormControl
-                            sx={selectStyle}
-                            margin='dense'
-                            variant='filled'
-                            fullWidth>
-                            <InputLabel>Phường/Xã</InputLabel>
-                            <Select
-                              disableUnderline
-                              size='small'
-                              onChange={(e) => setWard(e?.target?.value)}
-                              value={
-                                // districtData?.wards?.some(
-                                //   (item) => item.name === ward
-                                // )
-                                //   ? ward
-                                //   : ''
-                                ward
-                              }
-                              disabled={!district}>
-                              {/* {districtData?.wards?.map((item: IWard) => (
-                                <MenuItem key={item?.code} value={item?.name}>
-                                  {item?.name}
-                                </MenuItem>
-                              ))} */}
-                            </Select>
-                          </FormControl>
-                        )}
+                        <FormControl fullWidth margin='dense'>
+                          <Autocomplete
+                            disablePortal
+                            options={districtData?.wards ?? []}
+                            renderInput={(params) => (
+                              <TextField {...params} label='Phường/Xã' />
+                            )}
+                            onChange={(e, value) => setWard(value)}
+                            getOptionLabel={(option) => option?.name ?? ''}
+                          />
+                        </FormControl>
                         <FormControl
                           sx={{
                             mb: 2.5,
@@ -623,7 +565,7 @@ const Checkout = () => {
                         showTimeSelect
                         showIcon
                         icon={<CalendarTodayOutlinedIcon />}
-                        selected={formik?.values?.shipment?.delivery_date}
+                        selected={formik?.values?.shipment?.deliveryDate}
                         onChange={(e) =>
                           formik.setFieldValue('shipment.delivery_date', e)
                         }
@@ -756,8 +698,8 @@ const Checkout = () => {
                 <RadioGroup
                   name='payment.method'
                   onChange={handleChange}
-                  value={formik?.values?.payment}>
-                  {/* {paymentMethods?.data?.map((item) => (
+                  value={formik?.values?.paymentMethodId}>
+                  {paymentMethods?.data?.map((item) => (
                     <FormControlLabel
                       sx={{ my: 1 }}
                       key={item?.key}
@@ -788,10 +730,10 @@ const Checkout = () => {
                         </Box>
                       }
                     />
-                  ))} */}
+                  ))}
                 </RadioGroup>
                 <FormHelperText sx={helperTextStyle}>
-                  {formik?.errors?.payment}
+                  {formik?.errors?.paymentMethodId}
                 </FormHelperText>
               </FormControl>
             </Box>
@@ -822,7 +764,7 @@ const Checkout = () => {
                 className='total-price-cost'>
                 <Typography sx={{ fontSize: 13 }}>Tổng tiền:</Typography>
                 <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
-                  {/* {formatPrice(getTotalAmount() ?? 0)} */}
+                  {formatPrice(totalAmount)}
                 </Typography>
               </Box>
               <Divider sx={{ mt: 2, mb: 1 }} />
@@ -857,6 +799,7 @@ const Checkout = () => {
           </Grid2>
         </Grid2>
       </LayoutContainer>
+      {isCreateOrderPending && <FullScreenLoader />}
     </Box>
   );
 };

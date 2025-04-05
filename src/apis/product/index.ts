@@ -1,5 +1,6 @@
 import { IProduct } from "@/interfaces/IProduct";
 import { axiosInstance } from "@/lib/utils/axiosInstance"
+import { TPaginatedResponse } from "@/types/response.type";
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 interface getProductsPayload {
@@ -22,7 +23,7 @@ interface IGetProductResponse {
 
 const getProducts = async (filter?: getProductsPayload) => {
    const res = await axiosInstance.get(`/products`, { params: filter})
-   return res.data  as IGetProductsResponse
+   return res.data  as TPaginatedResponse<IProduct>
 }
 
 export const useGetProducts = (filter?: getProductsPayload) => {

@@ -1,12 +1,6 @@
 import { getRequest } from '@/utils/fetch-client';
 import { IProduct } from '@/interfaces/IProduct';
-
-export type TProductsRes = {
-  data: IProduct[];
-  total: number;
-  status: boolean;
-  message: string;
-};
+import { TPaginatedResponse } from '@/types/response.type';
 
 export type TProductRes = {
   data: IProduct;
@@ -16,9 +10,9 @@ export type TProductRes = {
 
 const productUrl = 'products'
 
-export async function getProductListApi (page?: string, sort?: string) {
-  const res: TProductsRes = await getRequest(`/${productUrl}?${page ? `page=${page}` : ''}&limit=9${sort ? `&sort=${sort}` : ''}`);
-  return res;
+export async function getProductList(page?: string, sort?: string) {
+  const res = await getRequest(`/${productUrl}?${page ? `page=${page}` : ''}&limit=9${sort ? `&sort=${sort}` : ''}`);
+  return res as TPaginatedResponse<IProduct>;
 };
 
 export async function getProductBySlug(slug: string) {

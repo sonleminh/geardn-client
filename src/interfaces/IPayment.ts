@@ -1,23 +1,15 @@
-export interface IPayment {
+export interface IPaymentMethod {
     id: string;
     key: string;
     name: string;
     image: string;
-    is_disabled: string;
+    isDisabled: string;
     createdAt: Date;
 }
 
-export interface ICreatePayment extends Record<string, unknown>  {
-    key: string;
-    name: string;
-    image: string;
-    is_disabled: boolean;
-}
-
-export interface IUpdatePaymentPayload {
-    id: string;
-    key: string;
-    name: string;
-    image: string;
-    is_disabled: boolean;
+export interface IPaymentMethodListRespone {
+    success: boolean;
+    message: string;
+    data:  IPaymentMethod[];
+    total: number;
 }

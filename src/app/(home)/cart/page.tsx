@@ -57,6 +57,8 @@ import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 
 const Cart = () => {
   const { user, setCheckoutCart } = useAuthStore((state) => state);
+  const { cartItems, updateQuantity, removeFromCart, syncCart } =
+    useCartStore();
   const router = useRouter();
 
   const breadcrumbsOptions = [
@@ -64,8 +66,6 @@ const Cart = () => {
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
 
-  const { cartItems, updateQuantity, removeFromCart, syncCart } =
-    useCartStore();
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
@@ -253,7 +253,6 @@ const Cart = () => {
     if (selected.length === 0) {
       return showNotification('Vui lòng chọn sản phẩm', 'warning');
     }
-
     const selectedItems = selected
       .map((skuId) => cartItems?.find((item) => item.skuId === skuId))
       ?.filter((item): item is ICartItem => item !== undefined);

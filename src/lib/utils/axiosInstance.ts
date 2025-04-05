@@ -39,13 +39,6 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 // Add a request interceptor
 axiosExtend.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Get the authentication token from iron-session
-    const token = await getSession();
-    // Add the token to the request headers if it exists
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
     return config;
   },
   (error) => {
