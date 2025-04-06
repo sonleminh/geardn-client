@@ -6,51 +6,50 @@ export interface ICartPayload {
 }
 
 export interface IOrderItem {
-    modelid: string;
-    name: string;
-    image: string;
-    price: number;
-    extinfo: {
-        tier_index: number[];
-        is_pre_order: boolean;
+    product: {
+        name: string;
+        images: string[];
     };
-    productid: string;
-    product_name: string;
+    sku: {
+        sku: string;
+        price: number;
+        quantity: string;
+        imageUrl: string;
+        productSkuAttributes: {
+            attribute: {
+                type: string;
+                value: string;
+            }
+        }[];
+    };
     quantity: number;
 }
 
 export interface IOrder {
-    id: string;
-    userid: string;
-    customer: {
-        name: string;
-        phone: string;
-        mail?: string;
-    }
-    items: IOrderItem[]
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        country: string;
-    };
-    shipment?: {
+    id: number;
+    userId: number;
+    orderCode: string;
+    totalPrice: number;
+    status: string;
+    fullName: string;
+    phoneNumber: string;
+    email?: string;
+    note?: string,
+    shipment: {
         method: number;
-        delivery_date: Date;
         address: string;
+        deliveryDate: Date;
     };
-    payment: {
-        id: string,
+    paymentMethod: {
+        id: number,
         key: string,
         name: string,
         image: string,
     },
     flag: {
-        is_online_order: boolean,
+        isOnlineOrder: boolean,
     },
-    note?: string,
-    total_amount: number;
-    status: string;
+    orderItems: IOrderItem[]
 }
 
 export interface ICreateOrder {

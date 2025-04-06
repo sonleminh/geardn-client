@@ -8,3 +8,9 @@ export type TPaginatedResponse<T> = {
     status: boolean;
     message: string;
   };
+
+  export type TBaseResponse<T> = {
+    success: boolean;
+    message: string;
+    data: T;
+  };

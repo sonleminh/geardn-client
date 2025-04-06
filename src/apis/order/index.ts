@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosExtend, axiosInstance } from "@/lib/utils/axiosInstance";
-import { ICartResponse, ISyncCartPayload } from "@/interfaces/ICart";
-import { IUser } from "@/interfaces/IUser";
 import { IPaymentMethodListRespone } from "@/interfaces/IPayment";
+import { IOrder } from "@/interfaces/IOrder";
+import { TBaseResponse } from "@/types/response.type";
 
 export interface IProvince {
     name: string;
@@ -60,6 +60,29 @@ export interface IProvince {
         }[]
 }
 
+const createOrder = async (payload: ICreateOrderPayload) => {
+    const res = await axiosInstance.post(`/orders`, payload)
+    return res.data as TBaseResponse<IOrder>
+ }
+ 
+ export const useCreateOrder = () => {
+     return useMutation({
+         mutationFn: createOrder
+     })
+ }
+
+ const getOrder = async (orderCode: string) => {
+    const res = await axiosInstance.get(`/orders/${orderCode}`)
+    return res.data as TBaseResponse<IOrder>
+ }
+ 
+ export const useGetOrder = (orderCode: string) => {
+     return useQuery({
+        queryKey: ["order", orderCode],
+        queryFn: () => getOrder(orderCode),
+})
+ }
+
 const getProvinces = async () => {
     const res = await axiosExtend.get(`https://provinces.open-api.vn/api/`)
     return res.data as IProvince[]
@@ -108,15 +131,4 @@ const getDistricts = async (code: number) => {
         queryKey: ["payment-method"],
     queryFn: () => getPaymentMethods(),
     })
- }
-
- const createOrder = async (payload: ICreateOrderPayload) => {
-    const res = await axiosInstance.post(`/orders`, payload)
-    return res.data
- }
- 
- export const useCreateOrder = () => {
-     return useMutation({
-         mutationFn: createOrder
-     })
  }

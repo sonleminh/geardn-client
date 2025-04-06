@@ -1,22 +1,16 @@
 'use client';
 
-import React, {
-  ChangeEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { ChangeEvent, useMemo, useState } from 'react';
 
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import SkeletonImage from '@/components/common/SkeletonImage';
 
 import { formatPrice } from '@/utils/format-price';
 
-import EMPTY_CART from '@/assets/empty-cart.png';
 import { ROUTES } from '@/constants/route';
 
 import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import {
   Autocomplete,
   Box,
@@ -25,7 +19,6 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
-  FormLabel,
   Grid2,
   InputLabel,
   MenuItem,
@@ -39,22 +32,9 @@ import {
   Theme,
   Typography,
 } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useFormik } from 'formik';
 import Link from 'next/link';
 // import { checkoutSchema } from './utils/schema/checkoutSchema';
-import moment from 'moment';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { useRouter } from 'next/navigation';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
-import { postRequest } from '@/utils/fetch-client';
-import { useAuthStore } from '@/stores/auth-store';
-import { useNotificationStore } from '@/stores/notification-store';
 import {
   IDistrict,
   IProvince,
@@ -65,16 +45,22 @@ import {
   useGetProvince,
   useGetProvinces,
 } from '@/apis/order';
-import LayoutContainer from '@/components/layout-container';
-import CustomAutocomplete from '@/components/common/Autocomplete';
-import { useCartStore } from '@/stores/cart-store';
-import { truncateTextByLine } from '@/utils/css-helper.util';
 import { FullScreenLoader } from '@/components/common/FullScreenLoader';
+import LayoutContainer from '@/components/layout-container';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCartStore } from '@/stores/cart-store';
+import { useNotificationStore } from '@/stores/notification-store';
+import { truncateTextByLine } from '@/utils/css-helper.util';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import moment from 'moment';
+import { useRouter } from 'next/navigation';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
   const { showNotification } = useNotificationStore();
-
+  const { cartItems, removeItem } = useCartStore();
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CHECKOUT, label: 'Thanh toán' },
@@ -87,11 +73,6 @@ const Checkout = () => {
   const { mutateAsync: onCreateOrder, isPending: isCreateOrderPending } =
     useCreateOrder();
 
-  const [customerData, setCustomerData] = useState<{
-    name: string;
-    phone: string;
-    email: string;
-  }>({ name: '', phone: '', email: '' });
   const [province, setProvince] = useState<IProvince | null>(null);
   const [district, setDistrict] = useState<IDistrict | null>(null);
   const [ward, setWard] = useState<IWard | null>(null);
@@ -165,6 +146,12 @@ const Checkout = () => {
         userId: user?.id ?? null,
       };
       onCreateOrder(payload, {
+        onSuccess: (data) => {
+          checkoutCart?.forEach((item) => {
+            removeItem(item?.skuId);
+          });
+          router.push(`${ROUTES.ORDER_CONFIRMATION}/${data?.data?.orderCode}`);
+        },
         onError: () => {
           showNotification('Đã có lỗi xảy ra', 'error');
         },
@@ -634,7 +621,7 @@ const Checkout = () => {
                         showTimeSelect
                         showIcon
                         icon={<CalendarTodayOutlinedIcon />}
-                        selected={formik?.values?.shipment?.delivery_date}
+                        selected={formik?.values?.shipment?.deliveryDate}
                         onChange={(e) =>
                           formik.setFieldValue('shipment.delivery_date', e)
                         }

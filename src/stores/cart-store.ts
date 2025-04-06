@@ -8,7 +8,7 @@ export type CartState = {
   cartItems: ICartStoreItem[];
   addToCart: (item: ICartStoreItem) => void;
   updateQuantity: (skuId: number, quantity: number) => void;
-  removeFromCart: (skuId: number) => void;
+  removeItem: (skuId: number) => void;
   clearCart: () => void;
   syncCart: (cartItems: ICartStoreItem[]) => void;
 }
@@ -43,7 +43,7 @@ export const useCartStore = create<CartState>()(
         }))
       }
         ,
-        removeFromCart: (skuId) =>
+        removeItem: (skuId) =>
           set((state) => ({
             cartItems: state.cartItems.filter((i) => i.skuId !== skuId),
           })),

@@ -30,6 +30,7 @@ import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
+import { AxiosError } from 'axios';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -50,49 +51,75 @@ const LoginPage = () => {
     // validationSchema: schema,
     validateOnChange: false,
     async onSubmit(values) {
-      const userData = await onLoginWithEmailPwd(values, {
-        onSuccess: async () => {
-          const syncPayload = cartItems?.map(
-            ({ productId, skuId, quantity }) => ({
-              productId,
-              skuId,
-              quantity,
-            })
-          );
-          const updatedCart = await onSyncCart(syncPayload);
+      try {
+        const userData = await onLoginWithEmailPwd(values, {
+          onSuccess: async () => {
+            const syncPayload = cartItems?.map(
+              ({ productId, skuId, quantity }) => ({
+                productId,
+                skuId,
+                quantity,
+              })
+            );
+            const updatedCart = await onSyncCart(syncPayload);
 
-          const syncCartData = updatedCart?.data?.items?.map((item) => ({
-            productId: item?.productId,
-            skuId: item?.sku?.id,
-            productName: item?.product?.name,
-            imageUrl: item?.sku?.imageUrl
-              ? item?.sku?.imageUrl
-              : item?.product?.images?.[0],
-            price: item?.sku?.price,
-            quantity: item?.quantity,
-            attributes: item?.sku?.productSkuAttributes.map((attr) => ({
-              type: attr?.attribute?.type,
-              value: attr?.attribute?.value,
-            })),
-          }));
-          syncCart(syncCartData);
-        },
-        onError: () => {
-          showNotification(
-            'The system is overloaded, please wait a moment...',
-            'error'
-          );
-        },
-      });
-      login({
-        id: userData?.data?.id,
-        email: userData?.data?.email,
-        name: userData?.data?.name,
-      });
-      if (userData?.data?.id) {
-        router.push('/');
-        // router.push('/tai-khoan');
-        showNotification('Đăng nhập thành công', 'success');
+            const syncCartData = updatedCart?.data?.items?.map((item) => ({
+              productId: item?.productId,
+              skuId: item?.sku?.id,
+              productName: item?.product?.name,
+              imageUrl: item?.sku?.imageUrl
+                ? item?.sku?.imageUrl
+                : item?.product?.images?.[0],
+              price: item?.sku?.price,
+              quantity: item?.quantity,
+              attributes: item?.sku?.productSkuAttributes.map((attr) => ({
+                type: attr?.attribute?.type,
+                value: attr?.attribute?.value,
+              })),
+            }));
+            syncCart(syncCartData);
+            login({
+              id: userData?.data?.id,
+              email: userData?.data?.email,
+              name: userData?.data?.name,
+            });
+            if (userData?.data?.id) {
+              router.push('/');
+              // router.push('/tai-khoan');
+              showNotification('Đăng nhập thành công', 'success');
+            }
+          },
+          onError: (error) => {
+            let message = 'Đã xảy ra lỗi không xác định';
+
+            // Check nếu là AxiosError
+            if (error instanceof AxiosError) {
+              const status = error.response?.status;
+              const backendMsg = error.response?.data?.message;
+
+              if (status === 404) {
+                message =
+                  'Không tìm thấy tài khoản hoặc địa chỉ API không tồn tại.';
+              } else if (status === 401) {
+                message = 'Sai mật khẩu. Vui lòng thử lại.';
+              } else if (status === 400) {
+                message =
+                  typeof backendMsg === 'string'
+                    ? backendMsg
+                    : Array.isArray(backendMsg)
+                    ? backendMsg.join(', ')
+                    : 'Yêu cầu không hợp lệ.';
+              } else if (backendMsg) {
+                message = backendMsg;
+              }
+            }
+            console.log('error', message);
+            return showNotification(message, 'error');
+          },
+        });
+      } catch (error) {
+        console.error('Unexpected error in onSubmit:', error);
+        showNotification('Hệ thống gặp lỗi. Vui lòng thử lại sau.', 'error');
       }
     },
   });

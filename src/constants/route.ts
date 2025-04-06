@@ -4,4 +4,5 @@ export const ROUTES = {
     SIGNUP: '/signup',
     CART: '/cart',
     CHECKOUT: '/checkout',
+    ORDER_CONFIRMATION: '/order-confirmation',
   };
