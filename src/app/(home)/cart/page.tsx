@@ -57,8 +57,7 @@ import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 
 const Cart = () => {
   const { user, setCheckoutCart } = useAuthStore((state) => state);
-  const { cartItems, updateQuantity, removeFromCart, syncCart } =
-    useCartStore();
+  const { cartItems, updateQuantity, removeItem, syncCart } = useCartStore();
   const router = useRouter();
 
   const breadcrumbsOptions = [
@@ -196,7 +195,7 @@ const Cart = () => {
   };
 
   const handleDeleteItem = async (skuId: number) => {
-    removeFromCart(skuId);
+    removeItem(skuId);
     if (user) {
       const backupCartItems = [...cartItems];
       const cartServerItem = cartServer?.data?.items?.find(

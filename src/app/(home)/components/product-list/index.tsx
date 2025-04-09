@@ -10,12 +10,16 @@ import { TCategoriesRes } from '@/services/category/api';
 import { TProductsRes } from '@/services/product/api';
 import {
   Box,
+  Card,
+  CardContent,
+  CardMedia,
   FormControl,
   Grid2,
   List,
   ListItem,
   NativeSelect,
   Pagination,
+  Skeleton,
   Typography,
 } from '@mui/material';
 import { ProductListStyle } from './style';
@@ -25,12 +29,14 @@ import { IProduct } from '@/interfaces/IProduct';
 
 const ProductList = ({
   productsData,
+  isProductsPending,
   categoriesData,
-}: // currentPage,
-{
-  productsData: TPaginatedResponse<IProduct>;
+  currentPage,
+}: {
+  isProductsPending: boolean;
+  productsData: TPaginatedResponse<IProduct> | undefined;
   categoriesData: TCategoriesRes;
-  // currentPage: number;
+  currentPage: number;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,6 +64,7 @@ const ProductList = ({
             }}>
             <Box
               sx={{
+                minHeight: '400px',
                 p: '12px 16px',
                 boxShadow:
                   '0 1px 2px 0 rgba(60, 64, 67, .1), 0 2px 6px 2px rgba(60, 64, 67, .15)',
@@ -65,33 +72,37 @@ const ProductList = ({
               }}>
               <Typography className='category-heading'>Danh mục</Typography>
               <List>
-                {categoriesData?.data?.map((item) => (
-                  <AppLink
-                    href={item?.slug}
-                    key={item.id}
-                    sx={{
-                      color: '#000',
-                    }}>
-                    <ListItem sx={{ display: 'flex', px: 0 }}>
-                      <Box
+                {isProductsPending
+                  ? [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+                      <Skeleton key={index} height={40} />
+                    ))
+                  : categoriesData?.data?.map((item) => (
+                      <AppLink
+                        href={item?.slug}
+                        key={item.id}
                         sx={{
-                          position: 'relative',
-                          width: '24px',
-                          height: { xs: '24px' },
-                          mr: 1.5,
-                          overflow: 'hidden',
-                          '& img': {
-                            objectFit: 'cover',
-                          },
+                          color: '#000',
                         }}>
-                        <SkeletonImage src={item.icon} alt={'geardn'} />
-                      </Box>
-                      <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
-                        {item.name}
-                      </Typography>
-                    </ListItem>
-                  </AppLink>
-                ))}
+                        <ListItem sx={{ display: 'flex', px: 0 }}>
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              width: '24px',
+                              height: { xs: '24px' },
+                              mr: 1.5,
+                              overflow: 'hidden',
+                              '& img': {
+                                objectFit: 'cover',
+                              },
+                            }}>
+                            <SkeletonImage src={item.icon} alt={'geardn'} />
+                          </Box>
+                          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+                            {item.name}
+                          </Typography>
+                        </ListItem>
+                      </AppLink>
+                    ))}
               </List>
             </Box>
           </Grid2>
@@ -99,20 +110,64 @@ const ProductList = ({
             <Box>
               <Heading total={productsData?.meta?.total ?? 0} />
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                {productsData?.data?.map((item, index) => (
-                  <Grid2 key={index} size={4}>
-                    <ProductCard data={item} />
-                  </Grid2>
-                ))}
+                {isProductsPending
+                  ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (
+                      <Grid2 key={index} size={4}>
+                        <Card>
+                          <CardMedia>
+                            <Skeleton
+                              variant='rectangular'
+                              width='100%'
+                              height={250}
+                            />
+                          </CardMedia>
+                          <CardContent
+                            sx={{
+                              p: '12px',
+                              paddingBottom: '12px !important',
+                            }}>
+                            <Skeleton variant='text' width='100%' height={21} />
+                            <Skeleton
+                              variant='text'
+                              width='100%'
+                              height={21}
+                              sx={{ mb: '8px' }}
+                            />
+                            <Box
+                              sx={{
+                                height: 24,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                              }}>
+                              <Skeleton
+                                variant='text'
+                                height={24}
+                                width={'40%'}
+                              />
+                              <Skeleton
+                                variant='text'
+                                height={24}
+                                width={'40%'}
+                              />
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid2>
+                    ))
+                  : productsData?.data?.map((item, index) => (
+                      <Grid2 key={index} size={4}>
+                        <ProductCard data={item} />
+                      </Grid2>
+                    ))}
               </Grid2>
-              {/* <Pagination
+              <Pagination
                 sx={{ display: 'flex', justifyContent: 'center' }}
-                count={Math.ceil((productsData?.total ?? 0) / 9)}
+                count={Math.ceil((productsData?.meta?.total ?? 0) / 2)}
                 page={currentPage}
                 onChange={handlePageChange}
                 showFirstButton
                 showLastButton
-              /> */}
+              />
             </Box>
           </Grid2>
         </Grid2>

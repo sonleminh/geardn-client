@@ -41,7 +41,7 @@ const ProductDetailPage = () => {
   const params = useParams();
   const product = params.product as string;
   const { user } = useAuthStore();
-  const { cartItems, addToCart } = useCartStore();
+  const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
   const { data } = useGetProduct(product);
   const { mutateAsync: onAddToCart } = useAddToCart();
   const { showNotification } = useNotificationStore();
@@ -202,52 +202,56 @@ const ProductDetailPage = () => {
         })),
       });
     }
-    const res = await onAddToCart(
-      {
+
+    if (user && data) {
+      const newItem = {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
+        productName: data?.data?.name,
+        imageUrl:
+          selectedSku?.imageUrl !== ''
+            ? selectedSku?.imageUrl
+            : data?.data?.images?.[0],
+        price: selectedSku?.price,
         quantity: count ?? 1,
-      },
-      {
-        onError: () => {
-          showNotification('Đã có lỗi xảy ra', 'error');
-        },
+        attributes: selectedSku?.productSkuAttributes.map((attr) => ({
+          type: attr.attribute.type,
+          value: attr.attribute.value,
+        })),
+      };
+
+      addToCart(newItem);
+
+      try {
+        await onAddToCart(
+          {
+            productId: selectedSku?.productId,
+            skuId: selectedSku?.id,
+            quantity: count ?? 1,
+          },
+          {
+            onError: () => {
+              const cartItem = cartItems?.find(
+                (item) => item.skuId === selectedSku?.id
+              );
+              if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
+                removeItem(selectedSku?.id);
+              } else {
+                updateQuantity(
+                  selectedSku?.id,
+                  selectedSku?.quantity - (count ?? 0)
+                );
+              }
+              showNotification('Đã có lỗi xảy ra', 'error');
+            },
+          }
+        );
+      } catch (error) {
+        console.log('error', error);
+        removeItem(newItem.skuId);
+        showNotification('Lỗi kết nối tới máy chủ', 'error');
       }
-    );
-    // await addCartItemAPI({
-    //   productId: selectedSku?.productId,
-    //   skuId: selectedSku?.id,
-    //   quantity: count ?? 1,
-    // });
-
-    // const existingCart = JSON.parse(localStorage.getItem('cart') ?? '[]');
-
-    // const modelInCart = cart?.items?.find(
-    //   (item) => item.modelid === matchedModel?.id
-    // );
-
-    // if (
-    //   modelInCart &&
-    //   (count ?? 1) + modelInCart?.quantity > matchedModel?.stock
-    // ) {
-    //   return setAddQuantityError(true);
-    // }
-    // try {
-    //   await addCartAPI({
-    //     userid: user?.id ? user?.id : null,
-    //     model:
-    //       product?.tier_variations?.length === 0
-    //         ? product?.models[0]?.id ?? ''
-    //         : matchedModel?.id ?? '',
-    //     quantity: count ?? 1,
-    //   });
-    //   mutate('/cart');
-    //   globalMutate(`/cart`, undefined, { revalidate: true });
-    //   showNotification('Sản phẩm đã dược thêm vào giỏ hàng!', 'success');
-    //   setAddQuantityError(false);
-    // } catch (error: any) {
-    //   showNotification(error?.message, 'error');
-    // }
+    }
   };
 
   const handleCountChange = (value: number | null) => {

@@ -37,7 +37,7 @@ const ProductCard = ({ data }: { data: IProduct }) => {
           className='product-img'>
           <SkeletonImage src={data?.images[0]} alt='geardn' fill />
         </Box>
-        <Box sx={{ p: '12px 12px 0' }}>
+        <Box sx={{ p: '12px' }}>
           <Typography
             sx={{
               height: 42,
@@ -53,7 +53,7 @@ const ProductCard = ({ data }: { data: IProduct }) => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              mb: 1,
+              // mb: 1,
             }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <StarRateIcon sx={{ mr: 0.5, color: '#F19B4C', fontSize: 18 }} />

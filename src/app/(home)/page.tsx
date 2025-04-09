@@ -3,20 +3,27 @@
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
-import { Box, Button, InputBase, Typography } from '@mui/material';
+import { Box, Button, Grid2, InputBase, Typography } from '@mui/material';
 import ProductList from './components/product-list';
 import { getProductListApi } from '@/services/product/api';
 import { getCategoryListApi } from '@/services/category/api';
 import Explore from './components/explore';
 import { useGetProducts } from '@/apis/product';
 import { useGetCategories } from '@/apis/category';
+import { useSearchParams } from 'next/navigation';
 
 const Homepage: React.FC = () => {
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get('page');
+
   // const params = await searchParams;
   // const page = params?.page ?? '1';
   // const productsData = await getProductListApi(page);
   // const categoriesData = await getCategoryListApi();
-  const { data: productsData } = useGetProducts({});
+  const { data: productsData, isPending: isProductsPending } = useGetProducts(
+    {}
+  );
   const { data: categoriesData } = useGetCategories();
   return (
     <Box sx={{ pb: 10 }}>
@@ -50,10 +57,21 @@ const Homepage: React.FC = () => {
         />
       </Box>
       <section id='shop'>
+        {isProductsPending ? (
+          <LayoutContainer>
+            <Grid2 container>
+              <Grid2 size={3}></Grid2>
+              <Grid2 size={9}></Grid2>
+            </Grid2>
+          </LayoutContainer>
+        ) : (
+          <></>
+        )}
         <ProductList
           productsData={productsData}
+          isProductsPending={isProductsPending}
           categoriesData={categoriesData}
-          // currentPage={Number(page)}
+          currentPage={Number(page)}
         />
       </section>
       {/* <Explore productsData={productsData} /> */}
