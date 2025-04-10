@@ -26,28 +26,27 @@ import { ProductListStyle } from './style';
 import { ICategory } from '@/interfaces/ICategory';
 import { useQuery } from '@tanstack/react-query';
 
-const ProductList = ({ page, limit }: { page: number; limit: number }) => {
-  const [query, setQuery] = useState<IQuery>({
-    limit: 2,
-    page: 1,
-  });
+const ProductList = ({ query }: { query: IQuery }) => {
+  // const [query, setQuery] = useState<IQuery>({
+  //   limit: 2,
+  //   page: 1,
+  // });
 
   // const { data: productsData, isPending: isProductsPending } = useQuery({
   //   queryKey: ['products', page, limit],
   //   queryFn: () => fetchProducts(page, limit),
   // });
-
   const { data: productsData, isPending: isProductsPending } =
     useGetProducts(query);
   const { data: categoriesData, isPending: isCategoriesPending } =
     useGetCategories();
 
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setQuery((prev) => ({ ...prev, page: newPage }));
-  };
+  // const handlePageChange = (
+  //   event: React.ChangeEvent<unknown>,
+  //   newPage: number
+  // ) => {
+  //   setQuery((prev) => ({ ...prev, page: newPage }));
+  // };
   return (
     <LayoutContainer>
       <Box sx={ProductListStyle}>
@@ -163,7 +162,7 @@ const ProductList = ({ page, limit }: { page: number; limit: number }) => {
                 sx={{ display: 'flex', justifyContent: 'center' }}
                 count={Math.ceil((productsData?.meta?.total ?? 0) / 2)}
                 page={query?.page ?? 1}
-                onChange={handlePageChange}
+                // onChange={handlePageChange}
                 showFirstButton
                 showLastButton
               />

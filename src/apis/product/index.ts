@@ -1,7 +1,9 @@
 import { IProduct } from "@/interfaces/IProduct";
+import { IQuery } from "@/interfaces/IQuery";
 import { axiosInstance } from "@/lib/utils/axiosInstance"
 import { TPaginatedResponse } from "@/types/response.type";
 import { useMutation, useQuery } from "@tanstack/react-query"
+import queryString from 'query-string';
 
 interface getProductsPayload {
     sort?: string;
@@ -21,15 +23,19 @@ interface IGetProductResponse {
     data: IProduct;
 }
 
-const getProducts = async (filter?: getProductsPayload) => {
-   const res = await axiosInstance.get(`/products`, { params: filter})
+const getProducts = async (query: IQuery) => {
+    console.log('query:', query)
+    const newParams = { ...query, page: (query.page ?? 0) + 1 };
+  const queryParams = queryString.stringify(newParams ?? {});
+   const res = await axiosInstance.get(`/products?${queryParams}`)
    return res.data  as TPaginatedResponse<IProduct>
 }
 
-export const useGetProducts = (filter?: getProductsPayload) => {
+export const useGetProducts = (query: IQuery) => {
     return useQuery({
-        queryKey: ["get-products", JSON.stringify(filter || {})],
-    queryFn: () => getProducts(filter),
+        queryKey: ["products", query],
+        queryFn: () => getProducts(query),
+
 })
 }
 
