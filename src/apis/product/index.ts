@@ -56,3 +56,9 @@ const getProductsByCategory = async (slug: string, filter?: getProductsPayload) 
         queryFn: () => getProduct(slug),
  })
  }
+
+ export async function fetchProducts(page: number, limit: number) {
+    const res = await axiosInstance.get(`/products?page=${page}&limit=${limit}`)
+    // if (!res?.ok) throw new Error('Failed to fetch')
+    return res.data  as TPaginatedResponse<IProduct>
+  }

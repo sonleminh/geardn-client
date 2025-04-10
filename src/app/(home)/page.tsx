@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
@@ -8,23 +8,51 @@ import ProductList from './components/product-list';
 import { getProductListApi } from '@/services/product/api';
 import { getCategoryListApi } from '@/services/category/api';
 import Explore from './components/explore';
-import { useGetProducts } from '@/apis/product';
+import { fetchProducts, useGetProducts } from '@/apis/product';
 import { useGetCategories } from '@/apis/category';
-import { useSearchParams } from 'next/navigation';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
+// import { useSearchParams } from 'next/navigation';
 
-const Homepage: React.FC = () => {
-  const searchParams = useSearchParams();
+const getServerData = async (page: number, limit: number) => {
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: ['products', { page, limit }],
+    queryFn: () => fetchProducts(page, limit),
+  });
+  return queryClient;
+};
 
-  const page = searchParams.get('page');
+// const Homepage: React.FC = () => {
+export async function Homepage({
+  searchParams,
+}: {
+  searchParams: { page?: string; limit?: string };
+}) {
+  const page = Number(searchParams?.page || 1);
+  const limit = 2;
+
+  console.log('page', page);
+  console.log('limit', limit);
+  const queryClient = await getServerData(page, limit);
+  const dehydratedState = dehydrate(queryClient);
+
+  // await queryClient.prefetchQuery({
+  //   queryKey: ['products', page, limit],
+  //   queryFn: () => fetchProducts(page, limit),
+  // });
+
+  // const searchParams = useSearchParams();
+
+  // const page = searchParams.get('page');
 
   // const params = await searchParams;
   // const page = params?.page ?? '1';
   // const productsData = await getProductListApi(page);
   // const categoriesData = await getCategoryListApi();
-  const { data: productsData, isPending: isProductsPending } = useGetProducts(
-    {}
-  );
-  const { data: categoriesData } = useGetCategories();
+  // const { data: productsData, isPending: isProductsPending } = useGetProducts(
+  //   {}
+  // );
+  // const { data: categoriesData } = useGetCategories();
   return (
     <Box sx={{ pb: 10 }}>
       <Box
@@ -57,7 +85,7 @@ const Homepage: React.FC = () => {
         />
       </Box>
       <section id='shop'>
-        {isProductsPending ? (
+        {/* {isProductsPending ? (
           <LayoutContainer>
             <Grid2 container>
               <Grid2 size={3}></Grid2>
@@ -66,13 +94,16 @@ const Homepage: React.FC = () => {
           </LayoutContainer>
         ) : (
           <></>
-        )}
-        <ProductList
+        )} */}
+        {/* <ProductList
           productsData={productsData}
           isProductsPending={isProductsPending}
           categoriesData={categoriesData}
           currentPage={Number(page)}
-        />
+        /> */}
+        <Hydrate state={dehydratedState}>
+          <ProductList page={page} limit={limit} />
+        </Hydrate>
       </section>
       {/* <Explore productsData={productsData} /> */}
       <LayoutContainer>
@@ -120,6 +151,6 @@ const Homepage: React.FC = () => {
       </LayoutContainer>
     </Box>
   );
-};
+}
 
 export default Homepage;

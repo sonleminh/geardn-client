@@ -53,7 +53,6 @@ const ProductCard = ({ data }: { data: IProduct }) => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              // mb: 1,
             }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <StarRateIcon sx={{ mr: 0.5, color: '#F19B4C', fontSize: 18 }} />

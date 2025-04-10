@@ -1,53 +1,52 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import LayoutContainer from '@/components/layout-container';
-import SkeletonImage from '@/components/common/SkeletonImage';
-import ProductCard from '@/components/common/ProductCard';
 import AppLink from '@/components/common/AppLink';
+import ProductCard from '@/components/common/ProductCard';
+import SkeletonImage from '@/components/common/SkeletonImage';
+import LayoutContainer from '@/components/layout-container';
 
-import { TCategoriesRes } from '@/services/category/api';
-import { TProductsRes } from '@/services/product/api';
+import { useGetCategories } from '@/apis/category';
+import { fetchProducts, useGetProducts } from '@/apis/product';
+import Heading from '@/components/common/heading';
+import { IQuery } from '@/interfaces/IQuery';
 import {
   Box,
   Card,
   CardContent,
   CardMedia,
-  FormControl,
   Grid2,
   List,
   ListItem,
-  NativeSelect,
   Pagination,
   Skeleton,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
 import { ProductListStyle } from './style';
-import Heading from '@/components/common/heading';
-import { TPaginatedResponse } from '@/types/response.type';
-import { IProduct } from '@/interfaces/IProduct';
+import { ICategory } from '@/interfaces/ICategory';
+import { useQuery } from '@tanstack/react-query';
 
-const ProductList = ({
-  productsData,
-  isProductsPending,
-  categoriesData,
-  currentPage,
-}: {
-  isProductsPending: boolean;
-  productsData: TPaginatedResponse<IProduct> | undefined;
-  categoriesData: TCategoriesRes;
-  currentPage: number;
-}) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+const ProductList = ({ page, limit }: { page: number; limit: number }) => {
+  const [query, setQuery] = useState<IQuery>({
+    limit: 2,
+    page: 1,
+  });
+
+  // const { data: productsData, isPending: isProductsPending } = useQuery({
+  //   queryKey: ['products', page, limit],
+  //   queryFn: () => fetchProducts(page, limit),
+  // });
+
+  const { data: productsData, isPending: isProductsPending } =
+    useGetProducts(query);
+  const { data: categoriesData, isPending: isCategoriesPending } =
+    useGetCategories();
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', newPage.toString());
-    router.push(`?${params.toString()}`, { scroll: false });
+    setQuery((prev) => ({ ...prev, page: newPage }));
   };
   return (
     <LayoutContainer>
@@ -72,14 +71,14 @@ const ProductList = ({
               }}>
               <Typography className='category-heading'>Danh mục</Typography>
               <List>
-                {isProductsPending
+                {isCategoriesPending
                   ? [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
                       <Skeleton key={index} height={40} />
                     ))
-                  : categoriesData?.data?.map((item) => (
+                  : categoriesData?.data?.map((item: ICategory) => (
                       <AppLink
                         href={item?.slug}
-                        key={item.id}
+                        key={item?.id}
                         sx={{
                           color: '#000',
                         }}>
@@ -95,7 +94,7 @@ const ProductList = ({
                                 objectFit: 'cover',
                               },
                             }}>
-                            <SkeletonImage src={item.icon} alt={'geardn'} />
+                            <SkeletonImage src={item?.icon} alt={'geardn'} />
                           </Box>
                           <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
                             {item.name}
@@ -163,7 +162,7 @@ const ProductList = ({
               <Pagination
                 sx={{ display: 'flex', justifyContent: 'center' }}
                 count={Math.ceil((productsData?.meta?.total ?? 0) / 2)}
-                page={currentPage}
+                page={query?.page ?? 1}
                 onChange={handlePageChange}
                 showFirstButton
                 showLastButton
