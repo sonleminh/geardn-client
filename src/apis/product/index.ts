@@ -23,22 +23,6 @@ interface IGetProductResponse {
     data: IProduct;
 }
 
-const getProducts = async (query: IQuery) => {
-    console.log('query:', query)
-    const newParams = { ...query, page: (query.page ?? 0) + 1 };
-  const queryParams = queryString.stringify(newParams ?? {});
-   const res = await axiosInstance.get(`/products?${queryParams}`)
-   return res.data  as TPaginatedResponse<IProduct>
-}
-
-export const useGetProducts = (query: IQuery) => {
-    return useQuery({
-        queryKey: ["products", query],
-        queryFn: () => getProducts(query),
-
-})
-}
-
 const getProductsByCategory = async (slug: string, filter?: getProductsPayload) => {
     const res = await axiosInstance.get(`/products/category/${slug}`, { params: filter})
     return res.data as IGetProductsResponse
@@ -63,8 +47,29 @@ const getProductsByCategory = async (slug: string, filter?: getProductsPayload) 
  })
  }
 
- export async function fetchProducts(page: number, limit: number) {
-    const res = await axiosInstance.get(`/products?page=${page}&limit=${limit}`)
-    // if (!res?.ok) throw new Error('Failed to fetch')
-    return res.data  as TPaginatedResponse<IProduct>
+//  export async function fetchProducts(page: number, limit: number) {
+//     const res = await axiosInstance.get(`/products?page=${page}&limit=${limit}`)
+//     // if (!res?.ok) throw new Error('Failed to fetch')
+//     return res.data  as TPaginatedResponse<IProduct>
+//   }
+
+  export async function fetchProducts(page: number, sort?: string) {
+    const params: Record<string, any> = {
+      page: page ?? 1,
+      limit: 2,
+    };
+  
+    if (sort && sort !== '') {
+      params.sort = sort;
+    }
+    const res = await axiosInstance.get(`/products`, {
+      params
+    });
+    return res.data as TPaginatedResponse<IProduct>;
   }
+  
+  export const productsQueryOptions = (page: number, sort?: string) => ({
+    queryKey: ['products', page ?? 1, sort],
+    queryFn: () => fetchProducts(page, sort),
+    keepPreviousData: true,
+  });

@@ -10,7 +10,6 @@ export default function CategoryPage() {
   const params = useParams();
   const category = params.category as string;
   const { data } = useGetProductsByCategory(category);
-  console.log('data', data);
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
       <Heading total={data?.total ?? 0} params={data?.total ?? 0} />

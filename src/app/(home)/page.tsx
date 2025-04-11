@@ -1,45 +1,31 @@
-// 'use client';
-
+import { productsQueryOptions } from '@/apis/product';
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
-import { Box, Button, Grid2, InputBase, Typography } from '@mui/material';
-import ProductList from './components/product-list';
-import { getProductListApi } from '@/services/product/api';
-import { getCategoryListApi } from '@/services/category/api';
-import Explore from './components/explore';
-import { fetchProducts, useGetProducts } from '@/apis/product';
-import { useGetCategories } from '@/apis/category';
+import { Box } from '@mui/material';
 import {
   dehydrate,
-  QueryClient,
   HydrationBoundary,
+  QueryClient,
 } from '@tanstack/react-query';
-import { IQuery } from '@/interfaces/IQuery';
+import ProductList from './components/product-list';
+import { categoriesQueryOptions } from '@/apis/category';
 
-const fetchData = async (page: number, limit: number) => {
-  const queryClient = new QueryClient();
-
-  // Prefetch products for the given page and limit
-  await queryClient.prefetchQuery({
-    queryKey: ['products', { page, limit }],
-    queryFn: () => fetchProducts(page, limit),
-  });
-
-  return dehydrate(queryClient);
-};
-
-// const Homepage: React.FC = () => {
 export async function Homepage({
   searchParams,
 }: {
-  searchParams: { page?: string; limit?: string };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const page = Number(searchParams.page || 1);
-  const limit = 2;
+  const resolvedParams = await searchParams;
+  const pageParam = resolvedParams.page;
+  const sortParam = resolvedParams.sort;
+  const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
+  const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
+  const queryClient = new QueryClient();
 
-  // Fetch the data server-side
-  const dehydratedState = await fetchData(page, limit);
+  await queryClient.prefetchQuery(productsQueryOptions(page, sort));
+  await queryClient.prefetchQuery(categoriesQueryOptions());
+  const dehydratedState = dehydrate(queryClient);
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -73,27 +59,8 @@ export async function Homepage({
         />
       </Box>
       <section id='shop'>
-        {/* {isProductsPending ? (
-          <LayoutContainer>
-            <Grid2 container>
-              <Grid2 size={3}></Grid2>
-              <Grid2 size={9}></Grid2>
-            </Grid2>
-          </LayoutContainer>
-        ) : (
-          <></>
-        )} */}
-        {/* <ProductList
-          productsData={productsData}
-          isProductsPending={isProductsPending}
-          categoriesData={categoriesData}
-          currentPage={Number(page)}
-        /> */}
-        {/* <Hydrate state={dehydratedState}>
-          <ProductList page={page} limit={limit} />
-        </Hydrate> */}
         <HydrationBoundary state={dehydratedState}>
-          <ProductList query={{ page, limit }} />
+          <ProductList />
         </HydrationBoundary>
       </section>
       {/* <Explore productsData={productsData} /> */}

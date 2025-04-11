@@ -235,7 +235,7 @@ const Cart = () => {
 
   const handleOkRemoveItemDialog = () => {
     if (subtractItem) {
-      removeFromCart(subtractItem.skuId);
+      removeItem(subtractItem.skuId);
     }
     handleCloseRemoveItemDialog();
   };

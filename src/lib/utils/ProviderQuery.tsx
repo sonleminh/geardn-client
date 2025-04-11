@@ -1,9 +1,13 @@
 // app/providers.tsx
-"use client";
+'use client';
 
-import { isServer, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import * as React from "react";
-import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
+import {
+  isServer,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import * as React from 'react';
+import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -20,7 +24,7 @@ function makeQueryClient() {
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
-function getQueryClient() {
+export function getQueryClient() {
   if (isServer) {
     // Server: always make a new query client
     return makeQueryClient();
@@ -43,7 +47,9 @@ export function Providers(props: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryStreamedHydration>{props.children}</ReactQueryStreamedHydration>
+      <ReactQueryStreamedHydration>
+        {props.children}
+      </ReactQueryStreamedHydration>
     </QueryClientProvider>
   );
 }
