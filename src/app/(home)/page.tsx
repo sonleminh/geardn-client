@@ -2,7 +2,7 @@ import { productsQueryOptions } from '@/apis/product';
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
-import { Box } from '@mui/material';
+import { Box, Button, InputBase, Typography } from '@mui/material';
 import {
   dehydrate,
   HydrationBoundary,
@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-query';
 import ProductList from './components/product-list';
 import { categoriesQueryOptions } from '@/apis/category';
+import Explore from './components/explore';
 
 export async function Homepage({
   searchParams,
@@ -63,9 +64,9 @@ export async function Homepage({
           <ProductList />
         </HydrationBoundary>
       </section>
-      {/* <Explore productsData={productsData} /> */}
+      <Explore />
       <LayoutContainer>
-        {/* <Box
+        <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -105,7 +106,7 @@ export async function Homepage({
             <Typography>asf asfas fasf as</Typography>
             <Typography>asf asfas fasf as</Typography>
           </Box>
-        </Box> */}
+        </Box>
       </LayoutContainer>
     </Box>
   );

@@ -54,18 +54,19 @@ const getProductsByCategory = async (slug: string, filter?: getProductsPayload) 
 //   }
 
   export async function fetchProducts(page: number, sort?: string) {
-    const params: Record<string, any> = {
-      page: page ?? 1,
-      limit: 2,
-    };
-  
-    if (sort && sort !== '') {
-      params.sort = sort;
-    }
-    const res = await axiosInstance.get(`/products`, {
-      params
+
+    const params = new URLSearchParams({
+      page: String(page ?? 1),
+      limit: '9',
+      ...(sort && sort !== '' ? { sort } : {})
     });
-    return res.data as TPaginatedResponse<IProduct>;
+
+    const res = await fetch(`${process.env.BACKEND_API_URL}/products?${params.toString()}`, {
+      next: { revalidate: 60 } 
+    });
+    if (!res.ok) throw new Error('Failed to fetch products');
+
+  return res.json() as Promise<TPaginatedResponse<IProduct>>;
   }
   
   export const productsQueryOptions = (page: number, sort?: string) => ({

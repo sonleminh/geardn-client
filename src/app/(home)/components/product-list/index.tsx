@@ -1,18 +1,9 @@
 'use client';
 
-import AppLink from '@/components/common/AppLink';
-import ProductCard from '@/components/common/ProductCard';
-import SkeletonImage from '@/components/common/SkeletonImage';
-import LayoutContainer from '@/components/layout-container';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import { categoriesQueryOptions, useGetCategories } from '@/apis/category';
-import {
-  fetchProducts,
-  productsQueryOptions,
-  useGetProducts,
-} from '@/apis/product';
-import Heading from '@/components/common/heading';
-import { IQuery } from '@/interfaces/IQuery';
+import { useQuery } from '@tanstack/react-query';
 import {
   Box,
   Card,
@@ -25,26 +16,30 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { ProductListStyle } from './style';
-import { ICategory } from '@/interfaces/ICategory';
-import { useQuery } from '@tanstack/react-query';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FullScreenLoader } from '@/components/common/FullScreenLoader';
-import { LoadingCircle } from '@/components/common/LoadingCircle';
+
 import { FullComponentLoader } from '@/components/common/FullComponentLoader';
+import SkeletonImage from '@/components/common/SkeletonImage';
+import LayoutContainer from '@/components/layout-container';
+import ProductCard from '@/components/common/ProductCard';
+import Heading from '@/components/common/heading';
+import AppLink from '@/components/common/AppLink';
+
+import { categoriesQueryOptions } from '@/apis/category';
+import { productsQueryOptions } from '@/apis/product';
+
+import { ICategory } from '@/interfaces/ICategory';
+import { ProductListStyle } from './style';
 
 const ProductList = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
+
   const page = Number(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || '';
-  const router = useRouter();
+
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentSort, setCurrentSort] = useState<string>(sort);
   const [totalProducts, setTotalProducts] = useState(0);
-
-  console.log('page', page);
-  console.log('currentPage', currentPage);
 
   const {
     data: productsData,
@@ -190,7 +185,7 @@ const ProductList = () => {
                 </Grid2>
                 <Pagination
                   sx={{ display: 'flex', justifyContent: 'center' }}
-                  count={Math.ceil((totalProducts ?? 0) / 2)}
+                  count={Math.ceil((totalProducts ?? 0) / 9)}
                   page={currentPage ?? 1}
                   onChange={handlePageChange}
                   showFirstButton

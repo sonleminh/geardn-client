@@ -1,9 +1,5 @@
 'use client';
 
-import LayoutContainer from '@/components/layout-container';
-import ProductCard from '@/components/common/ProductCard';
-import { TProductsRes } from '@/services/product/api';
-
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { Box, Typography } from '@mui/material';
@@ -11,7 +7,16 @@ import { Box, Typography } from '@mui/material';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
-const Explore = ({ productsData }: { productsData: TProductsRes }) => {
+import { useQuery } from '@tanstack/react-query';
+
+import LayoutContainer from '@/components/layout-container';
+import ProductCard from '@/components/common/ProductCard';
+
+import { productsQueryOptions } from '@/apis/product';
+
+const Explore = () => {
+  const page = 1;
+  const { data: productsData } = useQuery(productsQueryOptions(page));
   return (
     <Box sx={{ mb: 10 }}>
       <LayoutContainer>
@@ -63,7 +68,7 @@ const Explore = ({ productsData }: { productsData: TProductsRes }) => {
             },
           }}
           className='mySwiper'>
-          {productsData?.products?.map((item, index) => (
+          {productsData?.data?.map((item, index) => (
             <SwiperSlide key={index}>
               <Box
                 sx={{

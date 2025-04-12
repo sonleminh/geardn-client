@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import {
   Box,
   Button,
@@ -18,26 +18,28 @@ import {
   Typography,
 } from '@mui/material';
 
-import { ROUTES } from '@/constants/route';
-
-import { useLogout } from '@/apis/auth';
-import LOGO from '@/assets/geardn-logo.png';
-import { useAuthStore } from '@/stores/auth-store';
 import SkeletonImage from '../common/SkeletonImage';
+import { useLogout } from '@/apis/auth';
+
+import { useCartStore } from '@/stores/cart-store';
+import { useAuthStore } from '@/stores/auth-store';
+
+import LOGO from '@/assets/geardn-logo.png';
+import { ROUTES } from '@/constants/route';
 import { HeaderStyle } from './style';
 import { useGetCart } from '@/apis/cart';
-import { useCartStore } from '@/stores/cart-store';
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
+
   const { user, logout } = useAuthStore((state) => state);
-  const { mutateAsync: onLogout } = useLogout();
+  const { cartItems } = useCartStore();
 
   const { data: cartData, isLoading } = useGetCart(user);
-  const { cartItems } = useCartStore();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { mutateAsync: onLogout } = useLogout();
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
@@ -148,15 +150,9 @@ const Header = () => {
               }}>
               <SearchIcon />
               <Button
-                sx={{ position: 'relative', minWidth: 40, height: 40, ml: 2 }}>
-                <ShoppingCartOutlinedIcon
-                  onClick={() => {
-                    router.push(ROUTES.CART);
-                    // user !== null
-                    //   ? router.push(ROUTES.CART)
-                    //   : router.push(ROUTES.LOGIN);
-                  }}
-                />
+                sx={{ position: 'relative', minWidth: 40, height: 40, ml: 2 }}
+                onClick={() => router.push(ROUTES.CART)}>
+                <ShoppingCartOutlinedIcon />
                 <Typography
                   sx={{
                     position: 'absolute',
@@ -231,7 +227,7 @@ const Header = () => {
                   'aria-labelledby': 'basic-button',
                 }}
                 disableScrollLock={true}>
-                <MenuItem onClick={() => router.push('tai-khoan')}>
+                <MenuItem onClick={() => router.push(ROUTES.ACCOUNT)}>
                   Profile
                 </MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>

@@ -1,24 +1,8 @@
 'use client';
 
-import React, {
-  ChangeEvent,
-  startTransition,
-  useCallback,
-  useEffect,
-  useOptimistic,
-  useRef,
-  useState,
-} from 'react';
-
-import SkeletonImage from '@/components/common/SkeletonImage';
-import Breadcrumbs from '@/components/common/Breadcrumbs';
-import {
-  addCartAPI,
-  deleteCartItem,
-  subtractCartAPI,
-  updateCartQuantityAPI,
-} from '@/services/cart/api';
-import { formatPrice } from '@/utils/format-price';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import {
   Box,
@@ -35,25 +19,31 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import EMPTY_CART from '@/assets/empty-cart.png';
-import Link from 'next/link';
-import { ICartItem, ICartStoreItem } from '@/interfaces/ICart';
-import { useRouter } from 'next/navigation';
-import { ROUTES } from '@/constants/route';
+
+import { FullScreenLoader } from '@/components/common/FullScreenLoader';
+import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
-import { useCartStore } from '@/stores/cart-store';
-import { useAuthStore } from '@/stores/auth-store';
+import CustomDialog from '@/components/common/CustomDialog';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+
 import { useNotificationStore } from '@/stores/notification-store';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCartStore } from '@/stores/cart-store';
+
 import {
   useDeleteCartItem,
   useGetCart,
   useGetCartStock,
   useUpdateQuantity,
 } from '@/apis/cart';
-import CustomDialog from '@/components/common/CustomDialog';
+
 import { truncateTextByLine } from '@/utils/css-helper.util';
-import { LoadingCircle } from '@/components/common/LoadingCircle';
-import { FullScreenLoader } from '@/components/common/FullScreenLoader';
+import { formatPrice } from '@/utils/format-price';
+
+import { ROUTES } from '@/constants/route';
+import EMPTY_CART from '@/assets/empty-cart.png';
+
+import { ICartStoreItem } from '@/interfaces/ICart';
 
 const Cart = () => {
   const { user, setCheckoutCart } = useAuthStore((state) => state);
@@ -254,7 +244,7 @@ const Cart = () => {
     }
     const selectedItems = selected
       .map((skuId) => cartItems?.find((item) => item.skuId === skuId))
-      ?.filter((item): item is ICartItem => item !== undefined);
+      ?.filter((item): item is ICartStoreItem => item !== undefined);
     setCheckoutCart(selectedItems);
     router.push(ROUTES.CHECKOUT);
   };
