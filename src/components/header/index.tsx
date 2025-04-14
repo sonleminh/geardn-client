@@ -228,9 +228,11 @@ const Header = () => {
                 }}
                 disableScrollLock={true}>
                 <MenuItem onClick={() => router.push(ROUTES.ACCOUNT)}>
-                  Profile
+                  Tài khoản của tôi
                 </MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={() => router.push(ROUTES.PURCHASE)}>
+                  Đơn mua
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
               </Menu>
             </Box>

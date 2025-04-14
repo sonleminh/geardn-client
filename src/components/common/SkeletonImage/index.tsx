@@ -22,7 +22,7 @@ const SkeletonImage: React.FC<ImageProps> = (props) => {
       ) : (
         <Image
           {...props}
-          src={srcImg}
+          src={srcImg ?? null}
           alt={props?.alt}
           fill
           sizes={

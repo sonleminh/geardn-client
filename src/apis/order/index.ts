@@ -78,10 +78,22 @@ const createOrder = async (payload: ICreateOrderPayload) => {
  
  export const useGetOrder = (orderCode: string) => {
      return useQuery({
-        queryKey: ["order", orderCode],
+        queryKey: ["orders", orderCode],
         queryFn: () => getOrder(orderCode),
-})
+    })
+}
+
+const getUserPurchases = async (type: number) => {
+    const res = await axiosInstance.get(`/orders/user-purchases`, {params: { type }})
+    return res.data as TBaseResponse<IOrder[]>
  }
+ 
+ export const useGetUserPurchases = (type: number) => {
+     return useQuery({
+        queryKey: ["orders-user", type],
+        queryFn: () => getUserPurchases(type),
+    })
+}
 
 const getProvinces = async () => {
     const res = await axiosExtend.get(`https://provinces.open-api.vn/api/`)

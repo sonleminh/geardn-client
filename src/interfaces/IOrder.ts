@@ -49,7 +49,8 @@ export interface IOrder {
     flag: {
         isOnlineOrder: boolean,
     },
-    orderItems: IOrderItem[]
+    orderItems: IOrderItem[],
+    createdAt: Date;
 }
 
 export interface ICreateOrder {

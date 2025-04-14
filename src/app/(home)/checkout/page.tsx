@@ -59,6 +59,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
+  console.log('checkoutCart', checkoutCart);
   const { showNotification } = useNotificationStore();
   const { cartItems, removeItem } = useCartStore();
   const breadcrumbsOptions = [

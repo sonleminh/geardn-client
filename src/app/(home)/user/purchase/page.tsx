@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
+import { useGetUserPurchases } from '@/apis/order';
+import PurchaseList from './components/PurchaseList';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -26,25 +28,33 @@ function CustomTabPanel(props: TabPanelProps) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}>
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 }
 
 const Purchase = () => {
-  const [value, setValue] = useState(0);
+  const [type, setType] = useState(0);
 
+  const { data: userPurchases, isLoading } = useGetUserPurchases(type);
+  console.log('userPurchases', userPurchases);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+    setType(newValue);
   };
+
+  console.log('type', type);
   return (
-    <Box sx={{ bgcolor: '#fff' }}>
+    <Box sx={{ bgcolor: '' }}>
       <Box sx={{ width: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box>
           <Tabs
-            value={value}
+            value={type}
             onChange={handleChange}
             sx={{
+              mb: 1,
+              bgcolor: '#fff',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
               button: {
                 width: '16.6666667%',
               },
@@ -52,20 +62,26 @@ const Purchase = () => {
             <Tab label='Tất cả' {...a11yProps(0)} />
             <Tab label='Đang xử lý' {...a11yProps(1)} />
             <Tab label='Đang giao' {...a11yProps(2)} />
-            <Tab label='Hoàn tất' {...a11yProps(2)} />
-            <Tab label='Đã huỷ' {...a11yProps(2)} />
-            <Tab label='Trả hàng' {...a11yProps(2)} />
+            <Tab label='Hoàn tất' {...a11yProps(3)} />
+            <Tab label='Đã huỷ' {...a11yProps(4)} />
+            <Tab label='Trả hàng' {...a11yProps(5)} />
           </Tabs>
         </Box>
-        <CustomTabPanel value={value} index={0}>
-          Item One
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <CustomTabPanel key={index} value={type} index={index}>
+            {isLoading ? (
+              <div>Loading...</div>
+            ) : (
+              <PurchaseList orders={userPurchases?.data || []} />
+            )}
+          </CustomTabPanel>
+        ))}
+        {/* <CustomTabPanel value={type} index={1}>
           Item Two
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
+        <CustomTabPanel value={type} index={2}>
           Item Three
-        </CustomTabPanel>
+        </CustomTabPanel> */}
       </Box>
     </Box>
   );
