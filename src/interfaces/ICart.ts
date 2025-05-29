@@ -26,7 +26,7 @@ export interface ICartStoreItem {
     price: number;
     quantity: number;
     attributes: {
-        type: string;
+        attributeId: number;
         value: string;
     }[]
 }

@@ -69,12 +69,14 @@ const ProductDetailPage = () => {
 
     const options: Record<string, string[]> = {};
     data?.data?.skus?.forEach((sku) => {
-      sku?.productSkuAttributes?.forEach(({ attribute }) => {
-        if (!options[attribute.type]) {
-          options[attribute.type] = [];
+      sku?.productSkuAttributes?.forEach(({ attributeValue }) => {
+        if (!options[attributeValue.attributeId]) {
+          options[attributeValue.attributeId] = [];
         }
-        if (!options[attribute.type].includes(attribute.value)) {
-          options[attribute.type].push(attribute.value);
+        if (
+          !options[attributeValue.attributeId].includes(attributeValue.value)
+        ) {
+          options[attributeValue.attributeId].push(attributeValue.value);
         }
       });
     });
@@ -109,7 +111,8 @@ const ProductDetailPage = () => {
         Object.entries(selectedAttributes).every(([key, value]) =>
           sku.productSkuAttributes.some(
             (attr) =>
-              attr.attribute.type === key && attr.attribute.value === value
+              attr.attributeValue.attributeId === Number(key) &&
+              attr.attributeValue.value === value
           )
         )
       ) ?? null
@@ -118,7 +121,7 @@ const ProductDetailPage = () => {
 
   const availableCombinations = data?.data?.skus?.map((sku) =>
     sku.productSkuAttributes.reduce((acc, attr) => {
-      acc[attr.attribute.type] = attr.attribute.value;
+      acc[attr.attributeValue.attributeId] = attr.attributeValue.value;
       return acc;
     }, {} as Record<string, string>)
   );
@@ -197,8 +200,8 @@ const ProductDetailPage = () => {
         price: selectedSku?.price,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map((attr) => ({
-          type: attr.attribute.type,
-          value: attr.attribute.value,
+          attributeId: attr.attributeValue.attributeId,
+          value: attr.attributeValue.value,
         })),
       });
     }
@@ -215,8 +218,8 @@ const ProductDetailPage = () => {
         price: selectedSku?.price,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map((attr) => ({
-          type: attr.attribute.type,
-          value: attr.attribute.value,
+          attributeId: attr.attributeValue.attributeId,
+          value: attr.attributeValue.value,
         })),
       };
 

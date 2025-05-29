@@ -1,7 +1,7 @@
 export interface IAttribute {
     id: string;
-    type: string;
     value: string;
+    attributeId: number;
     createdAt: Date;
 }
 
@@ -14,7 +14,7 @@ export interface ISku {
     imageUrl: string;
     productSkuAttributes: {
         id: number;
-        attribute: IAttribute
+        attributeValue: IAttribute
     }[]
     createdAt: Date;
 }
