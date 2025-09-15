@@ -31,6 +31,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
 import { AxiosError } from 'axios';
+import { ROUTES } from '@/constants/route';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -311,7 +312,7 @@ const LoginPage = () => {
             />
             <Typography sx={{ mb: 2 }}>
               Bạn chưa có tài khoản?{' '}
-              <Link href={'/dang-ky'}>
+              <Link href={ROUTES.SIGNUP}>
                 {' '}
                 <Typography component={'span'}>Đăng ký</Typography>
               </Link>

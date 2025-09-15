@@ -1,6 +1,7 @@
 'use client';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { ROUTES } from '@/constants/route';
 import { signUpAPI } from '@/services/auth/api';
 import { useNotificationStore } from '@/stores/notification-store';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -225,7 +226,7 @@ export default function SignUp() {
             </Box>
             <Typography sx={{ mb: 2 }}>
               Already have an account?{' '}
-              <Link href={'/dang-nhap'}>
+              <Link href={ROUTES.LOGIN}>
                 <Typography component={'span'}>Login</Typography>
               </Link>
             </Typography>

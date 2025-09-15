@@ -17,16 +17,16 @@ export async function Homepage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const resolvedParams = await searchParams;
-  const pageParam = resolvedParams.page;
-  const sortParam = resolvedParams.sort;
-  const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
-  const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
-  const queryClient = new QueryClient();
+  // const resolvedParams = await searchParams;
+  // const pageParam = resolvedParams.page;
+  // const sortParam = resolvedParams.sort;
+  // const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
+  // const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
+  // const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(productsQueryOptions(page, sort));
-  await queryClient.prefetchQuery(categoriesQueryOptions());
-  const dehydratedState = dehydrate(queryClient);
+  // await queryClient.prefetchQuery(productsQueryOptions(page, sort));
+  // await queryClient.prefetchQuery(categoriesQueryOptions());
+  // const dehydratedState = dehydrate(queryClient);
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -59,6 +59,7 @@ export async function Homepage({
           priority
         />
       </Box>
+      {/*
       <section id='shop'>
         <HydrationBoundary state={dehydratedState}>
           <ProductList />
@@ -107,7 +108,7 @@ export async function Homepage({
             <Typography>asf asfas fasf as</Typography>
           </Box>
         </Box>
-      </LayoutContainer>
+      </LayoutContainer> */}
     </Box>
   );
 }
