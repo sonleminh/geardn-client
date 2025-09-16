@@ -12,11 +12,9 @@ import { useQuery } from '@tanstack/react-query';
 import LayoutContainer from '@/components/layout-container';
 import ProductCard from '@/components/common/ProductCard';
 
-import { productsQueryOptions } from '@/apis/product';
-
 const Explore = () => {
   const page = 1;
-  const { data: productsData } = useQuery(productsQueryOptions(page));
+  // const { data: productsData } = useQuery(productsQueryOptions(page));
   return (
     <Box sx={{ mb: 10 }}>
       <LayoutContainer>
@@ -68,20 +66,20 @@ const Explore = () => {
             },
           }}
           className='mySwiper'>
-          {productsData?.data?.map((item, index) => (
-            <SwiperSlide key={index}>
-              <Box
-                sx={{
-                  '.product-img': {
-                    '& img': {
-                      height: '300px !important',
-                    },
+          {/* {productsData?.data?.map((item, index) => ( */}
+          <SwiperSlide>
+            <Box
+              sx={{
+                '.product-img': {
+                  '& img': {
+                    height: '300px !important',
                   },
-                }}>
-                <ProductCard data={item} />
-              </Box>
-            </SwiperSlide>
-          ))}
+                },
+              }}>
+              {/* <ProductCard data={item} /> */}
+            </Box>
+          </SwiperSlide>
+          {/* ))} */}
         </Swiper>
       </LayoutContainer>
     </Box>

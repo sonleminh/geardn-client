@@ -25,27 +25,37 @@ import Heading from '@/components/common/heading';
 import AppLink from '@/components/common/AppLink';
 
 import { categoriesQueryOptions } from '@/apis/category';
-import { productsQueryOptions } from '@/apis/product';
 
 import { ICategory } from '@/interfaces/ICategory';
 import { ProductListStyle } from './style';
+import { IProduct } from '@/interfaces/IProduct';
+import { TPaginatedResponse } from '@/types/response.type';
 
-const ProductList = () => {
+const ProductList = ({
+  data,
+  params,
+}: {
+  data: TPaginatedResponse<IProduct>;
+  params: { q: string; page: string; sort: string };
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const page = Number(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || '';
+  const total = data?.meta?.total ?? 0;
+
+  console.log('total', total);
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentSort, setCurrentSort] = useState<string>(sort);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const {
-    data: productsData,
-    isPending: isProductsPending,
-    isLoading: isProductsLoading,
-  } = useQuery(productsQueryOptions(currentPage, currentSort));
+  // const {
+  //   data: productsData,
+  //   isPending: isProductsPending,
+  //   isLoading: isProductsLoading,
+  // } = useQuery(productsQueryOptions(currentPage, currentSort));
   const { data: categoriesData, isPending: isCategoriesPending } = useQuery(
     categoriesQueryOptions()
   );
@@ -55,11 +65,11 @@ const ProductList = () => {
     setCurrentSort(sort);
   }, [page, sort]);
 
-  useEffect(() => {
-    if (productsData?.meta?.total) {
-      setTotalProducts(productsData.meta.total);
-    }
-  }, [productsData?.meta?.total]);
+  // useEffect(() => {
+  //   if (productsData?.meta?.total) {
+  //     setTotalProducts(productsData.meta.total);
+  //   }
+  // }, [productsData?.meta?.total]);
 
   const handlePageChange = (_: unknown, value: number) => {
     setCurrentPage(value);
@@ -127,9 +137,9 @@ const ProductList = () => {
             </Grid2>
             <Grid2 size={9}>
               <Box sx={{ position: 'relative' }}>
-                <Heading total={totalProducts} />
+                <Heading total={total} />
                 <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                  {isProductsLoading
+                  {data.data.length === 0
                     ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <Card>
@@ -177,7 +187,7 @@ const ProductList = () => {
                           </Card>
                         </Grid2>
                       ))
-                    : productsData?.data?.map((item, index) => (
+                    : data?.data?.map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <ProductCard data={item} />
                         </Grid2>
@@ -185,15 +195,15 @@ const ProductList = () => {
                 </Grid2>
                 <Pagination
                   sx={{ display: 'flex', justifyContent: 'center' }}
-                  count={Math.ceil((totalProducts ?? 0) / 9)}
+                  count={Math.ceil((total ?? 0) / 9)}
                   page={currentPage ?? 1}
                   onChange={handlePageChange}
                   showFirstButton
                   showLastButton
                 />
-                {!isProductsLoading && isProductsPending && (
+                {/* {!isProductsLoading && isProductsPending && (
                   <FullComponentLoader />
-                )}
+                )} */}
               </Box>
             </Grid2>
           </Grid2>

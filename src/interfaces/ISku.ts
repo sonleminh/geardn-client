@@ -9,7 +9,7 @@ export interface ISku {
     id: number;
     productId: number;
     sku: string;
-    price: number;
+    sellingPrice: number;
     quantity: number;
     imageUrl: string;
     productSkuAttributes: {

@@ -1,4 +1,3 @@
-import { productsQueryOptions } from '@/apis/product';
 import BANNER_BG from '@/assets/geardn.jpg';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
@@ -11,18 +10,28 @@ import {
 import ProductList from './components/product-list';
 import { categoriesQueryOptions } from '@/apis/category';
 import Explore from './components/explore';
+import { fetchProducts } from '@/data/product.server';
 
-export async function Homepage({
+export default async function Homepage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // const resolvedParams = await searchParams;
-  // const pageParam = resolvedParams.page;
-  // const sortParam = resolvedParams.sort;
-  // const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
-  // const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
-  // const queryClient = new QueryClient();
+  // export default async function Homepage({
+  //   searchParams,
+  // }: {
+  //   searchParams: { q?: string; page?: string };
+  // }) {
+  const resolvedParams = await searchParams;
+  const pageParam = resolvedParams.page;
+  const sortParam = resolvedParams.sort;
+  const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
+  const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
+  // const q = searchParams.q ?? '';
+  // const page = Number(searchParams.page ?? 1);
+  const data = await fetchProducts({ q: '', page, revalidate: 60 });
+
+  // console.log(data);
 
   // await queryClient.prefetchQuery(productsQueryOptions(page, sort));
   // await queryClient.prefetchQuery(categoriesQueryOptions());
@@ -59,12 +68,14 @@ export async function Homepage({
           priority
         />
       </Box>
-      {/*
+
       <section id='shop'>
-        <HydrationBoundary state={dehydratedState}>
-          <ProductList />
-        </HydrationBoundary>
+        <ProductList
+          data={data}
+          params={{ q: '', page: page.toString(), sort }}
+        />
       </section>
+      {/*
       <Explore />
       <LayoutContainer>
         <Box
@@ -112,5 +123,3 @@ export async function Homepage({
     </Box>
   );
 }
-
-export default Homepage;

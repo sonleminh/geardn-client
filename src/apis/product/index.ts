@@ -5,6 +5,7 @@ import { TPaginatedResponse } from "@/types/response.type";
 import { useMutation, useQuery } from "@tanstack/react-query"
 import queryString from 'query-string';
 
+const API = process.env.NEXT_PUBLIC_API_URL!;
 interface getProductsPayload {
     sort?: string;
     page?: number;
@@ -53,24 +54,38 @@ const getProductsByCategory = async (slug: string, filter?: getProductsPayload) 
 //     return res.data  as TPaginatedResponse<IProduct>
 //   }
 
-  export async function fetchProducts(page: number, sort?: string) {
+  // export async function fetchProducts(page: number, sort?: string) {
 
-    const params = new URLSearchParams({
-      page: String(page ?? 1),
-      limit: '9',
-      ...(sort && sort !== '' ? { sort } : {})
-    });
+  //   const params = new URLSearchParams({
+  //     page: String(page ?? 1),
+  //     limit: '9',
+  //     ...(sort && sort !== '' ? { sort } : {})
+  //   });
 
-    const res = await fetch(`${process.env.BACKEND_API_URL}/products?${params.toString()}`, {
-      next: { revalidate: 60 } 
-    });
-    if (!res.ok) throw new Error('Failed to fetch products');
+  //   const res = await fetch(`${process.env.BACKEND_API_URL}/products?${params.toString()}`, {
+  //     next: { revalidate: 60 } 
+  //   });
+  //   if (!res.ok) throw new Error('Failed to fetch products');
 
-  return res.json() as Promise<TPaginatedResponse<IProduct>>;
-  }
+  // return res.json() as Promise<TPaginatedResponse<IProduct>>;
+  // }
   
-  export const productsQueryOptions = (page: number, sort?: string) => ({
-    queryKey: ['products', page ?? 1, sort],
-    queryFn: () => fetchProducts(page, sort),
-    keepPreviousData: true,
-  });
+  // export const productsQueryOptions = (page: number, sort?: string) => ({
+  //   queryKey: ['products', page ?? 1, sort],
+  //   queryFn: () => fetchProducts(page, sort),
+  //   keepPreviousData: true,
+  // });
+
+  export async function listProducts(params: { q?: string; page?: number; sort?: string }) {
+    const sp = new URLSearchParams();
+    if (params.q) sp.set('q', params.q);
+    if (params.page) sp.set('page', String(params.page));
+    if (params.sort) sp.set('sort', params.sort);
+  
+    const res = await fetch(`${API}/products?${sp.toString()}`, {
+      headers: { accept: 'application/json' },
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
