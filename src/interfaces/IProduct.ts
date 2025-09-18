@@ -47,5 +47,7 @@ export interface IProduct {
     description: string;
     slug: string;
     skus: ISku[]
+    priceMin: number;
+    priceMax: number;
     createdAt: string;
 }

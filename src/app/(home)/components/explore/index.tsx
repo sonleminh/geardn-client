@@ -11,8 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import LayoutContainer from '@/components/layout-container';
 import ProductCard from '@/components/common/ProductCard';
+import { IProduct } from '@/interfaces/IProduct';
 
-const Explore = () => {
+const Explore = ({ exploreData }: { exploreData: IProduct[] }) => {
   const page = 1;
   // const { data: productsData } = useQuery(productsQueryOptions(page));
   return (
@@ -61,25 +62,25 @@ const Explore = () => {
               spaceBetween: 30,
             },
             1500: {
-              slidesPerView: 3.5,
+              slidesPerView: 4.3,
               spaceBetween: 30,
             },
           }}
           className='mySwiper'>
-          {/* {productsData?.data?.map((item, index) => ( */}
-          <SwiperSlide>
-            <Box
-              sx={{
-                '.product-img': {
-                  '& img': {
-                    height: '300px !important',
+          {exploreData?.map((item, index) => (
+            <SwiperSlide key={index}>
+              <Box
+                sx={{
+                  '.product-img': {
+                    '& img': {
+                      height: '250px !important',
+                    },
                   },
-                },
-              }}>
-              {/* <ProductCard data={item} /> */}
-            </Box>
-          </SwiperSlide>
-          {/* ))} */}
+                }}>
+                <ProductCard data={item} />
+              </Box>
+            </SwiperSlide>
+          ))}
         </Swiper>
       </LayoutContainer>
     </Box>

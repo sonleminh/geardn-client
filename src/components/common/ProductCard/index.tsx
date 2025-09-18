@@ -30,7 +30,7 @@ const ProductCard = ({ data }: { data: IProduct }) => {
             height: { xs: '250px' },
             overflow: 'hidden',
             '& img': {
-              objectFit: 'cover',
+              objectFit: 'contain',
               transition: 'all 0.5s ease',
             },
           }}
@@ -59,18 +59,9 @@ const ProductCard = ({ data }: { data: IProduct }) => {
               <Typography sx={{ fontSize: 13 }}>5.0 (2 reviews)</Typography>
             </Box>
             <Box sx={{ fontWeight: 600 }}>
-              {data?.skus?.[0] ? (
-                <Typography>{formatPrice(data?.skus?.[0]?.price)}</Typography>
-              ) : (
-                <Typography
-                  sx={{
-                    height: 24,
-                    fontSize: 14,
-                    lineHeight: '24px',
-                  }}>
-                  Đang cập nhật
-                </Typography>
-              )}
+              <Typography>
+                {formatPrice(data?.priceMin) ?? 'Đang cập nhật'}
+              </Typography>
             </Box>
           </Box>
         </Box>

@@ -1,41 +1,31 @@
-import BANNER_BG from '@/assets/geardn.jpg';
-import SkeletonImage from '@/components/common/SkeletonImage';
-import LayoutContainer from '@/components/layout-container';
 import { Box, Button, InputBase, Typography } from '@mui/material';
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
-import ProductList from './components/product-list';
-import { categoriesQueryOptions } from '@/apis/category';
-import Explore from './components/explore';
+import SkeletonImage from '@/components/common/SkeletonImage';
+import ProductCatalog from './components/product-catalog';
+
+import { fetchCategories } from '@/data/category.server';
 import { fetchProducts } from '@/data/product.server';
+import BANNER_BG from '@/assets/geardn.jpg';
+import Explore from './components/explore';
+import LayoutContainer from '@/components/layout-container';
 
 export default async function Homepage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // export default async function Homepage({
-  //   searchParams,
-  // }: {
-  //   searchParams: { q?: string; page?: string };
-  // }) {
   const resolvedParams = await searchParams;
   const pageParam = resolvedParams.page;
   const sortParam = resolvedParams.sort;
   const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
   const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
-  // const q = searchParams.q ?? '';
-  // const page = Number(searchParams.page ?? 1);
-  const data = await fetchProducts({ q: '', page, revalidate: 60 });
 
-  // console.log(data);
-
-  // await queryClient.prefetchQuery(productsQueryOptions(page, sort));
-  // await queryClient.prefetchQuery(categoriesQueryOptions());
-  // const dehydratedState = dehydrate(queryClient);
+  const productsData = await fetchProducts({
+    q: '',
+    page,
+    sort,
+    revalidate: 60,
+  });
+  const categoriesData = await fetchCategories({ revalidate: 60 });
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -70,13 +60,15 @@ export default async function Homepage({
       </Box>
 
       <section id='shop'>
-        <ProductList
-          data={data}
+        <ProductCatalog
+          productsData={productsData}
+          categoriesData={categoriesData}
           params={{ q: '', page: page.toString(), sort }}
         />
       </section>
-      {/*
-      <Explore />
+
+      <Explore exploreData={productsData.data} />
+
       <LayoutContainer>
         <Box
           sx={{
@@ -112,14 +104,20 @@ export default async function Homepage({
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
               justifyContent: 'end',
+              flexDirection: 'column',
+              width: 400,
             }}>
-            <Typography>asf asfas fasf as</Typography>
-            <Typography>asf asfas fasf as</Typography>
+            <Typography sx={{ mb: 2 }}>
+              GearDN cung cấp các sản phẩm chất lượng tốt.
+            </Typography>
+            <Typography sx={{ color: '#bdbdbd' }}>
+              Chúng tôi cung cấp nhiều sản phẩm với nhiều thương hiệu khác nhau
+              để bạn có thể lựa chọn.
+            </Typography>
           </Box>
         </Box>
-      </LayoutContainer> */}
+      </LayoutContainer>
     </Box>
   );
 }

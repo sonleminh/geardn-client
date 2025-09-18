@@ -16,6 +16,7 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import { FullComponentLoader } from '@/components/common/FullComponentLoader';
 import SkeletonImage from '@/components/common/SkeletonImage';
@@ -31,11 +32,13 @@ import { ProductListStyle } from './style';
 import { IProduct } from '@/interfaces/IProduct';
 import { TPaginatedResponse } from '@/types/response.type';
 
-const ProductList = ({
-  data,
+const ProductCatalog = ({
+  productsData,
+  categoriesData,
   params,
 }: {
-  data: TPaginatedResponse<IProduct>;
+  productsData: TPaginatedResponse<IProduct>;
+  categoriesData: TPaginatedResponse<ICategory>;
   params: { q: string; page: string; sort: string };
 }) => {
   const router = useRouter();
@@ -43,33 +46,17 @@ const ProductList = ({
 
   const page = Number(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || '';
-  const total = data?.meta?.total ?? 0;
+  const total = productsData?.meta?.total ?? 0;
 
   console.log('total', total);
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentSort, setCurrentSort] = useState<string>(sort);
-  const [totalProducts, setTotalProducts] = useState(0);
-
-  // const {
-  //   data: productsData,
-  //   isPending: isProductsPending,
-  //   isLoading: isProductsLoading,
-  // } = useQuery(productsQueryOptions(currentPage, currentSort));
-  const { data: categoriesData, isPending: isCategoriesPending } = useQuery(
-    categoriesQueryOptions()
-  );
 
   useEffect(() => {
     setCurrentPage(page);
     setCurrentSort(sort);
   }, [page, sort]);
-
-  // useEffect(() => {
-  //   if (productsData?.meta?.total) {
-  //     setTotalProducts(productsData.meta.total);
-  //   }
-  // }, [productsData?.meta?.total]);
 
   const handlePageChange = (_: unknown, value: number) => {
     setCurrentPage(value);
@@ -89,49 +76,73 @@ const ProductList = ({
                 position: 'sticky',
                 top: 100,
                 height: '100%',
-                bgcolor: '#fff',
+                // bgcolor: '#fff',
               }}>
               <Box
                 sx={{
-                  minHeight: '400px',
-                  p: '12px 16px',
+                  pt: 2,
+                  // minHeight: '400px',
+                  // p: '12px 16px',
+                  bgcolor: '#fff',
                   boxShadow:
                     '0 1px 2px 0 rgba(60, 64, 67, .1), 0 2px 6px 2px rgba(60, 64, 67, .15)',
                   borderRadius: 1,
                 }}>
-                <Typography className='category-heading'>Danh mục</Typography>
+                <Typography className='category-heading' sx={{ mx: 2 }}>
+                  Danh mục
+                </Typography>
                 <List>
-                  {isCategoriesPending
-                    ? [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
-                        <Skeleton key={index} height={40} />
-                      ))
-                    : categoriesData?.data?.map((item: ICategory) => (
-                        <AppLink
-                          href={item?.slug}
-                          key={item?.id}
+                  {categoriesData?.data?.map((item: ICategory) => (
+                    <AppLink
+                      href={item?.slug}
+                      key={item?.id}
+                      sx={{
+                        color: '#000',
+                      }}>
+                      <ListItem
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          pl: 2,
+                          pr: 1,
+                          '&:hover': {
+                            backgroundColor: '#eee',
+                            transition: 'all 0.3s ease',
+                            svg: {
+                              display: 'block',
+                            },
+                          },
+                        }}>
+                        <Box
                           sx={{
-                            color: '#000',
+                            display: 'flex',
+                            alignItems: 'center',
                           }}>
-                          <ListItem sx={{ display: 'flex', px: 0 }}>
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '24px',
-                                height: { xs: '24px' },
-                                mr: 1.5,
-                                overflow: 'hidden',
-                                '& img': {
-                                  objectFit: 'cover',
-                                },
-                              }}>
-                              <SkeletonImage src={item?.icon} alt={'geardn'} />
-                            </Box>
-                            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
-                              {item.name}
-                            </Typography>
-                          </ListItem>
-                        </AppLink>
-                      ))}
+                          <Box
+                            marginY={0.2}
+                            sx={{
+                              position: 'relative',
+                              width: '28px',
+                              height: { xs: '28px' },
+                              mr: 2,
+                              overflow: 'hidden',
+                              '& img': {
+                                objectFit: 'cover',
+                              },
+                            }}>
+                            <SkeletonImage src={item?.icon} alt={'geardn'} />
+                          </Box>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                            {item.name}
+                          </Typography>
+                        </Box>
+                        <ChevronRightIcon
+                          sx={{ display: 'none', color: '#696969' }}
+                        />
+                      </ListItem>
+                    </AppLink>
+                  ))}
                 </List>
               </Box>
             </Grid2>
@@ -139,7 +150,7 @@ const ProductList = ({
               <Box sx={{ position: 'relative' }}>
                 <Heading total={total} />
                 <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                  {data.data.length === 0
+                  {productsData.data.length === 0
                     ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <Card>
@@ -187,7 +198,7 @@ const ProductList = ({
                           </Card>
                         </Grid2>
                       ))
-                    : data?.data?.map((item, index) => (
+                    : productsData?.data?.map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <ProductCard data={item} />
                         </Grid2>
@@ -201,9 +212,6 @@ const ProductList = ({
                   showFirstButton
                   showLastButton
                 />
-                {/* {!isProductsLoading && isProductsPending && (
-                  <FullComponentLoader />
-                )} */}
               </Box>
             </Grid2>
           </Grid2>
@@ -213,4 +221,4 @@ const ProductList = ({
   );
 };
 
-export default ProductList;
+export default ProductCatalog;
