@@ -28,14 +28,6 @@ export default async function CategoryPage({
         initialHasMore={firstPage.data?.hasMore ?? false}
         total={firstPage?.data?.total ?? 0}
       />
-      {/* <Heading total={data?.total ?? 0} params={data?.total ?? 0} />
-      <Grid2 container spacing={2}>
-        {data?.data?.map((item) => (
-          <Grid2 size={3} key={item.id}>
-            <ProductCard data={item} />
-          </Grid2>
-        ))}
-      </Grid2> */}
     </Box>
   );
 }
