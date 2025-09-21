@@ -2,11 +2,10 @@ import { Box, Button, InputBase, Typography } from '@mui/material';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import ProductCatalog from './components/product-catalog';
 
-import { fetchCategories } from '@/data/category.server';
-import { fetchProducts } from '@/data/product.server';
 import BANNER_BG from '@/assets/geardn.jpg';
 import Explore from './components/explore';
 import LayoutContainer from '@/components/layout-container';
+import { fetchProducts } from '@/data/product.server';
 
 export default async function Homepage({
   searchParams,
@@ -25,7 +24,7 @@ export default async function Homepage({
     sort,
     revalidate: 60,
   });
-  const categoriesData = await fetchCategories({ revalidate: 60 });
+  // const categoriesData = await fetchCategories({ revalidate: 60 });
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -62,7 +61,7 @@ export default async function Homepage({
       <section id='shop'>
         <ProductCatalog
           productsData={productsData}
-          categoriesData={categoriesData}
+          // categoriesData={categoriesData}
           params={{ q: '', page: page.toString(), sort }}
         />
       </section>

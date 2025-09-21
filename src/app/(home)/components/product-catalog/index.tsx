@@ -1,3 +1,121 @@
+// // src/app/(shop)/products/components/ProductListClient.tsx
+// 'use client';
+
+// import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+// import {
+//   Box,
+//   Pagination,
+//   TextField,
+//   MenuItem,
+//   Select,
+//   InputLabel,
+//   FormControl,
+//   Grid2,
+// } from '@mui/material';
+// import ProductCard from '@/components/common/ProductCard';
+
+// type Props = {
+//   products: Product[];
+//   page: number;
+//   totalPages: number;
+//   q: string;
+//   sort: string;
+//   limit: number;
+//   category: string;
+// };
+
+// function updateQuery(
+//   params: URLSearchParams,
+//   patch: Record<string, string | number | undefined>
+// ) {
+//   const next = new URLSearchParams(params);
+//   for (const [k, v] of Object.entries(patch)) {
+//     if (v === undefined || v === '' || v === 0) next.delete(k);
+//     else next.set(k, String(v));
+//   }
+//   return next.toString();
+// }
+
+// export default function ProductListClient({
+//   products,
+//   page,
+//   totalPages,
+//   q,
+//   sort,
+//   limit,
+//   category,
+// }: Props) {
+//   const router = useRouter();
+//   const searchParams = useSearchParams();
+//   const pathname = usePathname();
+
+//   const handlePageChange = (_: any, newPage: number) => {
+//     const qs = updateQuery(searchParams, { page: newPage });
+//     router.push(`${pathname}?${qs}`);
+//   };
+
+//   const handleSortChange = (value: string) => {
+//     const qs = updateQuery(searchParams, { sort: value, page: 1 }); // reset về page 1 khi đổi sort
+//     router.push(`${pathname}?${qs}`);
+//   };
+
+//   const handleSearch = (value: string) => {
+//     const qs = updateQuery(searchParams, { q: value, page: 1 });
+//     router.push(`${pathname}?${qs}`);
+//   };
+
+//   return (
+//     <Box sx={{ display: 'grid', gap: 2 }}>
+//       {/* Controls */}
+//       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+//         <TextField
+//           size='small'
+//           placeholder='Tìm sản phẩm'
+//           defaultValue={q}
+//           onKeyDown={(e) => {
+//             if (e.key === 'Enter')
+//               handleSearch((e.target as HTMLInputElement).value);
+//           }}
+//         />
+//         <FormControl size='small' sx={{ minWidth: 180 }}>
+//           <InputLabel>Sort</InputLabel>
+//           <Select
+//             label='Sort'
+//             value={sort}
+//             onChange={(e) => handleSortChange(e.target.value)}>
+//             <MenuItem value=''>Mặc định</MenuItem>
+//             <MenuItem value='price.asc'>Giá tăng dần</MenuItem>
+//             <MenuItem value='price.desc'>Giá giảm dần</MenuItem>
+//             <MenuItem value='newest'>Mới nhất</MenuItem>
+//             <MenuItem value='popular'>Phổ biến</MenuItem>
+//           </Select>
+//         </FormControl>
+//       </Box>
+
+//       {/* Grid sản phẩm */}
+//       <Grid2 container spacing={2}>
+//         {products.map((p) => (
+//           <Grid2 key={p.id} size={6}>
+//             <ProductCard data={p} />
+//           </Grid2>
+//         ))}
+//       </Grid2>
+
+//       {/* Pagination */}
+//       {totalPages > 1 && (
+//         <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+//           <Pagination
+//             page={page}
+//             count={totalPages}
+//             shape='rounded'
+//             onChange={handlePageChange}
+//           />
+//         </Box>
+//       )}
+//     </Box>
+//   );
+// }
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -34,11 +152,11 @@ import { TPaginatedResponse } from '@/types/response.type';
 
 const ProductCatalog = ({
   productsData,
-  categoriesData,
+  // categoriesData,
   params,
 }: {
   productsData: TPaginatedResponse<IProduct>;
-  categoriesData: TPaginatedResponse<ICategory>;
+  // categoriesData: TPaginatedResponse<ICategory>;
   params: { q: string; page: string; sort: string };
 }) => {
   const router = useRouter();
@@ -91,7 +209,7 @@ const ProductCatalog = ({
                 <Typography className='category-heading' sx={{ mx: 2 }}>
                   Danh mục
                 </Typography>
-                <List>
+                {/* <List>
                   {categoriesData?.data?.map((item: ICategory) => (
                     <AppLink
                       href={item?.slug}
@@ -143,7 +261,7 @@ const ProductCatalog = ({
                       </ListItem>
                     </AppLink>
                   ))}
-                </List>
+                </List> */}
               </Box>
             </Grid2>
             <Grid2 size={9}>

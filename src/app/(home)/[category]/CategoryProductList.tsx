@@ -38,7 +38,6 @@ export default function CategoryProductList({
           limit: 2,
           revalidate: 0,
         });
-        // Gộp và chống trùng id
         setItems((prev) => {
           const map = new Map(prev.map((p) => [p.id, p]));
           console.log('map', map);
