@@ -1,7 +1,12 @@
+export interface IAttributeValue {
+    value: string;
+    attribute: IAttribute;
+}
+
 export interface IAttribute {
     id: string;
-    value: string;
-    attributeId: number;
+    name: string;
+    label: string;
     createdAt: Date;
 }
 
@@ -10,11 +15,14 @@ export interface ISku {
     productId: number;
     sku: string;
     sellingPrice: number;
-    quantity: number;
     imageUrl: string;
     productSkuAttributes: {
         id: number;
-        attributeValue: IAttribute
+        attributeValue: IAttributeValue
     }[]
     createdAt: Date;
+    stocks: {
+        id: number;
+        quantity: number;
+    }[];
 }

@@ -1,6 +1,6 @@
 export const attributeLabels: Record<string, string> = {
-    COLOR: "Màu sắc",
-    SWITCH: "Switch",
-    SIZE: "Kích thước",
+    color: "Màu sắc",
+    switch: "Switch",
+    size: "Kích thước",
   };
   

@@ -1,20 +1,48 @@
 import { IProduct } from '@/interfaces/IProduct';
 import { fetchJson, buildUrl } from '@/lib/http';
-import { TPaginatedResponse } from '@/types/response.type';
+import { TBaseResponse, TPaginatedResponse } from '@/types/response.type';
 
 type FindProducts = {
   q?: string;
   page?: number;
   limit?: number;
-  sort?: string; // vd: 'price.asc' | 'price.desc' | 'newest'
-  category?: string;
+  sort?: string;
   revalidate?: number;
 };
 
+type FindProductsByCategory = {
+  category?: string;
+  limit?: number;
+  sort?: string;
+  nextCursor?: string;
+  revalidate?: number;
+};
+
+export type ProductPage = {
+  items: IProduct[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number;
+};
+
+
 export async function fetchProducts(params: FindProducts = {}) {
-  const { q = '', page = 1, limit = 12, sort = '', category = '', revalidate = 60 } = params;
-  const url = buildUrl(process.env.NEXT_PUBLIC_API!, '/api/products', { q, page, limit, sort, category });
+  const { q = '', page = 1, limit = 9, sort = '', revalidate = 60 } = params;
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, '/api/products', { q, page, limit, sort });
   return fetchJson<TPaginatedResponse<IProduct>>(url, { revalidate });
+}
+
+export async function fetchProductsByCategory(params: FindProductsByCategory = {}) {
+  const {  limit = 10, sort='', category = '', nextCursor = '', revalidate = 60 } = params;
+
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/api/products/category/${category}`, { limit, sort, cursor: nextCursor });
+  return fetchJson<TBaseResponse<ProductPage>>(url, { revalidate });
+}
+
+export async function fetchProduct(params: { slug: string, revalidate?: number }) {
+  const { slug = '', revalidate = 60 } = params;
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/api/products/slug/${slug}`);
+  return fetchJson<TBaseResponse<IProduct>>(url, { revalidate });
 }
 
 

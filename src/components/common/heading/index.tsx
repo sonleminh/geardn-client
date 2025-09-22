@@ -8,6 +8,8 @@ const Heading = ({ total, params }: { total: number; params?: number }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const currentSort = searchParams.get('sort') || '';
+
   return (
     <Box
       sx={{
@@ -24,13 +26,11 @@ const Heading = ({ total, params }: { total: number; params?: number }) => {
         <Typography sx={{ mr: 1, fontSize: 14 }}>Sắp xếp theo:</Typography>
         <FormControl sx={{ width: '120px' }} size='small'>
           <NativeSelect
-            defaultValue={''}
+            value={currentSort}
             disableUnderline
             onChange={(e) => {
               const params = new URLSearchParams(searchParams.toString());
               params.set('sort', e.target.value);
-              console.log('e.target.value', e.target.value);
-              console.log('params', params.toString());
               router.push(
                 e.target.value?.length ? `?${params.toString()}` : pathname,
                 { scroll: false }

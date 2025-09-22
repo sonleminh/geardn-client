@@ -5,11 +5,12 @@ import Heading from '@/components/common/heading';
 import ProductCard from '@/components/common/ProductCard';
 import { IProduct } from '@/interfaces/IProduct';
 import { Box, Button, Grid2 } from '@mui/material';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { fetchProductsByCategory } from '@/data/product.server';
 
 type Props = {
-  slug: string;
+  category: string;
+  sort: string;
   initialItems: IProduct[];
   initialCursor: string | null;
   initialHasMore: boolean;
@@ -17,7 +18,8 @@ type Props = {
 };
 
 export default function CategoryProductList({
-  slug,
+  category,
+  sort,
   initialItems,
   initialCursor,
   initialHasMore,
@@ -28,19 +30,26 @@ export default function CategoryProductList({
   const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
   const [isPending, startTransition] = useTransition();
 
+  // Reset state when props change (when sort changes and page re-renders)
+  useEffect(() => {
+    setItems(initialItems);
+    setCursor(initialCursor);
+    setHasMore(initialHasMore);
+  }, [initialItems, initialCursor, initialHasMore, sort]);
+
   const loadMore = () => {
     if (!hasMore || !cursor) return;
     startTransition(async () => {
       try {
         const page = await fetchProductsByCategory({
-          slug,
-          cursor,
+          category,
+          nextCursor: cursor,
           limit: 2,
+          sort,
           revalidate: 0,
         });
         setItems((prev) => {
           const map = new Map(prev.map((p) => [p.id, p]));
-          console.log('map', map);
           for (const it of page?.data?.items) map.set(it.id, it);
           return Array.from(map.values());
         });
