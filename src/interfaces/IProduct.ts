@@ -1,5 +1,5 @@
 import { ICategory } from "./ICategory";
-import { IAttribute, ISku } from "./ISku";
+import { IAttribute, ISku } from "./IProductSku";
 
 export interface ITagOptions {
     value: string;

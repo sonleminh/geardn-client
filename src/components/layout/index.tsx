@@ -10,8 +10,15 @@ import ScrollToTopBtn from '../common/scroll-to-top-btn';
 
 import { Box } from '@mui/material';
 import { Notification } from '../common/notification';
+import { IUser } from '@/interfaces/IUser';
 
-const Layout = ({ children }: { children?: React.ReactNode }) => {
+const Layout = ({
+  children,
+  initialUser,
+}: {
+  children?: React.ReactNode;
+  initialUser?: IUser | null;
+}) => {
   const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -33,7 +40,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
   };
   return (
     <>
-      <Header />
+      <Header initialUser={initialUser} />
       <ScrollToTopBtn
         showScrollTop={showScrollTop}
         handleScrollToTop={handleScrollToTop}

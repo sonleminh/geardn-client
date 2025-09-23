@@ -10,6 +10,8 @@ import { getRequest } from './utils/fetch-client';
 const publicRoute = ['/dang-nhap'];
 const protectedRoute = ['/tai-khoan'];
 
+const PROTECTED = [/^\/account/, /^\/orders/];
+
 async function whoami(accessToken: RequestCookie | undefined): Promise<IWhoIAmResponse | null> {
     try {
       return await getRequest(`/auth/whoami`, {
@@ -40,23 +42,34 @@ async function refreshAccessToken(refreshToken: RequestCookie | undefined): Prom
   }
 }
 
-export async function middleware(request: NextRequest) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('access_token');
-  const refreshToken = cookieStore.get('refresh_token');
-  const googleCredentials = cookieStore.get('GC');
+export async function middleware(req: NextRequest) {
+  if (!PROTECTED .some(rx => rx.test(req.nextUrl.pathname))) return;
+  // ping whoami trên BFF (ít tốn vì cùng origin)
+  const r = await fetch(new URL('/api/bff/auth/whoami', req.url), { headers: { cookie: req.headers.get('cookie') ?? '' } });
+  if (r.status === 200) return;
+  const url = req.nextUrl.clone();
+  url.pathname = '/login';
+  url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
+  return NextResponse.redirect(url);
+  // const cookieStore = await cookies();
+  // const accessToken = cookieStore.get('access_token');
+  // const refreshToken = cookieStore.get('refresh_token');
+  // const googleCredentials = cookieStore.get('GC');
   
-  let user: IWhoIAmResponse | null = null;
+  // let user: IWhoIAmResponse | null = null;
 
-    if (googleCredentials) {
-      const credentialDecoded = jwtDecode(
-          googleCredentials?.value
-        ) as ICustomJwtPayload;
-        if (credentialDecoded) {
-          console.log('cre:', credentialDecoded)
-          user = { id: credentialDecoded?.sub, email: credentialDecoded?.email, name: credentialDecoded?.name || '' }; 
-        }
-    }
+  //   if (googleCredentials) {
+  //     const credentialDecoded = jwtDecode(
+  //         googleCredentials?.value
+  //       ) as ICustomJwtPayload;
+  //       if (credentialDecoded) {
+  //         console.log('cre:', credentialDecoded)
+  //         user = { id: credentialDecoded?.sub, email: credentialDecoded?.email, name: credentialDecoded?.name || '' }; 
+  //       }
+  //   }
+
+  // -------------------------------------------------------
+
   // if(!googleCredentials && accessToken)
   //   {
   //   user = await whoami(accessToken)
@@ -82,14 +95,14 @@ export async function middleware(request: NextRequest) {
   //   }
   // }
 
-  const path = request.nextUrl.pathname;
-  const isProtectedRoute = protectedRoute.includes(path);
-  const isPublicRoute = publicRoute.includes(path);
+  // const path = request.nextUrl.pathname;
+  // const isProtectedRoute = protectedRoute.includes(path);
+  // const isPublicRoute = publicRoute.includes(path);
 
-   // Ignore requests for static files
-   if (path.startsWith('/_next/') || path.startsWith('/static/') || path.includes('.')) {
-    return NextResponse.next();
-  }
+  //  // Ignore requests for static files
+  //  if (path.startsWith('/_next/') || path.startsWith('/static/') || path.includes('.')) {
+  //   return NextResponse.next();
+  // }
 
 
   // if (isProtectedRoute && !accessToken) {
@@ -103,5 +116,7 @@ export async function middleware(request: NextRequest) {
   // if (isPublicRoute && accessToken) {
   //   return NextResponse.redirect(new URL('/', request.url));
   // }
-  return NextResponse.next();
+  // return NextResponse.next();
 }
+
+export const config = { matcher: ['/account/:path*','/orders/:path*'] };

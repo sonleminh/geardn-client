@@ -28,7 +28,7 @@ import HtmlRenderBox from '@/components/common/HtmlRenderBox';
 import MainSwiper from './components/main-swiper';
 import ThumbSwiper from './components/thumb-swiper';
 
-import { ISku } from '@/interfaces/ISku';
+import { IProductSkuAttributes, ISku } from '@/interfaces/IProductSku';
 import { formatPrice } from '@/utils/format-price';
 import { attributeLabels } from '@/constants/attributeLabels';
 
@@ -53,7 +53,6 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
     Record<string, string>
   >({});
   const mainSwiperRef = useRef<SwiperClass | null>(null);
-  //   console.log('count', count);
 
   const productImageList = useMemo(() => {
     return [
@@ -63,6 +62,8 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
         : []),
     ];
   }, [data?.images, data?.skus]);
+
+  console.log('productImageList', productImageList);
 
   const attributeOptions = useMemo(() => {
     if (!data) return {};
@@ -111,9 +112,9 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
       data?.skus?.find((sku) =>
         Object.entries(selectedAttributes).every(([key, value]) =>
           sku.productSkuAttributes.some(
-            (attr) =>
-              attr.attributeValue.attribute.name === key &&
-              attr.attributeValue.value === value
+            (productSkuAttributes: IProductSkuAttributes) =>
+              productSkuAttributes.attributeValue.attribute.name === key &&
+              productSkuAttributes.attributeValue.value === value
           )
         )
       ) ?? null
@@ -121,10 +122,17 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
   }, [selectedAttributes, data?.skus]);
 
   const availableCombinations = data?.skus?.map((sku) =>
-    sku.productSkuAttributes.reduce((acc, attr) => {
-      acc[attr.attributeValue.attribute.name] = attr.attributeValue.value;
-      return acc;
-    }, {} as Record<string, string>)
+    sku.productSkuAttributes.reduce(
+      (
+        acc: Record<string, string>,
+        productSkuAttributes: IProductSkuAttributes
+      ) => {
+        acc[productSkuAttributes.attributeValue.attribute.name] =
+          productSkuAttributes.attributeValue.value;
+        return acc;
+      },
+      {} as Record<string, string>
+    )
   );
 
   const handleAttributeChange = (type: string, value: string) => {
@@ -181,82 +189,86 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
       const itemAdded = cartItems?.find(
         (item) => item.skuId === selectedSku?.id
       );
-      //   if (
-      //     itemAdded &&
-      //     itemAdded?.quantity + (count ?? 1) > selectedSku?.quantity
-      //   ) {
-      //     return showNotification(
-      //       `Bạn đã có ${itemAdded?.quantity} trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá số lượng trong kho.`,
-      //       'error'
-      //     );
-      //   }
+      if (
+        itemAdded &&
+        itemAdded?.quantity + (count ?? 1) > (selectedSkuStock ?? 0)
+      ) {
+        return showNotification(
+          `Bạn đã có ${itemAdded?.quantity} trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá số lượng trong kho.`,
+          'error'
+        );
+      }
 
-      //   return addToCart({
-      //     productId: selectedSku?.productId,
-      //     skuId: selectedSku?.id,
-      //     productName: data?.data?.name,
-      //     imageUrl:
-      //       selectedSku?.imageUrl !== ''
-      //         ? selectedSku?.imageUrl
-      //         : data?.data?.images?.[0],
-      //     price: selectedSku?.price,
-      //     quantity: count ?? 1,
-      //     attributes: selectedSku?.productSkuAttributes.map((attr) => ({
-      //       attributeId: attr.attributeValue.attributeId,
-      //       value: attr.attributeValue.value,
-      //     })),
-      //   });
+      return addToCart({
+        productId: selectedSku?.productId,
+        skuId: selectedSku?.id,
+        productName: data?.name,
+        imageUrl:
+          selectedSku?.imageUrl !== ''
+            ? selectedSku?.imageUrl
+            : data?.images?.[0],
+        price: selectedSku?.sellingPrice,
+        quantity: count ?? 1,
+        attributes: selectedSku?.productSkuAttributes.map(
+          (productSkuAttributes: IProductSkuAttributes) => ({
+            attributeId: productSkuAttributes.attributeValue.attribute.id,
+            value: productSkuAttributes.attributeValue.value,
+          })
+        ),
+      });
     }
 
-    //   if (user && data) {
-    //     const newItem = {
-    //       productId: selectedSku?.productId,
-    //       skuId: selectedSku?.id,
-    //       productName: data?.data?.name,
-    //       imageUrl:
-    //         selectedSku?.imageUrl !== ''
-    //           ? selectedSku?.imageUrl
-    //           : data?.data?.images?.[0],
-    //       price: selectedSku?.price,
-    //       quantity: count ?? 1,
-    //       attributes: selectedSku?.productSkuAttributes.map((attr) => ({
-    //         attributeId: attr.attributeValue.attributeId,
-    //         value: attr.attributeValue.value,
-    //       })),
-    //     };
+    if (user && data) {
+      const newItem = {
+        productId: selectedSku?.productId,
+        skuId: selectedSku?.id,
+        productName: data?.name,
+        imageUrl:
+          selectedSku?.imageUrl !== ''
+            ? selectedSku?.imageUrl
+            : data?.images?.[0],
+        price: selectedSku?.sellingPrice,
+        quantity: count ?? 1,
+        attributes: selectedSku?.productSkuAttributes.map(
+          (productSkuAttributes: IProductSkuAttributes) => ({
+            attributeId: productSkuAttributes.attributeValue.attribute.id,
+            value: productSkuAttributes.attributeValue.value,
+          })
+        ),
+      };
 
-    //     addToCart(newItem);
+      addToCart(newItem);
 
-    //     try {
-    //       await onAddToCart(
-    //         {
-    //           productId: selectedSku?.productId,
-    //           skuId: selectedSku?.id,
-    //           quantity: count ?? 1,
-    //         },
-    //         {
-    //           onError: () => {
-    //             const cartItem = cartItems?.find(
-    //               (item) => item.skuId === selectedSku?.id
-    //             );
-    //             if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
-    //               removeItem(selectedSku?.id);
-    //             } else {
-    //               updateQuantity(
-    //                 selectedSku?.id,
-    //                 selectedSku?.quantity - (count ?? 0)
-    //               );
-    //             }
-    //             showNotification('Đã có lỗi xảy ra', 'error');
-    //           },
-    //         }
-    //       );
-    //     } catch (error) {
-    //       console.log('error', error);
-    //       removeItem(newItem.skuId);
-    //       showNotification('Lỗi kết nối tới máy chủ', 'error');
-    //     }
-    //   }
+      try {
+        await onAddToCart(
+          {
+            productId: selectedSku?.productId,
+            skuId: selectedSku?.id,
+            quantity: count ?? 1,
+          },
+          {
+            onError: () => {
+              const cartItem = cartItems?.find(
+                (item) => item.skuId === selectedSku?.id
+              );
+              if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
+                removeItem(selectedSku?.id);
+              } else {
+                updateQuantity(
+                  selectedSku?.id,
+                  selectedSku?.quantity - (count ?? 0)
+                );
+              }
+              showNotification('Đã có lỗi xảy ra', 'error');
+            },
+          }
+        );
+      } catch (error) {
+        console.log('error', error);
+        removeItem(newItem.skuId);
+        showNotification('Lỗi kết nối tới máy chủ', 'error');
+      }
+    }
   };
 
   const handleCountChange = (value: number | null) => {
@@ -270,21 +282,26 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
     { href: `/product/${product}`, label: data?.name as string },
   ];
 
-  //   const getLowestPrice = () => {
-  //     if (!data?.data?.skus || data?.data?.skus.length === 0) return null;
-
-  //     return Math.min(...data?.data?.skus.map((sku) => Number(sku.price)));
-  //   };
-
   const totalStock = data?.skus?.reduce(
     (acc, sku) =>
-      acc + (sku.stocks?.reduce((acc, stock) => acc + stock.quantity, 0) || 0),
+      acc +
+      (sku.stocks?.reduce(
+        (acc: number, stock: { id: number; quantity: number }) =>
+          acc + stock.quantity,
+        0
+      ) || 0),
     0
   );
 
   const selectedSkuStock = useMemo(() => {
-    return selectedSku?.stocks?.reduce((acc, stock) => acc + stock.quantity, 0);
+    return selectedSku?.stocks?.reduce(
+      (acc: number, stock: { id: number; quantity: number }) =>
+        acc + stock.quantity,
+      0
+    );
   }, [selectedSku]);
+
+  console.log('selectedSku', selectedSku);
 
   return (
     <Box pt={2} pb={4}>
@@ -302,7 +319,7 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
                     width: '100%',
                     height: '100%',
                   }}>
-                  {selectedSku ? (
+                  {selectedSku?.imageUrl ? (
                     <SkeletonImage
                       src={selectedSku?.imageUrl}
                       alt='Selected Option'
@@ -446,14 +463,14 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
                           totalStock === 0
                         }
                         value={count ?? ''}
-                        // onChange={(e) => {
-                        //   const value = e.target.value;
-                        //   if (selectedSku && +value > selectedSku?.quantity) {
-                        //     setCount(selectedSku?.quantity);
-                        //   } else {
-                        //     setCount(value ? parseInt(value, 10) : null);
-                        //   }
-                        // }}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (selectedSku && +value > selectedSkuStock) {
+                            setCount(selectedSkuStock);
+                          } else {
+                            setCount(value ? parseInt(value, 10) : null);
+                          }
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === '-') {
                             e.preventDefault();
@@ -477,7 +494,10 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
                       <Typography sx={{ fontSize: 14, lineHeight: '32px' }}>
                         {totalStock > 0 && selectedSku
                           ? selectedSku?.stocks?.reduce(
-                              (acc, stock) => acc + stock.quantity,
+                              (
+                                acc: number,
+                                stock: { id: number; quantity: number }
+                              ) => acc + stock.quantity,
                               0
                             )
                           : totalStock}{' '}

@@ -12,6 +12,7 @@ import 'swiper/css/scrollbar';
 import 'swiper/css/thumbs';
 import { Suspense } from 'react';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
+import { getUserOnServer } from '@/data/profile.server';
 
 export const metadata: Metadata = {
   title: 'GearDN',
@@ -23,9 +24,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUserOnServer();
   return (
-    <Suspense fallback={<LoadingCircle />}>
-      <Layout>{children}</Layout>
-    </Suspense>
+    <Layout initialUser={user?.data}>
+      <Suspense fallback={<LoadingCircle />}>{children}</Suspense>
+    </Layout>
   );
 }

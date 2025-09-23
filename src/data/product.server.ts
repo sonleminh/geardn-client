@@ -28,20 +28,20 @@ export type ProductPage = {
 
 export async function fetchProducts(params: FindProducts = {}) {
   const { q = '', page = 1, limit = 9, sort = '', revalidate = 60 } = params;
-  const url = buildUrl(process.env.NEXT_PUBLIC_API!, '/api/products', { q, page, limit, sort });
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, '/products', { q, page, limit, sort });
   return fetchJson<TPaginatedResponse<IProduct>>(url, { revalidate });
 }
 
 export async function fetchProductsByCategory(params: FindProductsByCategory = {}) {
   const {  limit = 10, sort='', category = '', nextCursor = '', revalidate = 60 } = params;
 
-  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/api/products/category/${category}`, { limit, sort, cursor: nextCursor });
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/products/category/${category}`, { limit, sort, cursor: nextCursor });
   return fetchJson<TBaseResponse<ProductPage>>(url, { revalidate });
 }
 
 export async function fetchProduct(params: { slug: string, revalidate?: number }) {
   const { slug = '', revalidate = 60 } = params;
-  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/api/products/slug/${slug}`);
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/products/slug/${slug}`);
   return fetchJson<TBaseResponse<IProduct>>(url, { revalidate });
 }
 

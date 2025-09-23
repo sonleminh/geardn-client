@@ -4,22 +4,24 @@ export interface IAttributeValue {
 }
 
 export interface IAttribute {
-    id: string;
+    id: number;
     name: string;
     label: string;
     createdAt: Date;
 }
 
-export interface ISku {
+export interface IProductSkuAttributes {
+    id: number;
+    attributeValue: IAttributeValue
+}
+
+export interface IProductSku {
     id: number;
     productId: number;
     sku: string;
     sellingPrice: number;
     imageUrl: string;
-    productSkuAttributes: {
-        id: number;
-        attributeValue: IAttributeValue
-    }[]
+    productSkuAttributes: IProductSkuAttributes[]
     createdAt: Date;
     stocks: {
         id: number;

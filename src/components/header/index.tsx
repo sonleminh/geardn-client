@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 
 import SkeletonImage from '../common/SkeletonImage';
-import { useLogout } from '@/apis/auth';
+// import { useLogout } from '@/apis/auth';
 
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -28,16 +28,22 @@ import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
 import { HeaderStyle } from './style';
 import { useGetCart } from '@/apis/cart';
+import { useSession } from '@/hooks/useSession';
+import { IUser } from '@/interfaces/IUser';
 
-const Header = () => {
+const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, logout } = useAuthStore((state) => state);
+  // const { user, logout } = useAuthStore((state) => state);
   const { cartItems } = useCartStore();
 
-  const { data: cartData, isLoading } = useGetCart(user);
-  const { mutateAsync: onLogout } = useLogout();
+  // const { data: cartData, isLoading } = useGetCart(user);
+  // const { mutateAsync: onLogout } = useLogout();
+  const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
+  // const user = data?.data?.data ?? initialUser;
+  console.log('data:', data);
+  console.log('initialUser:', initialUser);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -66,20 +72,21 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = async () => {
-    const result = await onLogout();
-    if (result?.success === true) {
-      logout();
-      router.push(ROUTES.LOGIN);
-    }
-  };
-  const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (user === null) {
-      router.push(ROUTES.LOGIN);
-    } else {
-      setAnchorEl(event.currentTarget);
-    }
-  };
+  // const handleLogout = async () => {
+  //   const result = await onLogout();
+  //   if (result?.success === true) {
+  //     logout();
+  //     router.push(ROUTES.LOGIN);
+  //   }
+  // };
+  // const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  //   if (user === null) {
+  //     router.push(ROUTES.LOGIN);
+  //   } else {
+  //     setAnchorEl(event.currentTarget);
+  //   }
+  // };
+
   return (
     <Box sx={HeaderStyle(isExpanded, pathname)}>
       <Box className='header-main'>
@@ -153,7 +160,7 @@ const Header = () => {
                 sx={{ position: 'relative', minWidth: 40, height: 40, ml: 2 }}
                 onClick={() => router.push(ROUTES.CART)}>
                 <ShoppingCartOutlinedIcon />
-                <Typography
+                {/* <Typography
                   sx={{
                     position: 'absolute',
                     top: -2,
@@ -170,9 +177,9 @@ const Header = () => {
                     color: '#fff',
                   }}>
                   {cartItems ? cartItems.length : isLoading ? '' : 0}
-                </Typography>
+                </Typography> */}
               </Button>
-              {user !== null ? (
+              {/* {user !== null ? (
                 user?.picture ? (
                   <Button
                     sx={{}}
@@ -217,7 +224,7 @@ const Header = () => {
                   onClick={handleUserClick}>
                   <AccountCircleIcon sx={{ fontSize: 30 }} />
                 </Button>
-              )}
+              )} */}
               <Menu
                 id='basic-menu'
                 anchorEl={anchorEl}
@@ -233,7 +240,7 @@ const Header = () => {
                 <MenuItem onClick={() => router.push(ROUTES.PURCHASE)}>
                   Đơn mua
                 </MenuItem>
-                <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+                {/* <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem> */}
               </Menu>
             </Box>
           </Grid2>

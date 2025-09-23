@@ -13,17 +13,20 @@ export interface ISignUpPayload {
 }
 
 export interface ILogInResponse {
-  success: boolean;
-  message: string;
-  data: {
     id: string;
     email: string;
     name: string;
     role: string;
     message?: string;
-  };
 }
 
+export interface IWhoAmIResponse {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    message?: string;
+}
 export interface ILogoutResponse {
   message: string;
   statusCode: number;

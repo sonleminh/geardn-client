@@ -1,5 +1,6 @@
 'use client';
 
+import { signup } from '@/apis/auth';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { ROUTES } from '@/constants/route';
 import { signUpAPI } from '@/services/auth/api';
@@ -32,9 +33,10 @@ export default function SignUp() {
     // validationSchema: schema,
     validateOnChange: false,
     async onSubmit(values) {
-      const result = await signUpAPI(values);
-      if (result.id) {
-        router.push('/dang-nhap');
+      const result = await signup(values);
+      console.log('rs:', result);
+      if (result.data.id) {
+        router.push(ROUTES.LOGIN);
         showNotification('Tạo tài khoản thành công', 'success');
       }
     },

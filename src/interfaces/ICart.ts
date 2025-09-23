@@ -4,7 +4,7 @@
 //     items: ICartItem[]
 // }
 
-import { ISku } from "./ISku";
+import { ISku } from "./IProductSku";
 
 // export interface ICart {
 //     id: string;
