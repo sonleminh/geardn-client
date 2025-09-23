@@ -7,8 +7,8 @@ import { ICustomJwtPayload, IRefreshTokenResponse } from './interfaces/IAuth';
 import { IWhoIAmResponse } from './interfaces/IUser';
 import { getRequest } from './utils/fetch-client';
 
-const publicRoute = ['/dang-nhap'];
-const protectedRoute = ['/tai-khoan'];
+const publicRoute = ['/login'];
+const protectedRoute = ['/user'];
 
 const PROTECTED = [/^\/account/, /^\/orders/];
 
@@ -46,9 +46,11 @@ export async function middleware(req: NextRequest) {
   if (!PROTECTED .some(rx => rx.test(req.nextUrl.pathname))) return;
   // ping whoami trên BFF (ít tốn vì cùng origin)
   const r = await fetch(new URL('/api/bff/auth/whoami', req.url), { headers: { cookie: req.headers.get('cookie') ?? '' } });
+  console.log('r:', r);
   if (r.status === 200) return;
   const url = req.nextUrl.clone();
   url.pathname = '/login';
+  console.log('url:', url);
   url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
   return NextResponse.redirect(url);
   // const cookieStore = await cookies();

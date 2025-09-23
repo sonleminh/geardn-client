@@ -30,12 +30,14 @@ import { HeaderStyle } from './style';
 import { useGetCart } from '@/apis/cart';
 import { useSession } from '@/hooks/useSession';
 import { IUser } from '@/interfaces/IUser';
+import { useLogout } from '@/apis/auth/index';
+import { logoutAPI } from '@/apis/auth';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // const { user, logout } = useAuthStore((state) => state);
+  const { user, logout } = useAuthStore((state) => state);
   const { cartItems } = useCartStore();
 
   // const { data: cartData, isLoading } = useGetCart(user);
@@ -72,20 +74,20 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
     setAnchorEl(null);
   };
 
-  // const handleLogout = async () => {
-  //   const result = await onLogout();
-  //   if (result?.success === true) {
-  //     logout();
-  //     router.push(ROUTES.LOGIN);
-  //   }
-  // };
-  // const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   if (user === null) {
-  //     router.push(ROUTES.LOGIN);
-  //   } else {
-  //     setAnchorEl(event.currentTarget);
-  //   }
-  // };
+  const handleLogout = async () => {
+    const result = await logoutAPI();
+    if (result?.success === true) {
+      logout();
+      router.push(ROUTES.LOGIN);
+    }
+  };
+  const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (user === null) {
+      router.push(ROUTES.LOGIN);
+    } else {
+      setAnchorEl(event.currentTarget);
+    }
+  };
 
   return (
     <Box sx={HeaderStyle(isExpanded, pathname)}>
@@ -179,7 +181,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                   {cartItems ? cartItems.length : isLoading ? '' : 0}
                 </Typography> */}
               </Button>
-              {/* {user !== null ? (
+              {user !== null ? (
                 user?.picture ? (
                   <Button
                     sx={{}}
@@ -224,7 +226,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                   onClick={handleUserClick}>
                   <AccountCircleIcon sx={{ fontSize: 30 }} />
                 </Button>
-              )} */}
+              )}
               <Menu
                 id='basic-menu'
                 anchorEl={anchorEl}
@@ -240,7 +242,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                 <MenuItem onClick={() => router.push(ROUTES.PURCHASE)}>
                   Đơn mua
                 </MenuItem>
-                {/* <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem> */}
+                <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
               </Menu>
             </Box>
           </Grid2>

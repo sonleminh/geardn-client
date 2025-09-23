@@ -23,6 +23,16 @@ export async function loginWithEmailPwd(payload: { email: string; password: stri
   return data as TBaseResponse<ILogInResponse>;
 }
 
+export async function logoutAPI() {
+  const res = await fetch('/api/bff/auth/logout', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || 'Logout failed');
+  return data;
+}
+
 export async function whoami() {
   const r = await fetch('/api/bff/auth/whoami', { cache: 'no-store' });
   if (!r.ok) throw new Error(String(r.status));

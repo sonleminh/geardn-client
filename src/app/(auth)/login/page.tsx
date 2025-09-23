@@ -24,7 +24,6 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import LockIcon from '@mui/icons-material/Lock';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
-// import { useLoginWithEmailPwd } from '@/apis/auth';
 import { useSyncCart } from '@/apis/cart';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { useAuthStore } from '@/stores/auth-store';
@@ -38,6 +37,7 @@ const LoginPage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { cartItems, syncCart } = useCartStore();
+  const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
   // const {
   //   mutateAsync: onLoginWithEmailPwd,
@@ -59,6 +59,12 @@ const LoginPage = () => {
       console.log('userData:', userData);
 
       if (userData?.data?.id) {
+        login({
+          id: userData?.data?.id,
+          email: userData?.data?.email,
+          name: userData?.data?.name,
+          picture: userData?.data?.picture,
+        });
         router.push('/');
         showNotification('Đăng nhập thành công', 'success');
       }
