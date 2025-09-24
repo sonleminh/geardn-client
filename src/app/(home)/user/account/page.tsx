@@ -13,9 +13,10 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSession } from '@/hooks/useSession';
 
 const Account = () => {
-  const { user } = useAuthStore();
+  const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
   return (
     <Box
       sx={{
@@ -58,11 +59,11 @@ const Account = () => {
                 <TableCell width={'30%'} align='right'>
                   Email
                 </TableCell>
-                <TableCell align='left'>{user?.email}</TableCell>
+                <TableCell align='left'>{data?.email}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align='right'>Tên</TableCell>
-                <TableCell align='left'>{user?.name}</TableCell>
+                <TableCell align='left'>{data?.name}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

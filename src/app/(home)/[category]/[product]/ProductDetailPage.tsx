@@ -63,8 +63,6 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
     ];
   }, [data?.images, data?.skus]);
 
-  console.log('productImageList', productImageList);
-
   const attributeOptions = useMemo(() => {
     if (!data) return {};
 

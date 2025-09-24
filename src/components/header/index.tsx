@@ -21,31 +21,29 @@ import {
 import SkeletonImage from '../common/SkeletonImage';
 // import { useLogout } from '@/apis/auth';
 
-import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 
 import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
 import { HeaderStyle } from './style';
-import { useGetCart } from '@/apis/cart';
 import { useSession } from '@/hooks/useSession';
 import { IUser } from '@/interfaces/IUser';
-import { useLogout } from '@/apis/auth/index';
 import { logoutAPI } from '@/apis/auth';
+import AppLink from '../common/AppLink';
+import { useCartStore } from '@/stores/cart-store';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
   const pathname = usePathname();
 
   const { user, logout } = useAuthStore((state) => state);
-  const { cartItems } = useCartStore();
+  const { cartItems } = useCartStore((state) => state);
+  console.log('cartItems:', cartItems);
 
   // const { data: cartData, isLoading } = useGetCart(user);
   // const { mutateAsync: onLogout } = useLogout();
   const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
-  // const user = data?.data?.data ?? initialUser;
-  console.log('data:', data);
-  console.log('initialUser:', initialUser);
+  const userData = data ?? initialUser;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,7 +80,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
     }
   };
   const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (user === null) {
+    if (!userData) {
       router.push(ROUTES.LOGIN);
     } else {
       setAnchorEl(event.currentTarget);
@@ -94,7 +92,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
       <Box className='header-main'>
         <Grid2 container height={80}>
           <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Link href={'/'}>
+            <AppLink href={'/'}>
               <Box className='header-logo'>
                 <SkeletonImage
                   src={LOGO}
@@ -104,7 +102,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                   priority
                 />
               </Box>
-            </Link>
+            </AppLink>
           </Grid2>
           <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
             <List
@@ -162,7 +160,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                 sx={{ position: 'relative', minWidth: 40, height: 40, ml: 2 }}
                 onClick={() => router.push(ROUTES.CART)}>
                 <ShoppingCartOutlinedIcon />
-                {/* <Typography
+                <Typography
                   sx={{
                     position: 'absolute',
                     top: -2,
@@ -175,14 +173,16 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                     borderRadius: 10,
                     fontSize: 11,
                     fontWeight: 600,
-                    bgcolor: isLoading ? 'rgba(0, 0 ,0, 0.3)' : '#000',
+                    bgcolor: '#000',
+                    // bgcolor: isLoading ? 'rgba(0, 0 ,0, 0.3)' : '#000',
                     color: '#fff',
                   }}>
-                  {cartItems ? cartItems.length : isLoading ? '' : 0}
-                </Typography> */}
+                  {cartItems ? cartItems?.length : 0}
+                  {/* {cartItems ? cartItems.length : isLoading ? '' : 0} */}
+                </Typography>
               </Button>
-              {user !== null ? (
-                user?.picture ? (
+              {userData !== null ? (
+                userData?.picture ? (
                   <Button
                     sx={{}}
                     onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
@@ -200,7 +200,11 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                           objectFit: 'cover',
                         },
                       }}>
-                      <SkeletonImage src={user?.picture} alt='geardn' fill />
+                      <SkeletonImage
+                        src={userData?.picture}
+                        alt='geardn'
+                        fill
+                      />
                     </Box>
                     <Typography sx={{ fontSize: 14, textTransform: 'none' }}>
                       {user?.name}
@@ -208,14 +212,20 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                   </Button>
                 ) : (
                   <Button
-                    sx={{ minWidth: 40, height: 40 }}
-                    className='usernname-icon'
+                    disableRipple
+                    disableFocusRipple
+                    sx={{
+                      minWidth: 40,
+                      height: 40,
+                      bgcolor: 'transparent',
+                      '&:hover': { backgroundColor: 'transparent' },
+                    }}
                     onClick={handleUserClick}>
                     <AccountCircleIcon
                       sx={{ mr: 0.5, ml: 1.5, fontSize: 32 }}
                     />
                     <Typography sx={{ fontSize: 14, textTransform: 'none' }}>
-                      {user?.name}
+                      {userData?.name}
                     </Typography>
                   </Button>
                 )

@@ -50,9 +50,9 @@ const syncCart = async (payload: ISyncCartPayload[]) => {
  }
  
  export const useSyncCart = () => {
-     return useMutation({
-         mutationFn: syncCart
-     })
+    return useMutation({
+        mutationFn: syncCart
+    })
  }
 
 const getCart = async () => {

@@ -10,7 +10,8 @@ import { getRequest } from './utils/fetch-client';
 const publicRoute = ['/login'];
 const protectedRoute = ['/user'];
 
-const PROTECTED = [/^\/account/, /^\/orders/];
+const PROTECTED = [/^\/user/, /^\/orders/];
+const AUTH_ONLY = [/^\/login(?:\/|$)/, /^\/signup(?:\/|$)/];
 
 async function whoami(accessToken: RequestCookie | undefined): Promise<IWhoIAmResponse | null> {
     try {
@@ -43,16 +44,30 @@ async function refreshAccessToken(refreshToken: RequestCookie | undefined): Prom
 }
 
 export async function middleware(req: NextRequest) {
-  if (!PROTECTED .some(rx => rx.test(req.nextUrl.pathname))) return;
+  const path = req.nextUrl.pathname;
+  const isProtected = PROTECTED.some(rx => rx.test(path));
+  const isAuthOnly = AUTH_ONLY.some(rx => rx.test(path));
+  if (!isProtected && !isAuthOnly) return;
+
   // ping whoami trên BFF (ít tốn vì cùng origin)
   const r = await fetch(new URL('/api/bff/auth/whoami', req.url), { headers: { cookie: req.headers.get('cookie') ?? '' } });
-  console.log('r:', r);
-  if (r.status === 200) return;
-  const url = req.nextUrl.clone();
-  url.pathname = '/login';
-  console.log('url:', url);
-  url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
-  return NextResponse.redirect(url);
+
+  if (isAuthOnly) {
+    if (r.status === 200) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/';
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
+    return; // not logged in => allow access to login/signup
+  }
+
+   if (isProtected && r.status !== 200) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
+    return NextResponse.redirect(url);
+  }
   // const cookieStore = await cookies();
   // const accessToken = cookieStore.get('access_token');
   // const refreshToken = cookieStore.get('refresh_token');
@@ -121,4 +136,6 @@ export async function middleware(req: NextRequest) {
   // return NextResponse.next();
 }
 
-export const config = { matcher: ['/account/:path*','/orders/:path*'] };
+export const config = {
+  matcher: ['/user/:path*', '/orders/:path*', '/login', '/signup'],
+}

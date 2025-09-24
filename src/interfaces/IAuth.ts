@@ -17,7 +17,6 @@ export interface ILogInResponse {
     email: string;
     name: string;
     role: string;
-    message?: string;
 }
 
 export interface IWhoAmIResponse {
@@ -25,7 +24,7 @@ export interface IWhoAmIResponse {
     email: string;
     name: string;
     role: string;
-    message?: string;
+    picture: string;
 }
 export interface ILogoutResponse {
   message: string;

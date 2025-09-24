@@ -13,7 +13,7 @@ async function parseMaybeJson(res: Response) {
       return parseMaybeJson(res) as Promise<T>;
     }
     // try refresh once
-    const rf = await fetch('/api/bff/auth/refresh', { method: 'POST', cache: 'no-store' });
+    const rf = await fetch('/api/bff/auth/refresh-token', { method: 'GET', cache: 'no-store' });
     if (!rf.ok) throw new Error('Unauthorized');
     // re-run original request (make sure init.body is re-creatable if it was a stream)
     res = await doFetch();

@@ -4,7 +4,7 @@
 //     items: ICartItem[]
 // }
 
-import { ISku } from "./IProductSku";
+import { IProductSku } from "./IProductSku";
 
 // export interface ICart {
 //     id: string;
@@ -26,8 +26,8 @@ export interface ICartStoreItem {
     price: number;
     quantity: number;
     attributes: {
-        attributeId: number;
-        value: string;
+        attribute: string;
+        attributeValue: string;
     }[]
 }
 
@@ -38,7 +38,7 @@ export interface ICartServerItem {
         name: string;
         images: string[];
     };
-    sku: ISku;
+    sku: IProductSku;
     quantity: number;
 }
 

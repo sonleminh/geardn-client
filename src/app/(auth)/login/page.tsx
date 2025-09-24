@@ -32,6 +32,7 @@ import { useNotificationStore } from '@/stores/notification-store';
 import { AxiosError } from 'axios';
 import { ROUTES } from '@/constants/route';
 import { loginWithEmailPwd } from '@/apis/auth';
+import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -59,12 +60,44 @@ const LoginPage = () => {
       console.log('userData:', userData);
 
       if (userData?.data?.id) {
+        const syncPayload = cartItems?.map(
+          ({ productId, skuId, quantity }) => ({
+            productId,
+            skuId,
+            quantity,
+          })
+        );
+        const updatedCart = await onSyncCart(syncPayload);
+        console.log('updatedCart:', updatedCart);
+        const syncCartData = updatedCart?.data?.items?.map((item) => ({
+          productId: item?.productId,
+          skuId: item?.sku?.id,
+          productName: item?.product?.name,
+          imageUrl: item?.sku?.imageUrl
+            ? item?.sku?.imageUrl
+            : item?.product?.images?.[0],
+          price: item?.sku?.sellingPrice,
+          quantity: item?.quantity,
+          attributes: item?.sku?.productSkuAttributes.map(
+            (productSkuAttribute: IProductSkuAttributes) => ({
+              attribute: productSkuAttribute?.attributeValue?.attribute?.name,
+              attributeValue: productSkuAttribute?.attributeValue?.value,
+            })
+          ),
+        }));
+        console.log('syncCartData:', syncCartData);
+        syncCart(syncCartData);
         login({
           id: userData?.data?.id,
           email: userData?.data?.email,
           name: userData?.data?.name,
-          picture: userData?.data?.picture,
         });
+        // login({
+        //   id: userData?.data?.id,
+        //   email: userData?.data?.email,
+        //   name: userData?.data?.name,
+        //   picture: userData?.data?.picture,
+        // });
         router.push('/');
         showNotification('Đăng nhập thành công', 'success');
       }
@@ -76,34 +109,7 @@ const LoginPage = () => {
   //     password: values.password,
   //   });
   // onSuccess: async () => {
-  //   const syncPayload = cartItems?.map(
-  //     ({ productId, skuId, quantity }) => ({
-  //       productId,
-  //       skuId,
-  //       quantity,
-  //     })
-  //   );
-  //   const updatedCart = await onSyncCart(syncPayload);
-  //   const syncCartData = updatedCart?.data?.items?.map((item) => ({
-  //     productId: item?.productId,
-  //     skuId: item?.sku?.id,
-  //     productName: item?.product?.name,
-  //     imageUrl: item?.sku?.imageUrl
-  //       ? item?.sku?.imageUrl
-  //       : item?.product?.images?.[0],
-  //     price: item?.sku?.price,
-  //     quantity: item?.quantity,
-  //     attributes: item?.sku?.productSkuAttributes.map((attr) => ({
-  //       type: attr?.attribute?.type,
-  //       value: attr?.attribute?.value,
-  //     })),
-  //   }));
-  //   syncCart(syncCartData);
-  //   login({
-  //     id: userData?.data?.id,
-  //     email: userData?.data?.email,
-  //     name: userData?.data?.name,
-  //   });
+
   //   if (userData?.data?.id) {
   //     router.push('/');
   //     // router.push('/tai-khoan');
