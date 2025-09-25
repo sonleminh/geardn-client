@@ -35,16 +35,7 @@ import {
 import { useFormik } from 'formik';
 import Link from 'next/link';
 // import { checkoutSchema } from './utils/schema/checkoutSchema';
-import {
-  IDistrict,
-  IProvince,
-  IWard,
-  useCreateOrder,
-  useGetDistricts,
-  useGetPaymentMethods,
-  useGetProvince,
-  useGetProvinces,
-} from '@/apis/order';
+
 import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 import LayoutContainer from '@/components/layout-container';
 import { useAuthStore } from '@/stores/auth-store';
@@ -56,6 +47,7 @@ import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { createOrder } from '@/apis/order';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
@@ -71,8 +63,7 @@ const Checkout = () => {
 
   const { data: provinceList } = useGetProvinces();
   const { data: paymentMethods } = useGetPaymentMethods();
-  const { mutateAsync: onCreateOrder, isPending: isCreateOrderPending } =
-    useCreateOrder();
+  const { data: orderData } = createOrder();
 
   const [province, setProvince] = useState<IProvince | null>(null);
   const [district, setDistrict] = useState<IDistrict | null>(null);
@@ -261,7 +252,7 @@ const Checkout = () => {
                         }}>
                         {item.productName}
                       </Typography>
-                      {item?.attributes?.length && (
+                      {item?.attributes?.length > 0 && (
                         <Typography
                           sx={{
                             display: 'inline-block',
@@ -272,7 +263,7 @@ const Checkout = () => {
                             borderRadius: 0.5,
                           }}>
                           {item?.attributes
-                            ?.map((item) => item?.value)
+                            ?.map((item) => item?.attributeValue)
                             .join(', ')}
                         </Typography>
                       )}

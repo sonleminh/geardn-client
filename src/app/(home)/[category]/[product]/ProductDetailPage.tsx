@@ -38,11 +38,12 @@ import { ATTRIBUTE_ORDER } from '@/constants/attributeOrder';
 import { useNotificationStore } from '@/stores/notification-store';
 import { IProduct } from '@/interfaces/IProduct';
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { useSession } from '@/hooks/useSession';
 
 const ProductDetailPage = ({ data }: { data: IProduct }) => {
   const params = useParams();
   const product = params.product as string;
-  const { user } = useAuthStore();
+  const { data: user } = useSession();
   const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
   const { mutateAsync: onAddToCart } = useAddToCart();
   const { showNotification } = useNotificationStore();
@@ -68,18 +69,22 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
 
     const options: Record<string, string[]> = {};
     data?.skus?.forEach((sku) => {
-      sku?.productSkuAttributes?.forEach(({ attributeValue }) => {
-        if (!options[attributeValue?.attribute?.name]) {
-          options[attributeValue?.attribute?.name] = [];
+      sku?.productSkuAttributes?.forEach(
+        (productSkuAttributes: IProductSkuAttributes) => {
+          if (!options[productSkuAttributes?.attributeValue?.attribute?.name]) {
+            options[productSkuAttributes?.attributeValue?.attribute?.name] = [];
+          }
+          if (
+            !options[
+              productSkuAttributes?.attributeValue?.attribute?.name
+            ].includes(productSkuAttributes?.attributeValue?.value)
+          ) {
+            options[productSkuAttributes?.attributeValue?.attribute?.name].push(
+              productSkuAttributes?.attributeValue?.value
+            );
+          }
         }
-        if (
-          !options[attributeValue?.attribute?.name].includes(
-            attributeValue.value
-          )
-        ) {
-          options[attributeValue?.attribute?.name].push(attributeValue.value);
-        }
-      });
+      );
     });
 
     const order = ATTRIBUTE_ORDER[data?.category?.name] ?? Object.keys(options);
@@ -201,16 +206,15 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
         productName: data?.name,
-        imageUrl:
-          selectedSku?.imageUrl !== ''
-            ? selectedSku?.imageUrl
-            : data?.images?.[0],
+        imageUrl: selectedSku?.imageUrl
+          ? selectedSku?.imageUrl
+          : data?.images?.[0],
         price: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
           (productSkuAttributes: IProductSkuAttributes) => ({
-            attributeId: productSkuAttributes.attributeValue.attribute.id,
-            value: productSkuAttributes.attributeValue.value,
+            attribute: productSkuAttributes.attributeValue.attribute.name,
+            attributeValue: productSkuAttributes.attributeValue.value,
           })
         ),
       });
@@ -221,16 +225,15 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
         productName: data?.name,
-        imageUrl:
-          selectedSku?.imageUrl !== ''
-            ? selectedSku?.imageUrl
-            : data?.images?.[0],
+        imageUrl: selectedSku?.imageUrl
+          ? selectedSku?.imageUrl
+          : data?.images?.[0],
         price: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
           (productSkuAttributes: IProductSkuAttributes) => ({
-            attributeId: productSkuAttributes.attributeValue.attribute.id,
-            value: productSkuAttributes.attributeValue.value,
+            attribute: productSkuAttributes.attributeValue.attribute.name,
+            attributeValue: productSkuAttributes.attributeValue.value,
           })
         ),
       };

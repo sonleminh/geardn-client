@@ -44,6 +44,7 @@ import { ROUTES } from '@/constants/route';
 import EMPTY_CART from '@/assets/empty-cart.png';
 
 import { ICartStoreItem } from '@/interfaces/ICart';
+import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 
 const Cart = () => {
   const { user, setCheckoutCart } = useAuthStore((state) => state);
@@ -86,12 +87,14 @@ const Cart = () => {
           imageUrl: item?.sku?.imageUrl
             ? item?.sku?.imageUrl
             : item?.product?.images?.[0],
-          price: item?.sku?.price,
+          price: item?.sku?.sellingPrice,
           quantity: item?.quantity,
-          attributes: item?.sku?.productSkuAttributes?.map((attr) => ({
-            type: attr?.attribute?.type,
-            value: attr?.attribute?.value,
-          })),
+          attributes: item?.sku?.productSkuAttributes?.map(
+            (productSkuAttributes: IProductSkuAttributes) => ({
+              attribute: productSkuAttributes?.attributeValue?.attribute?.name,
+              attributeValue: productSkuAttributes?.attributeValue?.value,
+            })
+          ),
         }))
       );
     }
@@ -365,7 +368,7 @@ const Cart = () => {
                                         borderRadius: 0.5,
                                       }}>
                                       {row?.attributes
-                                        ?.map((item) => item?.value)
+                                        ?.map((item) => item?.attributeValue)
                                         .join(', ')}
                                     </Typography>
                                   ) : (

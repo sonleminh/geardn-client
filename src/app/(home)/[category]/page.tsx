@@ -1,6 +1,6 @@
 // import { fetchProductsByCategory } from '@/data/product.server';
 import { Box } from '@mui/material';
-import CategoryProductList from './CategoryProductList';
+import CategoryProductClient from './CategoryProductClient';
 import { fetchProductsByCategory } from '@/data/product.server';
 
 export default async function CategoryPage({
@@ -25,7 +25,7 @@ export default async function CategoryPage({
 
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
-      <CategoryProductList
+      <CategoryProductClient
         category={category}
         sort={sort}
         initialItems={firstPage.data?.items ?? []}
