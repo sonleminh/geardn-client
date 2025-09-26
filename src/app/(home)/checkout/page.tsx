@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ChangeEvent, useMemo, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import SkeletonImage from '@/components/common/SkeletonImage';
@@ -48,6 +48,10 @@ import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createOrder } from '@/apis/order';
+// Simplified location option matching our BFF responses
+type LocationOption = { id: number; code: number; name: string };
+import { useQuery } from '@tanstack/react-query';
+import { getDistricts, getProvinces, getWards } from '@/apis/location';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
@@ -61,17 +65,44 @@ const Checkout = () => {
 
   const router = useRouter();
 
-  const { data: provinceList } = useGetProvinces();
-  const { data: paymentMethods } = useGetPaymentMethods();
-  const { data: orderData } = createOrder();
+  // const { data: provinceList } = useGetProvinces();
+  // const { data: paymentMethods } = useGetPaymentMethods();
+  // const { data: orderData } = createOrder();
 
-  const [province, setProvince] = useState<IProvince | null>(null);
-  const [district, setDistrict] = useState<IDistrict | null>(null);
-  const [ward, setWard] = useState<IWard | null>(null);
+  const [province, setProvince] = useState<LocationOption | null>(null);
+  const [district, setDistrict] = useState<LocationOption | null>(null);
+  const [ward, setWard] = useState<LocationOption | null>(null);
   const [detailAddress, setDetailAddress] = useState<string>('');
   const [shopAddress, setShopAddress] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [shipmentError, setShipmentError] = useState(false);
+
+  const { data: provinceList = [] } = useQuery({
+    queryKey: ['prov'],
+    queryFn: getProvinces,
+    staleTime: 86400000,
+  });
+  const { data: districtList = [] } = useQuery({
+    queryKey: ['dist', province],
+    queryFn: () => getDistricts(province?.code ?? 0),
+    enabled: !!province,
+    staleTime: 86400000,
+  });
+  const { data: wardList = [] } = useQuery({
+    queryKey: ['ward', district],
+    queryFn: () => getWards(district?.code ?? 0),
+    enabled: !!district,
+    staleTime: 86400000,
+  });
+
+  // Reset dependent selections when parent changes
+  useEffect(() => {
+    setDistrict(null);
+    setWard(null);
+  }, [province?.code]);
+  useEffect(() => {
+    setWard(null);
+  }, [district?.code]);
 
   const handleModalOpen = () => setModalOpen(true);
   const handleModalClose = () => {
@@ -83,15 +114,6 @@ const Checkout = () => {
       setDetailAddress('');
     }
   };
-
-  const { data: provinceData } = useGetProvince(
-    provinceList?.find?.((item) => item?.code === province?.code)?.code ?? 0
-  );
-
-  const { data: districtData } = useGetDistricts(
-    provinceData?.districts?.find?.((item) => item?.code === district?.code)
-      ?.code ?? 0
-  );
 
   const formik = useFormik({
     initialValues: {
@@ -137,17 +159,17 @@ const Checkout = () => {
         },
         userId: user?.id ?? null,
       };
-      onCreateOrder(payload, {
-        onSuccess: (data) => {
-          checkoutCart?.forEach((item) => {
-            removeItem(item?.skuId);
-          });
-          router.push(`${ROUTES.ORDER_CONFIRMATION}/${data?.data?.orderCode}`);
-        },
-        onError: () => {
-          showNotification('Đã có lỗi xảy ra', 'error');
-        },
-      });
+      // onCreateOrder(payload, {
+      //   onSuccess: (data) => {
+      //     checkoutCart?.forEach((item) => {
+      //       removeItem(item?.skuId);
+      //     });
+      //     router.push(`${ROUTES.ORDER_CONFIRMATION}/${data?.data?.orderCode}`);
+      //   },
+      //   onError: () => {
+      //     showNotification('Đã có lỗi xảy ra', 'error');
+      //   },
+      // });
     },
   });
 
@@ -458,23 +480,33 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={provinceData?.districts ?? []}
+                            options={districtList ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Quận/Huyện' />
                             )}
                             onChange={(e, value) => setDistrict(value)}
+                            value={district}
+                            isOptionEqualToValue={(option, value) =>
+                              option?.code === value?.code
+                            }
                             getOptionLabel={(option) => option?.name ?? ''}
+                            disabled={!province}
                           />
                         </FormControl>
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={districtData?.wards ?? []}
+                            options={wardList ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Phường/Xã' />
                             )}
                             onChange={(e, value) => setWard(value)}
+                            value={ward}
+                            isOptionEqualToValue={(option, value) =>
+                              option?.code === value?.code
+                            }
                             getOptionLabel={(option) => option?.name ?? ''}
+                            disabled={!district}
                           />
                         </FormControl>
                         <FormControl
@@ -678,7 +710,7 @@ const Checkout = () => {
                   name='payment.method'
                   onChange={handleChange}
                   value={formik?.values?.paymentMethodId}>
-                  {paymentMethods?.data?.map((item) => (
+                  {/* {paymentMethods?.data?.map((item) => (
                     <FormControlLabel
                       sx={{ my: 1 }}
                       key={item?.key}
@@ -709,7 +741,7 @@ const Checkout = () => {
                         </Box>
                       }
                     />
-                  ))}
+                  ))} */}
                 </RadioGroup>
                 <FormHelperText sx={helperTextStyle}>
                   {formik?.errors?.paymentMethodId}
@@ -778,7 +810,7 @@ const Checkout = () => {
           </Grid2>
         </Grid2>
       </LayoutContainer>
-      {isCreateOrderPending && <FullScreenLoader />}
+      {/* {isCreateOrderPending && <FullScreenLoader />} */}
     </Box>
   );
 };
