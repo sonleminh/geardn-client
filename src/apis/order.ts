@@ -1,7 +1,7 @@
-import { IOrder } from "@/interfaces/IOrder";
+import { ICreateOrderPayload, IOrder } from "@/interfaces/IOrder";
 import { TBaseResponse } from "@/types/response.type";
 
-export async function createOrder(payload: { name: string; email: string; password: string }) {
+export async function createOrder(payload: ICreateOrderPayload) {
     const res = await fetch('/api/bff/order/create', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

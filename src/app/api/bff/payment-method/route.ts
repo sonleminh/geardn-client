@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
 
-    const beRes = await fetch(`${process.env.BACKEND_API_URL}/auth/whoami`, {
+    const beRes = await fetch(`${process.env.BACKEND_API_URL}/payment-methods`, {
       method: 'GET',
       headers: {
         'content-type': 'application/json',

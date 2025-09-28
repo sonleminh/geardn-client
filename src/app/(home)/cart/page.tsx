@@ -87,7 +87,7 @@ const Cart = () => {
           imageUrl: item?.sku?.imageUrl
             ? item?.sku?.imageUrl
             : item?.product?.images?.[0],
-          price: item?.sku?.sellingPrice,
+          sellingPrice: item?.sku?.sellingPrice,
           quantity: item?.quantity,
           attributes: item?.sku?.productSkuAttributes?.map(
             (productSkuAttributes: IProductSkuAttributes) => ({
@@ -210,7 +210,7 @@ const Cart = () => {
       .filter((item) => item !== undefined);
 
     return selectedItems?.reduce(
-      (acc, item) => acc + (item?.price ?? 0) * (item?.quantity ?? 0),
+      (acc, item) => acc + (item?.sellingPrice ?? 0) * (item?.quantity ?? 0),
       0
     );
   };
@@ -382,7 +382,7 @@ const Cart = () => {
                               component='th'
                               scope='row'
                               align='center'>
-                              {formatPrice(row?.price)}
+                              {formatPrice(row?.sellingPrice)}
                             </TableCell>
                             <TableCell
                               component='th'

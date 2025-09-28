@@ -49,9 +49,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createOrder } from '@/apis/order';
 // Simplified location option matching our BFF responses
-type LocationOption = { id: number; code: number; name: string };
 import { useQuery } from '@tanstack/react-query';
 import { getDistricts, getProvinces, getWards } from '@/apis/location';
+import { ILocationOption } from '@/interfaces/ILocation';
+import { useDistricts, useProvinces, useWards } from '@/queries/location';
+import { usePaymentMethods } from '@/queries/payment';
+import { useCreateOrder } from '@/queries/order';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
@@ -69,32 +72,19 @@ const Checkout = () => {
   // const { data: paymentMethods } = useGetPaymentMethods();
   // const { data: orderData } = createOrder();
 
-  const [province, setProvince] = useState<LocationOption | null>(null);
-  const [district, setDistrict] = useState<LocationOption | null>(null);
-  const [ward, setWard] = useState<LocationOption | null>(null);
+  const [province, setProvince] = useState<ILocationOption | null>(null);
+  const [district, setDistrict] = useState<ILocationOption | null>(null);
+  const [ward, setWard] = useState<ILocationOption | null>(null);
   const [detailAddress, setDetailAddress] = useState<string>('');
   const [shopAddress, setShopAddress] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [shipmentError, setShipmentError] = useState(false);
 
-  const { data: provinceList = [] } = useQuery({
-    queryKey: ['prov'],
-    queryFn: getProvinces,
-    staleTime: 86400000,
-  });
-  const { data: districtList = [] } = useQuery({
-    queryKey: ['dist', province],
-    queryFn: () => getDistricts(province?.code ?? 0),
-    enabled: !!province,
-    staleTime: 86400000,
-  });
-  const { data: wardList = [] } = useQuery({
-    queryKey: ['ward', district],
-    queryFn: () => getWards(district?.code ?? 0),
-    enabled: !!district,
-    staleTime: 86400000,
-  });
-
+  const { data: provinces = [] } = useProvinces();
+  const { data: districts = [] } = useDistricts(province?.code);
+  const { data: wards = [] } = useWards(district?.code);
+  const { data: paymentMethods } = usePaymentMethods();
+  const { mutate: onCreateOrder } = useCreateOrder();
   // Reset dependent selections when parent changes
   useEffect(() => {
     setDistrict(null);
@@ -145,7 +135,7 @@ const Checkout = () => {
       }
       const payload = {
         ...values,
-        items: checkoutCart?.map((item) => ({
+        orderItems: checkoutCart?.map((item) => ({
           skuId: item.skuId,
           quantity: item.quantity,
         })),
@@ -159,17 +149,17 @@ const Checkout = () => {
         },
         userId: user?.id ?? null,
       };
-      // onCreateOrder(payload, {
-      //   onSuccess: (data) => {
-      //     checkoutCart?.forEach((item) => {
-      //       removeItem(item?.skuId);
-      //     });
-      //     router.push(`${ROUTES.ORDER_CONFIRMATION}/${data?.data?.orderCode}`);
-      //   },
-      //   onError: () => {
-      //     showNotification('Đã có lỗi xảy ra', 'error');
-      //   },
-      // });
+      onCreateOrder(payload, {
+        onSuccess: (data) => {
+          checkoutCart?.forEach((item) => {
+            removeItem(item?.skuId);
+          });
+          router.push(`${ROUTES.ORDER_CONFIRMATION}/${data?.data?.orderCode}`);
+        },
+        onError: () => {
+          showNotification('Đã có lỗi xảy ra', 'error');
+        },
+      });
     },
   });
 
@@ -464,7 +454,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={provinceList ?? []}
+                            options={provinces ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Tỉnh/Thành phố' />
                             )}
@@ -480,7 +470,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={districtList ?? []}
+                            options={districts ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Quận/Huyện' />
                             )}
@@ -496,7 +486,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={wardList ?? []}
+                            options={wards ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Phường/Xã' />
                             )}
@@ -710,7 +700,7 @@ const Checkout = () => {
                   name='payment.method'
                   onChange={handleChange}
                   value={formik?.values?.paymentMethodId}>
-                  {/* {paymentMethods?.data?.map((item) => (
+                  {paymentMethods?.data?.map((item) => (
                     <FormControlLabel
                       sx={{ my: 1 }}
                       key={item?.key}
@@ -741,7 +731,7 @@ const Checkout = () => {
                         </Box>
                       }
                     />
-                  ))} */}
+                  ))}
                 </RadioGroup>
                 <FormHelperText sx={helperTextStyle}>
                   {formik?.errors?.paymentMethodId}

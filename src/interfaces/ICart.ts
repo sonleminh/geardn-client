@@ -23,7 +23,7 @@ export interface ICartStoreItem {
     skuId: number;
     productName: string;
     imageUrl: string;
-    price: number;
+    sellingPrice: number;
     quantity: number;
     attributes: {
         attribute: string;

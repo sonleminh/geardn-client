@@ -53,28 +53,24 @@ export interface IOrder {
     createdAt: Date;
 }
 
-export interface ICreateOrder {
-    customer: {
-        name: string;
-        phone: string;
-        mail?: string;
-    }
-    items: IOrderItem[]
-    address?: {
-        city: string;
-        district: string;
-        ward: string;
-        specific_address: string;
-    };
-    shipment?: {
+export interface ICreateOrderPayload {
+    userId?: string | null;
+    fullName: string;
+    phoneNumber: string;
+    email: string;
+    totalPrice: number;
+    note: string;
+    shipment: {
         method: number;
-        delivery_date: Date;
         address: string;
-    };
-    payment: string,
-    flag: {
-        is_online_order: boolean,
+        deliveryDate: Date
     },
-    note?: string,
-    userid: string | null;
-}
+    flag: {
+        isOnlineOrder: boolean;
+    },
+    paymentMethodId: number;
+    orderItems:  {
+        skuId: number;
+        quantity: number
+    }[]
+  }
