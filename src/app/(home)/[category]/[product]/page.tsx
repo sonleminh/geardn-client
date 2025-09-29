@@ -1,6 +1,6 @@
 import { fetchProduct } from '@/data/product.server';
 import { Box } from '@mui/material';
-import ProductDetailPage from './ProductDetailPage';
+import ProductDetailPage from './ProductDetailClient';
 
 export default async function ProductDetail({
   params,

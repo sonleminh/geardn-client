@@ -59,6 +59,11 @@ const Cart = () => {
   const { data: cartStock } = useGetCartStock(
     cartItems?.map((item) => item.skuId)
   );
+
+  console.log(
+    'cartStock',
+    cartItems?.map((item) => item.skuId)
+  );
   const { data: cartServer } = useGetCart(user);
   const { mutateAsync: deleteCartItem } = useDeleteCartItem();
 
@@ -155,6 +160,7 @@ const Cart = () => {
 
   const handleAddItem = async (skuId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
+    console.log('itemToUpdate', itemToUpdate);
     if (!itemToUpdate) return;
     const newQuantity = itemToUpdate.quantity + 1;
     if (user) {
@@ -163,6 +169,8 @@ const Cart = () => {
         skuId: skuId,
         quantity: newQuantity,
       });
+    } else {
+      updateQuantity(skuId, newQuantity);
     }
   };
 
@@ -183,8 +191,12 @@ const Cart = () => {
       debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
       return;
     }
-    updateQuantity(skuId, newQuantity);
-    debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+    if (user) {
+      updateQuantity(skuId, newQuantity);
+      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+    } else {
+      updateQuantity(skuId, newQuantity);
+    }
   };
 
   const handleDeleteItem = async (skuId: number) => {
@@ -499,16 +511,6 @@ const Cart = () => {
                                 Xóa
                               </Typography>
                             </TableCell>
-                            <CustomDialog
-                              content={`Rất tiếc, bạn chỉ có thể mua tối đa ${
-                                cartStock?.data?.find(
-                                  (item) => item.id === row?.skuId
-                                )?.quantity ?? 0
-                              } sản phẩm của chương trình giảm giá này`}
-                              showCancelButton={false}
-                              open={openOutOfStockDialog}
-                              handleOk={handleOkOutOfStockDialog}
-                            />
                           </TableRow>
                         );
                       })}
@@ -613,6 +615,7 @@ const Cart = () => {
       </LayoutContainer>
       <CustomDialog
         title='Bạn chắc chắn muốn bỏ sản phẩm này?'
+        content=''
         okContent='Có'
         cancelContent='Không'
         open={openRemoveItemDialog}

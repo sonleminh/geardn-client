@@ -40,7 +40,7 @@ import { IProduct } from '@/interfaces/IProduct';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { useSession } from '@/hooks/useSession';
 
-const ProductDetailPage = ({ data }: { data: IProduct }) => {
+const ProductDetailClient = ({ data }: { data: IProduct }) => {
   const params = useParams();
   const product = params.product as string;
   const { data: user } = useSession();
@@ -209,7 +209,7 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
         imageUrl: selectedSku?.imageUrl
           ? selectedSku?.imageUrl
           : data?.images?.[0],
-        price: selectedSku?.sellingPrice,
+        sellingPrice: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
           (productSkuAttributes: IProductSkuAttributes) => ({
@@ -228,7 +228,7 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
         imageUrl: selectedSku?.imageUrl
           ? selectedSku?.imageUrl
           : data?.images?.[0],
-        price: selectedSku?.sellingPrice,
+        sellingPrice: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
           (productSkuAttributes: IProductSkuAttributes) => ({
@@ -566,4 +566,4 @@ const ProductDetailPage = ({ data }: { data: IProduct }) => {
   );
 };
 
-export default ProductDetailPage;
+export default ProductDetailClient;

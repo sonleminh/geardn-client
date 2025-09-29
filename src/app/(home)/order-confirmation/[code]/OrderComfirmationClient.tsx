@@ -1,5 +1,4 @@
 'use client';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
 import { Box, Button, Divider, Grid2, Typography } from '@mui/material';
@@ -13,10 +12,9 @@ import { useGetOrder } from '@/apis/order';
 
 import ORDER_SUCCESS from '@/assets/order-success.png';
 import BANNER_BG from '@/assets/geardn.jpg';
+import { IOrder } from '@/interfaces/IOrder';
 
-const CheckoutSuccess = () => {
-  const params = useParams();
-  const { data } = useGetOrder(params?.slug as string);
+const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -98,10 +96,10 @@ const CheckoutSuccess = () => {
           <Grid2 sx={{}} size={8.5}>
             <Box sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: '4px' }}>
               <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-                Sản phẩm trong đơn ({data?.data?.orderItems?.length})
+                Sản phẩm trong đơn ({data?.orderItems?.length})
               </Typography>
 
-              {data?.data?.orderItems?.map((item, orderItemIndex) => (
+              {data?.orderItems?.map((item, orderItemIndex) => (
                 <Box
                   sx={{
                     display: 'flex',
@@ -183,14 +181,10 @@ const CheckoutSuccess = () => {
                   },
                 }}>
                 <Typography sx={{ mb: 0.5, fontWeight: 600 }}>
-                  {data?.data?.fullName}
+                  {data?.fullName}
                 </Typography>
-                <Typography sx={{ mb: 0.5 }}>
-                  {data?.data?.phoneNumber}
-                </Typography>
-                {data?.data?.email && (
-                  <Typography>{data?.data?.email}</Typography>
-                )}
+                <Typography sx={{ mb: 0.5 }}>{data?.phoneNumber}</Typography>
+                {data?.email && <Typography>{data?.email}</Typography>}
               </Box>
             </Box>
             <Box sx={{ p: 2, mb: 2, bgcolor: '#fff', borderRadius: '4px' }}>
@@ -211,12 +205,12 @@ const CheckoutSuccess = () => {
                     fontSize: 13,
                     fontWeight: 600,
                   }}>
-                  {data?.data?.shipment?.method === 1
+                  {data?.shipment?.method === 1
                     ? 'Giao tới:'
                     : 'Nhận hàng tại:'}
                 </Typography>
                 <Typography sx={{ fontWeight: 500 }}>
-                  {data?.data?.shipment?.address}
+                  {data?.shipment?.address}
                 </Typography>
               </Box>
               <Box
@@ -233,12 +227,12 @@ const CheckoutSuccess = () => {
                     fontSize: 13,
                     fontWeight: 600,
                   }}>
-                  {data?.data?.shipment?.method === 1
+                  {data?.shipment?.method === 1
                     ? 'Thời gian giao:'
                     : 'Thời gian nhận hàng:'}
                 </Typography>
                 <Typography sx={{ fontWeight: 500 }}>
-                  {moment(data?.data?.shipment?.deliveryDate).format('LLL')}
+                  {moment(data?.shipment?.deliveryDate).format('LLL')}
                 </Typography>
               </Box>
               <Box
@@ -258,7 +252,7 @@ const CheckoutSuccess = () => {
                   Ghi chú:
                 </Typography>
                 <Typography sx={{ fontWeight: 500 }}>
-                  {data?.data?.note !== '' ? data?.data?.note : 'Không có'}
+                  {data?.note !== '' ? data?.note : 'Không có'}
                 </Typography>
               </Box>
             </Box>
@@ -274,7 +268,7 @@ const CheckoutSuccess = () => {
                   borderRadius: 2,
                   bgcolor: '#F3F4F6',
                 }}>
-                {data?.data?.paymentMethod?.image && (
+                {data?.paymentMethod?.image && (
                   <Box
                     sx={{
                       position: 'relative',
@@ -284,15 +278,14 @@ const CheckoutSuccess = () => {
                       overflow: 'hidden',
                     }}>
                     <SkeletonImage
-                      src={data?.data?.paymentMethod?.image}
+                      src={data?.paymentMethod?.image}
                       alt='COD - GearDN'
                       fill
                     />
                   </Box>
                 )}
                 <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
-                  {data?.data?.paymentMethod?.key} -{' '}
-                  {data?.data?.paymentMethod?.name}
+                  {data?.paymentMethod?.key} - {data?.paymentMethod?.name}
                 </Typography>
               </Box>
             </Box>
@@ -322,9 +315,7 @@ const CheckoutSuccess = () => {
                   mb: 1,
                 }}>
                 <Typography sx={{ fontSize: 13 }}>Mã đơn hàng:</Typography>
-                <Typography sx={{ fontSize: 14 }}>
-                  {data?.data?.orderCode}
-                </Typography>
+                <Typography sx={{ fontSize: 14 }}>{data?.orderCode}</Typography>
               </Box>
               <Box
                 sx={{
@@ -335,7 +326,7 @@ const CheckoutSuccess = () => {
                 className='total-price-cost'>
                 <Typography sx={{ fontSize: 13 }}>Tổng tiền:</Typography>
                 <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
-                  {formatPrice(data?.data?.totalPrice ?? 0)}
+                  {formatPrice(data?.totalPrice ?? 0)}
                 </Typography>
               </Box>
               <Divider sx={{ mt: 2, mb: 1 }} />
@@ -366,4 +357,4 @@ const CheckoutSuccess = () => {
   );
 };
 
-export default CheckoutSuccess;
+export default OrderConfirmationClient;

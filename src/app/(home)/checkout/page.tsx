@@ -151,6 +151,7 @@ const Checkout = () => {
       };
       onCreateOrder(payload, {
         onSuccess: (data) => {
+          console.log('data', data);
           checkoutCart?.forEach((item) => {
             removeItem(item?.skuId);
           });
@@ -165,7 +166,7 @@ const Checkout = () => {
 
   const totalAmount = useMemo(() => {
     return checkoutCart?.reduce(
-      (acc, item) => acc + item.price * item.quantity,
+      (acc, item) => acc + item.sellingPrice * item.quantity,
       0
     );
   }, [checkoutCart]);
@@ -288,7 +289,7 @@ const Checkout = () => {
                       textAlign: 'center',
                       fontSize: 14,
                     }}>
-                    {formatPrice(item?.price)}
+                    {formatPrice(item?.sellingPrice)}
                   </Typography>
                   <Typography
                     sx={{
@@ -306,7 +307,7 @@ const Checkout = () => {
                       textAlign: 'center',
                       fontSize: 14,
                     }}>
-                    {formatPrice(item?.price) ?? 1 * item.quantity}
+                    {formatPrice(item?.sellingPrice) ?? 1 * item.quantity}
                   </Typography>
                 </Box>
               ))}
