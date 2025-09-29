@@ -8,13 +8,13 @@ import 'moment/locale/vi';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import LayoutContainer from '@/components/layout-container';
 import { formatPrice } from '@/utils/format-price';
-import { useGetOrder } from '@/apis/order';
 
 import ORDER_SUCCESS from '@/assets/order-success.png';
 import BANNER_BG from '@/assets/geardn.jpg';
 import { IOrder } from '@/interfaces/IOrder';
 
 const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
+  console.log('orderItems', data?.orderItems);
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -124,15 +124,15 @@ const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
                         '.cart-item': { objectFit: 'cover' },
                       }}>
                       <SkeletonImage
-                        src={item?.sku?.imageUrl}
+                        src={item?.imageUrl}
                         alt={''}
                         fill
                         className='cart-item'
                       />
                     </Box>
                     <Box>
-                      <Typography>{item?.product?.name}</Typography>
-                      {item?.sku?.productSkuAttributes?.length ? (
+                      <Typography>{item?.productName}</Typography>
+                      {item?.skuAttributes?.length ? (
                         <Box
                           sx={{
                             display: 'inline-block',
@@ -142,8 +142,8 @@ const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
                             fontSize: 11,
                             borderRadius: 0.5,
                           }}>
-                          {item?.sku?.productSkuAttributes
-                            ?.map((attItem) => attItem?.attribute?.value)
+                          {item?.skuAttributes
+                            ?.map((attItem) => attItem?.value)
                             .join(', ')}
                         </Box>
                       ) : (
@@ -161,7 +161,7 @@ const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
                         fontWeight: 600,
                         textAlign: 'end',
                       }}>
-                      {formatPrice(item?.sku?.price)}
+                      {formatPrice(item?.sellingPrice)}
                     </Typography>
                   </Box>
                 </Box>

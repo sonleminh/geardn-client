@@ -35,7 +35,7 @@ export async function fetchProducts(params: FindProducts = {}) {
 export async function fetchProductsByCategory(params: FindProductsByCategory = {}) {
   const {  limit = 10, sort='', category = '', nextCursor = '', revalidate = 60 } = params;
 
-  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/products/category/${category}`, { limit, sort, cursor: nextCursor });
+  const url = buildUrl(process.env.NEXT_PUBLIC_API!, `/products/category/slug/${category}`, { limit, sort, cursor: nextCursor });
   return fetchJson<TBaseResponse<ProductPage>>(url, { revalidate });
 }
 

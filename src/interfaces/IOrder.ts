@@ -6,23 +6,15 @@ export interface ICartPayload {
 }
 
 export interface IOrderItem {
-    product: {
-        name: string;
-        images: string[];
-    };
-    sku: {
-        sku: string;
-        price: number;
-        quantity: string;
-        imageUrl: string;
-        productSkuAttributes: {
-            attribute: {
-                type: string;
-                value: string;
-            }
-        }[];
-    };
+    imageUrl: string;
+    productId: number;
+    productName: string;
+    productSlug: string;
     quantity: number;
+    sellingPrice: number;   
+    skuAttributes: {attribute: string; value: string}[];
+    skuCode: string;
+    skuId: number;     
 }
 
 export interface IOrder {

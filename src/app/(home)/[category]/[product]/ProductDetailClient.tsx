@@ -41,8 +41,8 @@ import SkeletonImage from '@/components/common/SkeletonImage';
 import { useSession } from '@/hooks/useSession';
 
 const ProductDetailClient = ({ data }: { data: IProduct }) => {
-  const params = useParams();
-  const product = params.product as string;
+  // const params = useParams();
+  // const product = params.product as string;
   const { data: user } = useSession();
   const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
   const { mutateAsync: onAddToCart } = useAddToCart();
@@ -280,7 +280,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
 
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
-    { href: `/product/${product}`, label: data?.name as string },
+    { href: '', label: data?.name as string },
   ];
 
   const totalStock = data?.skus?.reduce(
