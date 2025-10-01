@@ -10,7 +10,6 @@ export default async function ProductDetail({
   const { product } = await params;
 
   const productsData = await fetchProduct({ slug: product, revalidate: 0 });
-
   return (
     <Box>
       <ProductDetailPage data={productsData.data} />

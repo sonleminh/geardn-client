@@ -14,7 +14,6 @@ import BANNER_BG from '@/assets/geardn.jpg';
 import { IOrder } from '@/interfaces/IOrder';
 
 const OrderConfirmationClient = ({ data }: { data: IOrder }) => {
-  console.log('orderItems', data?.orderItems);
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>

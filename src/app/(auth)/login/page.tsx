@@ -24,7 +24,6 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import LockIcon from '@mui/icons-material/Lock';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
-import { useSyncCart } from '@/apis/cart';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
@@ -33,6 +32,7 @@ import { AxiosError } from 'axios';
 import { ROUTES } from '@/constants/route';
 import { loginWithEmailPwd } from '@/apis/auth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
+import { useSyncCart } from '@/queries/cart';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -67,7 +67,7 @@ const LoginPage = () => {
             quantity,
           })
         );
-        const updatedCart = await onSyncCart(syncPayload);
+        const updatedCart = await onSyncCart({ items: syncPayload });
         console.log('updatedCart:', updatedCart);
         const syncCartData = updatedCart?.data?.items?.map((item) => ({
           productId: item?.productId,
@@ -76,7 +76,7 @@ const LoginPage = () => {
           imageUrl: item?.sku?.imageUrl
             ? item?.sku?.imageUrl
             : item?.product?.images?.[0],
-          price: item?.sku?.sellingPrice,
+          sellingPrice: item?.sku?.sellingPrice,
           quantity: item?.quantity,
           attributes: item?.sku?.productSkuAttributes.map(
             (productSkuAttribute: IProductSkuAttributes) => ({

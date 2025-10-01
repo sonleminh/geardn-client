@@ -146,16 +146,16 @@ const Cart = () => {
     []
   );
 
-  // const debouncedReduceQuantity = useCallback(
-  //   debounce((payload: { skuId: number; quantity: number }) => {
-  //     onUpdateQuantity(payload, {
-  //       onError: () => {
-  //         updateQuantity(payload.skuId, payload.quantity - 1); // !!
-  //       },
-  //     });
-  //   }, 1000),
-  //   []
-  // );
+  const debouncedReduceQuantity = useCallback(
+    debounce((payload: { skuId: number; quantity: number }) => {
+      onUpdateQuantity(payload, {
+        onError: () => {
+          updateQuantity(payload.skuId, payload.quantity - 1); // !!
+        },
+      });
+    }, 1000),
+    []
+  );
 
   const handleAddItem = async (skuId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
@@ -173,47 +173,47 @@ const Cart = () => {
     }
   };
 
-  // const handleSubtractItem = async (skuId: number, name: string) => {
-  //   const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
+  const handleSubtractItem = async (skuId: number, name: string) => {
+    const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
 
-  //   if (!itemToUpdate) return;
+    if (!itemToUpdate) return;
 
-  //   const newQuantity = itemToUpdate.quantity - 1;
-  //   if (newQuantity === 0 && !user) {
-  //     setOpenRemoveItemDialog(true);
-  //     setSubtractItem({ skuId, name });
-  //     return;
-  //   }
-  //   if (newQuantity === 0 && user) {
-  //     setOpenRemoveItemDialog(true);
-  //     setSubtractItem({ skuId, name });
-  //     debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
-  //     return;
-  //   }
-  //   if (user) {
-  //     updateQuantity(skuId, newQuantity);
-  //     debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
-  //   } else {
-  //     updateQuantity(skuId, newQuantity);
-  //   }
-  // };
+    const newQuantity = itemToUpdate.quantity - 1;
+    if (newQuantity === 0 && !user) {
+      setOpenRemoveItemDialog(true);
+      setSubtractItem({ skuId, name });
+      return;
+    }
+    if (newQuantity === 0 && user) {
+      setOpenRemoveItemDialog(true);
+      setSubtractItem({ skuId, name });
+      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+      return;
+    }
+    if (user) {
+      updateQuantity(skuId, newQuantity);
+      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+    } else {
+      updateQuantity(skuId, newQuantity);
+    }
+  };
 
-  // const handleDeleteItem = async (skuId: number) => {
-  //   removeItem(skuId);
-  //   if (user) {
-  //     const backupCartItems = [...cartItems];
-  //     const cartServerItem = cartServer?.data?.items?.find(
-  //       (item) => item?.sku?.id === skuId
-  //     );
-  //     if (cartServerItem) {
-  //       await deleteCartItem(cartServerItem?.id, {
-  //         onError: () => {
-  //           syncCart(backupCartItems);
-  //         },
-  //       });
-  //     }
-  //   }
-  // };
+  const handleDeleteItem = async (skuId: number) => {
+    removeItem(skuId);
+    if (user) {
+      const backupCartItems = [...cartItems];
+      const cartServerItem = cartServer?.data?.items?.find(
+        (item) => item?.sku?.id === skuId
+      );
+      if (cartServerItem) {
+        await deleteCartItem(cartServerItem?.id, {
+          onError: () => {
+            syncCart(backupCartItems);
+          },
+        });
+      }
+    }
+  };
 
   const totalAmount = () => {
     const selectedItems = selected
@@ -416,13 +416,12 @@ const Cart = () => {
                                     borderTopRightRadius: 0,
                                     borderBottomRightRadius: 0,
                                   }}
-                                  // onClick={() =>
-                                  //   handleSubtractItem(
-                                  //     row?.skuId,
-                                  //     row?.productName
-                                  //   )
-                                  // }
-                                >
+                                  onClick={() =>
+                                    handleSubtractItem(
+                                      row?.skuId,
+                                      row?.productName
+                                    )
+                                  }>
                                   -
                                 </Button>
                                 <TextField
@@ -508,8 +507,7 @@ const Cart = () => {
                                     cursor: 'pointer',
                                   },
                                 }}
-                                // onClick={() => handleDeleteItem(row?.skuId)}
-                              >
+                                onClick={() => handleDeleteItem(row?.skuId)}>
                                 Xóa
                               </Typography>
                             </TableCell>
