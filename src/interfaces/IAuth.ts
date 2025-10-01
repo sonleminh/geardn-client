@@ -37,7 +37,6 @@ export interface ISignUpResponse {
   name: string;
   role: string;
   status: number;
-  message: string;
 }
 
 export interface IRefreshTokenResponse {

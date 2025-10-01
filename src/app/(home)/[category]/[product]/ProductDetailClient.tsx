@@ -18,7 +18,7 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 import { SwiperClass } from 'swiper/react';
 
 import { useGetProduct } from '@/apis/product';
-import { useAddToCart } from '@/apis/cart';
+// import { useAddToCart } from '@/apis/cart';
 
 import LayoutContainer from '@/components/layout-container';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
@@ -45,7 +45,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
   // const product = params.product as string;
   const { data: user } = useSession();
   const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
-  const { mutateAsync: onAddToCart } = useAddToCart();
+  // const { mutateAsync: onAddToCart } = useAddToCart();
   const { showNotification } = useNotificationStore();
 
   const [count, setCount] = useState<number | null>(1);
@@ -241,29 +241,29 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       addToCart(newItem);
 
       try {
-        await onAddToCart(
-          {
-            productId: selectedSku?.productId,
-            skuId: selectedSku?.id,
-            quantity: count ?? 1,
-          },
-          {
-            onError: () => {
-              const cartItem = cartItems?.find(
-                (item) => item.skuId === selectedSku?.id
-              );
-              if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
-                removeItem(selectedSku?.id);
-              } else {
-                updateQuantity(
-                  selectedSku?.id,
-                  selectedSku?.quantity - (count ?? 0)
-                );
-              }
-              showNotification('Đã có lỗi xảy ra', 'error');
-            },
-          }
-        );
+        // await onAddToCart(
+        //   {
+        //     productId: selectedSku?.productId,
+        //     skuId: selectedSku?.id,
+        //     quantity: count ?? 1,
+        //   },
+        //   {
+        //     onError: () => {
+        //       const cartItem = cartItems?.find(
+        //         (item) => item.skuId === selectedSku?.id
+        //       );
+        //       if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
+        //         removeItem(selectedSku?.id);
+        //       } else {
+        //         updateQuantity(
+        //           selectedSku?.id,
+        //           selectedSku?.quantity - (count ?? 0)
+        //         );
+        //       }
+        //       showNotification('Đã có lỗi xảy ra', 'error');
+        //     },
+        //   }
+        // );
       } catch (error) {
         console.log('error', error);
         removeItem(newItem.skuId);

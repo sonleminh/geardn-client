@@ -151,7 +151,6 @@ const Checkout = () => {
       };
       onCreateOrder(payload, {
         onSuccess: (data) => {
-          console.log('data', data);
           checkoutCart?.forEach((item) => {
             removeItem(item?.skuId);
           });

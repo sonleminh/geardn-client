@@ -43,7 +43,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   // const { data: cartData, isLoading } = useGetCart(user);
   // const { mutateAsync: onLogout } = useLogout();
   const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
-  const userData = data ?? initialUser;
+  const userData = data?.data ?? initialUser;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);

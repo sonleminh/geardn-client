@@ -30,12 +30,12 @@ import { useNotificationStore } from '@/stores/notification-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 
-import {
-  useDeleteCartItem,
-  useGetCart,
-  useGetCartStock,
-  useUpdateQuantity,
-} from '@/apis/cart';
+// import {
+//   useDeleteCartItem,
+//   useGetCart,
+//   useGetCartStock,
+//   useUpdateQuantity,
+// } from '@/apis/cart';
 
 import { truncateTextByLine } from '@/utils/css-helper.util';
 import { formatPrice } from '@/utils/format-price';
@@ -45,6 +45,8 @@ import EMPTY_CART from '@/assets/empty-cart.png';
 
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
+import { useGetCart, useUpdateQuantity } from '@/queries/cart';
+import { useSession } from '@/hooks/useSession';
 
 const Cart = () => {
   const { user, setCheckoutCart } = useAuthStore((state) => state);
@@ -56,16 +58,13 @@ const Cart = () => {
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
 
-  const { data: cartStock } = useGetCartStock(
-    cartItems?.map((item) => item.skuId)
-  );
-
-  console.log(
-    'cartStock',
-    cartItems?.map((item) => item.skuId)
-  );
-  const { data: cartServer } = useGetCart(user);
-  const { mutateAsync: deleteCartItem } = useDeleteCartItem();
+  // const { data: cartStock } = useGetCartStock(
+  //   cartItems?.map((item) => item.skuId)
+  // );
+  const { data: userSession } = useSession();
+  const { data: cartServer } = useGetCart(userSession?.data ?? null);
+  console.log('cartServer', cartServer);
+  // const { mutateAsync: deleteCartItem } = useDeleteCartItem();
 
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
@@ -82,28 +81,28 @@ const Cart = () => {
 
   console.log('cartItems', cartItems);
 
-  useEffect(() => {
-    if (user && cartServer?.data?.items) {
-      syncCart(
-        cartServer?.data?.items?.map((item) => ({
-          productId: item?.productId,
-          skuId: item?.sku?.id,
-          productName: item?.product?.name,
-          imageUrl: item?.sku?.imageUrl
-            ? item?.sku?.imageUrl
-            : item?.product?.images?.[0],
-          sellingPrice: item?.sku?.sellingPrice,
-          quantity: item?.quantity,
-          attributes: item?.sku?.productSkuAttributes?.map(
-            (productSkuAttributes: IProductSkuAttributes) => ({
-              attribute: productSkuAttributes?.attributeValue?.attribute?.name,
-              attributeValue: productSkuAttributes?.attributeValue?.value,
-            })
-          ),
-        }))
-      );
-    }
-  }, [cartServer]);
+  // useEffect(() => {
+  //   if (user && cartServer?.data?.items) {
+  //     syncCart(
+  //       cartServer?.data?.items?.map((item) => ({
+  //         productId: item?.productId,
+  //         skuId: item?.sku?.id,
+  //         productName: item?.product?.name,
+  //         imageUrl: item?.sku?.imageUrl
+  //           ? item?.sku?.imageUrl
+  //           : item?.product?.images?.[0],
+  //         sellingPrice: item?.sku?.sellingPrice,
+  //         quantity: item?.quantity,
+  //         attributes: item?.sku?.productSkuAttributes?.map(
+  //           (productSkuAttributes: IProductSkuAttributes) => ({
+  //             attribute: productSkuAttributes?.attributeValue?.attribute?.name,
+  //             attributeValue: productSkuAttributes?.attributeValue?.value,
+  //           })
+  //         ),
+  //       }))
+  //     );
+  //   }
+  // }, [cartServer]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -147,16 +146,16 @@ const Cart = () => {
     []
   );
 
-  const debouncedReduceQuantity = useCallback(
-    debounce((payload: { skuId: number; quantity: number }) => {
-      onUpdateQuantity(payload, {
-        onError: () => {
-          updateQuantity(payload.skuId, payload.quantity - 1); // !!
-        },
-      });
-    }, 1000),
-    []
-  );
+  // const debouncedReduceQuantity = useCallback(
+  //   debounce((payload: { skuId: number; quantity: number }) => {
+  //     onUpdateQuantity(payload, {
+  //       onError: () => {
+  //         updateQuantity(payload.skuId, payload.quantity - 1); // !!
+  //       },
+  //     });
+  //   }, 1000),
+  //   []
+  // );
 
   const handleAddItem = async (skuId: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
@@ -174,47 +173,47 @@ const Cart = () => {
     }
   };
 
-  const handleSubtractItem = async (skuId: number, name: string) => {
-    const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
+  // const handleSubtractItem = async (skuId: number, name: string) => {
+  //   const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
 
-    if (!itemToUpdate) return;
+  //   if (!itemToUpdate) return;
 
-    const newQuantity = itemToUpdate.quantity - 1;
-    if (newQuantity === 0 && !user) {
-      setOpenRemoveItemDialog(true);
-      setSubtractItem({ skuId, name });
-      return;
-    }
-    if (newQuantity === 0 && user) {
-      setOpenRemoveItemDialog(true);
-      setSubtractItem({ skuId, name });
-      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
-      return;
-    }
-    if (user) {
-      updateQuantity(skuId, newQuantity);
-      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
-    } else {
-      updateQuantity(skuId, newQuantity);
-    }
-  };
+  //   const newQuantity = itemToUpdate.quantity - 1;
+  //   if (newQuantity === 0 && !user) {
+  //     setOpenRemoveItemDialog(true);
+  //     setSubtractItem({ skuId, name });
+  //     return;
+  //   }
+  //   if (newQuantity === 0 && user) {
+  //     setOpenRemoveItemDialog(true);
+  //     setSubtractItem({ skuId, name });
+  //     debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+  //     return;
+  //   }
+  //   if (user) {
+  //     updateQuantity(skuId, newQuantity);
+  //     debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+  //   } else {
+  //     updateQuantity(skuId, newQuantity);
+  //   }
+  // };
 
-  const handleDeleteItem = async (skuId: number) => {
-    removeItem(skuId);
-    if (user) {
-      const backupCartItems = [...cartItems];
-      const cartServerItem = cartServer?.data?.items?.find(
-        (item) => item?.sku?.id === skuId
-      );
-      if (cartServerItem) {
-        await deleteCartItem(cartServerItem?.id, {
-          onError: () => {
-            syncCart(backupCartItems);
-          },
-        });
-      }
-    }
-  };
+  // const handleDeleteItem = async (skuId: number) => {
+  //   removeItem(skuId);
+  //   if (user) {
+  //     const backupCartItems = [...cartItems];
+  //     const cartServerItem = cartServer?.data?.items?.find(
+  //       (item) => item?.sku?.id === skuId
+  //     );
+  //     if (cartServerItem) {
+  //       await deleteCartItem(cartServerItem?.id, {
+  //         onError: () => {
+  //           syncCart(backupCartItems);
+  //         },
+  //       });
+  //     }
+  //   }
+  // };
 
   const totalAmount = () => {
     const selectedItems = selected
@@ -417,12 +416,13 @@ const Cart = () => {
                                     borderTopRightRadius: 0,
                                     borderBottomRightRadius: 0,
                                   }}
-                                  onClick={() =>
-                                    handleSubtractItem(
-                                      row?.skuId,
-                                      row?.productName
-                                    )
-                                  }>
+                                  // onClick={() =>
+                                  //   handleSubtractItem(
+                                  //     row?.skuId,
+                                  //     row?.productName
+                                  //   )
+                                  // }
+                                >
                                   -
                                 </Button>
                                 <TextField
@@ -471,15 +471,16 @@ const Cart = () => {
                                     borderBottomLeftRadius: 0,
                                   }}
                                   onClick={() => handleAddItem(row?.skuId)}
-                                  disabled={
-                                    (cartStock?.data?.find(
-                                      (item) => item.id === row?.skuId
-                                    )?.quantity ?? 0) <= (row?.quantity ?? 0)
-                                  }>
+                                  // disabled={
+                                  //   (cartStock?.data?.find(
+                                  //     (item) => item.id === row?.skuId
+                                  //   )?.quantity ?? 0) <= (row?.quantity ?? 0)
+                                  // }
+                                >
                                   +
                                 </Button>
                               </Box>
-                              {cartStock?.data &&
+                              {/* {cartStock?.data &&
                                 (cartStock?.data?.find(
                                   (item) => item.id === row?.skuId
                                 )?.quantity ?? 0) < 10 && (
@@ -493,7 +494,7 @@ const Cart = () => {
                                     }{' '}
                                     sản phẩm
                                   </Typography>
-                                )}
+                                )} */}
                             </TableCell>
                             <TableCell
                               component='th'
@@ -507,7 +508,8 @@ const Cart = () => {
                                     cursor: 'pointer',
                                   },
                                 }}
-                                onClick={() => handleDeleteItem(row?.skuId)}>
+                                // onClick={() => handleDeleteItem(row?.skuId)}
+                              >
                                 Xóa
                               </Typography>
                             </TableCell>

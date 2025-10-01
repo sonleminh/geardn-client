@@ -1,16 +1,4 @@
-// export interface ICart {
-//     id: string;
-//     userid: string;
-//     items: ICartItem[]
-// }
-
 import { IProductSku } from "./IProductSku";
-
-// export interface ICart {
-//     id: string;
-//     userid: string;
-//     items: ICartItem[]
-// }
 
 export interface ICartPayload {
     userid: string | null;
@@ -49,16 +37,32 @@ export interface ISyncCartPayload {
 }
 
 export interface ICartResponse {
+    id: number;
+    userId: number;
+    items: ICartServerItem[];
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    }
+}
+
+export interface IUpdateQuantityPayload {
+    skuId: number;
+    quantity: number;
+}
+
+export interface IUpdateQuantityResponse {
     success: boolean;
     message: string;
     data: {
         id: number;
         userId: number;
-        items: ICartServerItem[]};
-        user: {
+        items: {
             id: number;
-            name: string;
-            email: string;
-        }
+            productId: number;
+            skuId: number;
+            quantity: number;
+        }[]};
     total: number;
 }

@@ -1,4 +1,3 @@
-// src/lib/http.ts
 const API = process.env.NEXT_PUBLIC_API!;
 
 export function buildUrl(base: string, path: string, params?: Record<string, string | number | boolean | undefined>) {

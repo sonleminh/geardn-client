@@ -4,11 +4,3 @@ export interface IUser {
     name: string;
     picture?: string;
 }
-export interface IWhoIAmResponse {
-    id?: string;
-    name?: string;
-    email?: string;
-    exp?: number;
-    iat?: number;
-    statusCode?: number;
-  }
