@@ -4,8 +4,8 @@ import { ChangeEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { useQueryClient } from '@tanstack/react-query';
 import { jwtDecode } from 'jwt-decode';
 import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
@@ -28,36 +28,29 @@ import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
-import { AxiosError } from 'axios';
 import { ROUTES } from '@/constants/route';
 import { loginWithEmailPwd } from '@/apis/auth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import { useSyncCart } from '@/queries/cart';
+import { loginSchema } from '@/features/auth/schemas/login.schema';
 
 const LoginPage = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { cartItems, syncCart } = useCartStore();
   const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
-  // const {
-  //   mutateAsync: onLoginWithEmailPwd,
-  //   isPending: isLoginWithEmailPwd,
-  //   status: loginWithEmailPwdStatus,
-  // } = useLoginWithEmailPwd();
   const { mutateAsync: onSyncCart } = useSyncCart();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
     initialValues: { email: '', password: '' },
-    // validationSchema: schema,
+    validationSchema: toFormikValidationSchema(loginSchema),
     validateOnChange: false,
     async onSubmit(values) {
       const userData = await loginWithEmailPwd({
         email: values.email,
         password: values.password,
       });
-      console.log('userData:', userData);
 
       if (userData?.data?.id) {
         const syncPayload = cartItems?.map(
@@ -68,7 +61,7 @@ const LoginPage = () => {
           })
         );
         const updatedCart = await onSyncCart({ items: syncPayload });
-        console.log('updatedCart:', updatedCart);
+
         const syncCartData = updatedCart?.data?.items?.map((item) => ({
           productId: item?.productId,
           skuId: item?.sku?.id,
@@ -84,6 +77,7 @@ const LoginPage = () => {
               attributeValue: productSkuAttribute?.attributeValue?.value,
             })
           ),
+          cartItemId: item?.id,
         }));
         console.log('syncCartData:', syncCartData);
         syncCart(syncCartData);
@@ -315,7 +309,7 @@ const LoginPage = () => {
                   variant='contained'
                   fullWidth
                   sx={{ height: 48, mt: 3 }}
-                  disabled={!formik.values.email && !formik.values.password}
+                  disabled={!formik.values.email || !formik.values.password}
                   onClick={() => formik.handleSubmit()}>
                   Đăng nhập
                 </Button>

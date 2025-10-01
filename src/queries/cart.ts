@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { TBaseResponse } from '@/types/response.type';
 import { ICartResponse, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { getCart, syncCart, updateQty } from '@/apis/cart';
+import { deleteCartItem, getCart, syncCart, updateQty } from '@/apis/cart';
 import { IUser } from '@/interfaces/IUser';
 
 export function useGetCart(user: IUser | null) {
@@ -17,8 +17,15 @@ export function useSyncCart() {
     mutationFn: syncCart,
   });
 }
+
 export function useUpdateQuantity() {
   return useMutation<TBaseResponse<IUpdateQuantityResponse>, Error, IUpdateQuantityPayload>({
     mutationFn: updateQty,
+  });
+}
+
+export function useDeleteCartItem() {
+  return useMutation<TBaseResponse<IUpdateQuantityResponse>, Error, number>({
+    mutationFn: deleteCartItem,
   });
 }

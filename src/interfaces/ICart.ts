@@ -17,6 +17,7 @@ export interface ICartStoreItem {
         attribute: string;
         attributeValue: string;
     }[]
+    cartItemId?: number;
 }
 
 export interface ICartServerItem {
@@ -50,7 +51,7 @@ export interface ICartResponse {
 }
 
 export interface IUpdateQuantityPayload {
-    skuId: number;
+    id: number;
     quantity: number;
 }
 

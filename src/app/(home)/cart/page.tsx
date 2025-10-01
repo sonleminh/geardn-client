@@ -45,11 +45,15 @@ import EMPTY_CART from '@/assets/empty-cart.png';
 
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
-import { useGetCart, useUpdateQuantity } from '@/queries/cart';
+import {
+  useDeleteCartItem,
+  useGetCart,
+  useUpdateQuantity,
+} from '@/queries/cart';
 import { useSession } from '@/hooks/useSession';
 
 const Cart = () => {
-  const { user, setCheckoutCart } = useAuthStore((state) => state);
+  const { setCheckoutCart } = useAuthStore((state) => state);
   const { cartItems, updateQuantity, removeItem, syncCart } = useCartStore();
   const router = useRouter();
 
@@ -64,7 +68,8 @@ const Cart = () => {
   const { data: userSession } = useSession();
   const { data: cartServer } = useGetCart(userSession?.data ?? null);
   console.log('cartServer', cartServer);
-  // const { mutateAsync: deleteCartItem } = useDeleteCartItem();
+  const { mutateAsync: onDeleteCartItem, isPending: isDeleteCartItemPending } =
+    useDeleteCartItem();
 
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
@@ -79,30 +84,29 @@ const Cart = () => {
     name: string;
   }>();
 
-  console.log('cartItems', cartItems);
-
-  // useEffect(() => {
-  //   if (user && cartServer?.data?.items) {
-  //     syncCart(
-  //       cartServer?.data?.items?.map((item) => ({
-  //         productId: item?.productId,
-  //         skuId: item?.sku?.id,
-  //         productName: item?.product?.name,
-  //         imageUrl: item?.sku?.imageUrl
-  //           ? item?.sku?.imageUrl
-  //           : item?.product?.images?.[0],
-  //         sellingPrice: item?.sku?.sellingPrice,
-  //         quantity: item?.quantity,
-  //         attributes: item?.sku?.productSkuAttributes?.map(
-  //           (productSkuAttributes: IProductSkuAttributes) => ({
-  //             attribute: productSkuAttributes?.attributeValue?.attribute?.name,
-  //             attributeValue: productSkuAttributes?.attributeValue?.value,
-  //           })
-  //         ),
-  //       }))
-  //     );
-  //   }
-  // }, [cartServer]);
+  useEffect(() => {
+    if (userSession?.data && cartServer?.data?.items) {
+      syncCart(
+        cartServer?.data?.items?.map((item) => ({
+          productId: item?.productId,
+          skuId: item?.sku?.id,
+          productName: item?.product?.name,
+          imageUrl: item?.sku?.imageUrl
+            ? item?.sku?.imageUrl
+            : item?.product?.images?.[0],
+          sellingPrice: item?.sku?.sellingPrice,
+          quantity: item?.quantity,
+          attributes: item?.sku?.productSkuAttributes?.map(
+            (productSkuAttributes: IProductSkuAttributes) => ({
+              attribute: productSkuAttributes?.attributeValue?.attribute?.name,
+              attributeValue: productSkuAttributes?.attributeValue?.value,
+            })
+          ),
+          cartItemId: item?.id,
+        }))
+      );
+    }
+  }, [cartServer]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -135,37 +139,49 @@ const Cart = () => {
   };
 
   const debouncedIncreaseQuantity = useCallback(
-    debounce((payload: { skuId: number; quantity: number }) => {
-      onUpdateQuantity(payload, {
-        onError: () => {
-          showNotification('Đã có lỗi xảy ra', 'error');
-          updateQuantity(payload.skuId, payload.quantity - 1); // !!
-        },
-      });
-    }, 1000),
+    debounce(
+      (payload: { skuId: number; cartItemId: number; quantity: number }) => {
+        onUpdateQuantity(
+          { id: payload.cartItemId, quantity: payload.quantity },
+          {
+            onError: () => {
+              showNotification('Đã có lỗi xảy ra', 'error');
+              updateQuantity(payload.skuId, payload.quantity - 1); // !!
+            },
+          }
+        );
+      },
+      1000
+    ),
     []
   );
 
   const debouncedReduceQuantity = useCallback(
-    debounce((payload: { skuId: number; quantity: number }) => {
-      onUpdateQuantity(payload, {
-        onError: () => {
-          updateQuantity(payload.skuId, payload.quantity - 1); // !!
-        },
-      });
-    }, 1000),
+    debounce(
+      (payload: { skuId: number; cartItemId: number; quantity: number }) => {
+        onUpdateQuantity(
+          { id: payload.cartItemId, quantity: payload.quantity },
+          {
+            onError: () => {
+              updateQuantity(payload.skuId, payload.quantity - 1); // !!
+            },
+          }
+        );
+      },
+      1000
+    ),
     []
   );
 
-  const handleAddItem = async (skuId: number) => {
+  const handleAddItem = async (skuId: number, cartItemId?: number) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
-    console.log('itemToUpdate', itemToUpdate);
     if (!itemToUpdate) return;
     const newQuantity = itemToUpdate.quantity + 1;
-    if (user) {
+    if (userSession?.data && cartItemId) {
       updateQuantity(skuId, newQuantity);
       debouncedIncreaseQuantity({
         skuId: skuId,
+        cartItemId: cartItemId,
         quantity: newQuantity,
       });
     } else {
@@ -173,26 +189,38 @@ const Cart = () => {
     }
   };
 
-  const handleSubtractItem = async (skuId: number, name: string) => {
+  const handleSubtractItem = async (
+    skuId: number,
+    name: string,
+    cartItemId?: number
+  ) => {
     const itemToUpdate = cartItems?.find((item) => item.skuId === skuId);
 
     if (!itemToUpdate) return;
 
     const newQuantity = itemToUpdate.quantity - 1;
-    if (newQuantity === 0 && !user) {
+    if (newQuantity === 0 && !userSession?.data) {
       setOpenRemoveItemDialog(true);
       setSubtractItem({ skuId, name });
       return;
     }
-    if (newQuantity === 0 && user) {
+    if (newQuantity === 0 && userSession?.data && cartItemId) {
       setOpenRemoveItemDialog(true);
       setSubtractItem({ skuId, name });
-      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+      debouncedReduceQuantity({
+        skuId: skuId,
+        cartItemId: cartItemId,
+        quantity: newQuantity,
+      });
       return;
     }
-    if (user) {
+    if (userSession?.data && cartItemId) {
       updateQuantity(skuId, newQuantity);
-      debouncedReduceQuantity({ skuId: skuId, quantity: newQuantity });
+      debouncedReduceQuantity({
+        skuId: skuId,
+        cartItemId: cartItemId,
+        quantity: newQuantity,
+      });
     } else {
       updateQuantity(skuId, newQuantity);
     }
@@ -200,13 +228,13 @@ const Cart = () => {
 
   const handleDeleteItem = async (skuId: number) => {
     removeItem(skuId);
-    if (user) {
+    if (userSession?.data) {
       const backupCartItems = [...cartItems];
       const cartServerItem = cartServer?.data?.items?.find(
         (item) => item?.sku?.id === skuId
       );
       if (cartServerItem) {
-        await deleteCartItem(cartServerItem?.id, {
+        await onDeleteCartItem(cartServerItem?.id, {
           onError: () => {
             syncCart(backupCartItems);
           },
@@ -263,7 +291,6 @@ const Cart = () => {
     router.push(ROUTES.CHECKOUT);
   };
 
-  console.log('selected', selected);
   function debounce<T extends (...args: any[]) => void>(
     callback: T,
     delay: number
@@ -418,8 +445,9 @@ const Cart = () => {
                                   }}
                                   onClick={() =>
                                     handleSubtractItem(
-                                      row?.skuId,
-                                      row?.productName
+                                      row.skuId,
+                                      row.productName,
+                                      row?.cartItemId
                                     )
                                   }>
                                   -
@@ -469,7 +497,9 @@ const Cart = () => {
                                     borderTopLeftRadius: 0,
                                     borderBottomLeftRadius: 0,
                                   }}
-                                  onClick={() => handleAddItem(row?.skuId)}
+                                  onClick={() =>
+                                    handleAddItem(row?.skuId, row?.cartItemId)
+                                  }
                                   // disabled={
                                   //   (cartStock?.data?.find(
                                   //     (item) => item.id === row?.skuId

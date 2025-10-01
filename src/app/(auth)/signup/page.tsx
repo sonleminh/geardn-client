@@ -3,6 +3,7 @@
 import { signup } from '@/apis/auth';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { ROUTES } from '@/constants/route';
+import { signUpSchema } from '@/features/auth/schemas/signup.schema';
 import { signUpAPI } from '@/services/auth/api';
 import { useNotificationStore } from '@/stores/notification-store';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -19,6 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useFormik } from 'formik';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
@@ -30,7 +32,7 @@ export default function SignUp() {
 
   const formik = useFormik({
     initialValues: { name: '', email: '', password: '' },
-    // validationSchema: schema,
+    validationSchema: toFormikValidationSchema(signUpSchema),
     validateOnChange: false,
     async onSubmit(values) {
       const result = await signup(values);
