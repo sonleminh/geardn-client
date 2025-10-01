@@ -36,7 +36,6 @@ export default function SignUp() {
     validateOnChange: false,
     async onSubmit(values) {
       const result = await signup(values);
-      console.log('rs:', result);
       if (result.data.id) {
         router.push(ROUTES.LOGIN);
         showNotification('Tạo tài khoản thành công', 'success');

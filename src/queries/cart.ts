@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { TBaseResponse } from '@/types/response.type';
-import { ICartResponse, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { deleteCartItem, getCart, syncCart, updateQty } from '@/apis/cart';
+import { ICartResponse, ICartStockItem, ICartStockResponse, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
+import { deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
 import { IUser } from '@/interfaces/IUser';
 
 export function useGetCart(user: IUser | null) {
@@ -9,6 +9,15 @@ export function useGetCart(user: IUser | null) {
     queryKey: ['cart'],
     queryFn: getCart,
     enabled: !!user
+  });
+}
+
+export function useGetCartStock(skuIds: number[]) {
+  const key = ['cart-stock', skuIds.slice().sort((a,b)=>a-b).join(',')];
+  return useQuery<TBaseResponse<ICartStockItem[]>, Error>({
+    queryKey: [key],
+    queryFn: () => getCartStock(skuIds), 
+    enabled: skuIds.length > 0,
   });
 }
 

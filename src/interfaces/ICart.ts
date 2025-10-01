@@ -31,6 +31,11 @@ export interface ICartServerItem {
     quantity: number;
 }
 
+export interface ICartStockItem {
+        id: number;
+        quantity: number;
+}
+
 export interface ISyncCartPayload {
     items: {
         productId: number;

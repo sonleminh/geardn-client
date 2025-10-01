@@ -265,7 +265,6 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         //   }
         // );
       } catch (error) {
-        console.log('error', error);
         removeItem(newItem.skuId);
         showNotification('Lỗi kết nối tới máy chủ', 'error');
       }
@@ -301,8 +300,6 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       0
     );
   }, [selectedSku]);
-
-  console.log('selectedSku', selectedSku);
 
   return (
     <Box pt={2} pb={4}>

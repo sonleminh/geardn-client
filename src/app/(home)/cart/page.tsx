@@ -48,6 +48,7 @@ import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import {
   useDeleteCartItem,
   useGetCart,
+  useGetCartStock,
   useUpdateQuantity,
 } from '@/queries/cart';
 import { useSession } from '@/hooks/useSession';
@@ -62,12 +63,11 @@ const Cart = () => {
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
 
-  // const { data: cartStock } = useGetCartStock(
-  //   cartItems?.map((item) => item.skuId)
-  // );
+  const { data: cartStock } = useGetCartStock(
+    cartItems?.map((item) => item.skuId)
+  );
   const { data: userSession } = useSession();
   const { data: cartServer } = useGetCart(userSession?.data ?? null);
-  console.log('cartServer', cartServer);
   const { mutateAsync: onDeleteCartItem, isPending: isDeleteCartItemPending } =
     useDeleteCartItem();
 
@@ -500,16 +500,15 @@ const Cart = () => {
                                   onClick={() =>
                                     handleAddItem(row?.skuId, row?.cartItemId)
                                   }
-                                  // disabled={
-                                  //   (cartStock?.data?.find(
-                                  //     (item) => item.id === row?.skuId
-                                  //   )?.quantity ?? 0) <= (row?.quantity ?? 0)
-                                  // }
-                                >
+                                  disabled={
+                                    (cartStock?.data?.find(
+                                      (item) => item.id === row?.skuId
+                                    )?.quantity ?? 0) <= (row?.quantity ?? 0)
+                                  }>
                                   +
                                 </Button>
                               </Box>
-                              {/* {cartStock?.data &&
+                              {cartStock?.data &&
                                 (cartStock?.data?.find(
                                   (item) => item.id === row?.skuId
                                 )?.quantity ?? 0) < 10 && (
@@ -523,7 +522,7 @@ const Cart = () => {
                                     }{' '}
                                     sản phẩm
                                   </Typography>
-                                )} */}
+                                )}
                             </TableCell>
                             <TableCell
                               component='th'

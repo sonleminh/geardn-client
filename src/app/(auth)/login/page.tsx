@@ -79,7 +79,6 @@ const LoginPage = () => {
           ),
           cartItemId: item?.id,
         }));
-        console.log('syncCartData:', syncCartData);
         syncCart(syncCartData);
         login({
           id: userData?.data?.id,
