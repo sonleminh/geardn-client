@@ -39,14 +39,17 @@ import { useNotificationStore } from '@/stores/notification-store';
 import { IProduct } from '@/interfaces/IProduct';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { useSession } from '@/hooks/useSession';
+import { useAddCartItem, useUpdateQuantity } from '@/queries/cart';
 
 const ProductDetailClient = ({ data }: { data: IProduct }) => {
   // const params = useParams();
   // const product = params.product as string;
   const { data: user } = useSession();
   const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
-  // const { mutateAsync: onAddToCart } = useAddToCart();
+  const { mutateAsync: onAddToCart } = useAddCartItem();
   const { showNotification } = useNotificationStore();
+  const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
+    useUpdateQuantity();
 
   const [count, setCount] = useState<number | null>(1);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -187,11 +190,8 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
     }
-
+    const itemAdded = cartItems?.find((item) => item.skuId === selectedSku?.id);
     if (!user && data) {
-      const itemAdded = cartItems?.find(
-        (item) => item.skuId === selectedSku?.id
-      );
       if (
         itemAdded &&
         itemAdded?.quantity + (count ?? 1) > (selectedSkuStock ?? 0)
@@ -220,7 +220,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       });
     }
 
-    if (user && data) {
+    if (user && data && itemAdded) {
       const newItem = {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
@@ -239,35 +239,19 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       };
 
       addToCart(newItem);
-
-      try {
-        // await onAddToCart(
-        //   {
-        //     productId: selectedSku?.productId,
-        //     skuId: selectedSku?.id,
-        //     quantity: count ?? 1,
-        //   },
-        //   {
-        //     onError: () => {
-        //       const cartItem = cartItems?.find(
-        //         (item) => item.skuId === selectedSku?.id
-        //       );
-        //       if (cartItem && cartItem?.quantity - (count ?? 0) <= 0) {
-        //         removeItem(selectedSku?.id);
-        //       } else {
-        //         updateQuantity(
-        //           selectedSku?.id,
-        //           selectedSku?.quantity - (count ?? 0)
-        //         );
-        //       }
-        //       showNotification('Đã có lỗi xảy ra', 'error');
-        //     },
-        //   }
-        // );
-      } catch (error) {
-        removeItem(newItem.skuId);
-        showNotification('Lỗi kết nối tới máy chủ', 'error');
-      }
+      onAddToCart(
+        {
+          productId: selectedSku?.productId,
+          skuId: selectedSku?.id,
+          quantity: count ?? 1,
+        },
+        {
+          onError: () => {
+            showNotification('Đã có lỗi xảy ra', 'error');
+            updateQuantity(selectedSku?.id, itemAdded?.quantity);
+          },
+        }
+      );
     }
   };
 

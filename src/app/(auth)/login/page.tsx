@@ -33,26 +33,23 @@ import { loginWithEmailPwd } from '@/apis/auth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import { useSyncCart } from '@/queries/cart';
 import { loginSchema } from '@/features/auth/schemas/login.schema';
+import { useLoginWithEmailPwd } from '@/queries/auth';
 
 const LoginPage = () => {
   const router = useRouter();
   const { cartItems, syncCart } = useCartStore();
-  const { login } = useAuthStore((state) => state);
+  // const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
   const { mutateAsync: onSyncCart } = useSyncCart();
+  const { mutateAsync: onLoginWithEmailPwd } = useLoginWithEmailPwd();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: toFormikValidationSchema(loginSchema),
     validateOnChange: false,
-    async onSubmit(values) {
-      const userData = await loginWithEmailPwd({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (userData?.data?.id) {
+    onSubmit: async (values) => {
+      try {
         const syncPayload = cartItems?.map(
           ({ productId, skuId, quantity }) => ({
             productId,
@@ -80,11 +77,6 @@ const LoginPage = () => {
           cartItemId: item?.id,
         }));
         syncCart(syncCartData);
-        login({
-          id: userData?.data?.id,
-          email: userData?.data?.email,
-          name: userData?.data?.name,
-        });
         // login({
         //   id: userData?.data?.id,
         //   email: userData?.data?.email,
@@ -93,6 +85,8 @@ const LoginPage = () => {
         // });
         router.push('/');
         showNotification('Đăng nhập thành công', 'success');
+      } catch (error) {
+        // showNotification(error?.message, 'error');
       }
     },
   });
@@ -156,12 +150,12 @@ const LoginPage = () => {
       Cookies.set('GC', credentialResponse?.credential as string, {
         expires: credentialDecoded?.exp,
       });
-      login({
-        id: credentialDecoded?.sub,
-        email: credentialDecoded?.email as string,
-        name: credentialDecoded?.name as string,
-        picture: credentialDecoded?.picture,
-      });
+      // login({
+      //   id: credentialDecoded?.sub,
+      //   email: credentialDecoded?.email as string,
+      //   name: credentialDecoded?.name as string,
+      //   picture: credentialDecoded?.picture,
+      // });
       router.push('/');
     }
   };

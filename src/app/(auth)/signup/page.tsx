@@ -24,21 +24,26 @@ import { toFormikValidationSchema } from 'zod-formik-adapter';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
+import { useSignup } from '@/queries/auth';
 
 export default function SignUp() {
   const router = useRouter();
   const { showNotification } = useNotificationStore();
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { mutateAsync: onSignup } = useSignup();
 
   const formik = useFormik({
     initialValues: { name: '', email: '', password: '' },
     validationSchema: toFormikValidationSchema(signUpSchema),
     validateOnChange: false,
-    async onSubmit(values) {
-      const result = await signup(values);
-      if (result.data.id) {
+    onSubmit: async (values) => {
+      try {
+        const data = await onSignup(values);
         router.push(ROUTES.LOGIN);
         showNotification('Tạo tài khoản thành công', 'success');
+      } catch (err) {
+        console.log('err', err);
+        // showNotification(err, 'error');
       }
     },
   });

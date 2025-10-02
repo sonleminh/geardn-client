@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -10,6 +10,7 @@ import {
   Checkbox,
   Grid2,
   Paper,
+  SxProps,
   Table,
   TableBody,
   TableCell,
@@ -17,6 +18,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Theme,
   Typography,
 } from '@mui/material';
 
@@ -29,13 +31,6 @@ import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { useNotificationStore } from '@/stores/notification-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
-
-// import {
-//   useDeleteCartItem,
-//   useGetCart,
-//   useGetCartStock,
-//   useUpdateQuantity,
-// } from '@/apis/cart';
 
 import { truncateTextByLine } from '@/utils/css-helper.util';
 import { formatPrice } from '@/utils/format-price';
@@ -68,21 +63,83 @@ const Cart = () => {
   );
   const { data: userSession } = useSession();
   const { data: cartServer } = useGetCart(userSession?.data ?? null);
-  const { mutateAsync: onDeleteCartItem, isPending: isDeleteCartItemPending } =
-    useDeleteCartItem();
+  const { mutateAsync: onDeleteCartItem } = useDeleteCartItem();
 
   const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
     useUpdateQuantity();
 
   const { showNotification } = useNotificationStore();
 
+  const [pendingMap, setPendingMap] = useState<Record<number, boolean>>({});
+
+  // draft số lượng khi user đang gõ
+  const [draftQty, setDraftQty] = useState<Record<number, number | ''>>({});
+  const [editing, setEditing] = useState<Record<number, boolean>>({});
+  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  const [selectedCartItem, setSelectedCartItem] =
+    useState<ICartStoreItem | null>();
+  const [selectedCartItemStock, setSelectedCartItemStock] = useState<
+    number | null
+  >();
+
   const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
-  const [openOutOfStockDialog, setOpenOutOfStockDialog] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [subtractItem, setSubtractItem] = useState<{
     skuId: number;
     name: string;
   }>();
+
+  const getDisplayQty = (row: ICartStoreItem) =>
+    editing[row.skuId] ? draftQty[row.skuId] ?? row.quantity : row.quantity;
+
+  const handleFocus = (skuId: number, current: number) => {
+    setEditing((s) => ({ ...s, [skuId]: true }));
+    setDraftQty((s) => ({ ...s, [skuId]: current })); // seed từ quantity hiện tại
+  };
+
+  const handleChange = (skuId: number, raw: string) => {
+    if (raw === '') return setDraftQty((s) => ({ ...s, [skuId]: '' }));
+    const n = Number(raw.replace(/[^\d]/g, ''));
+    if (Number.isNaN(n)) return;
+    setDraftQty((s) => ({ ...s, [skuId]: n }));
+  };
+
+  const handleBlur = (row: ICartStoreItem) => {
+    const { skuId, cartItemId, productName } = row;
+    const raw = draftQty[skuId];
+    let next = typeof raw === 'number' ? raw : row.quantity;
+
+    const stock =
+      cartStock?.data?.find((i) => i.id === skuId)?.quantity ?? Infinity;
+
+    if (next <= 0) {
+      setOpenRemoveItemDialog(true);
+      setSubtractItem({ skuId, name: productName });
+      setDraftQty((s) => ({ ...s, [skuId]: row.quantity }));
+    } else {
+      if (Number.isFinite(stock) && next > stock) next = stock;
+
+      if (next !== row.quantity) {
+        // optimistic
+        updateQuantity(skuId, next);
+        if (userSession?.data && cartItemId) {
+          debouncedUpdateQuantity({
+            skuId,
+            cartItemId,
+            next,
+            prev: row.quantity,
+          });
+        }
+      }
+    }
+    // kết thúc edit
+    setEditing((s) => ({ ...s, [skuId]: false }));
+    setDraftQty((s) => {
+      const { [skuId]: _, ...rest } = s;
+      return rest;
+    });
+  };
 
   useEffect(() => {
     if (userSession?.data && cartServer?.data?.items) {
@@ -254,17 +311,6 @@ const Cart = () => {
     );
   };
 
-  // const handlePayBtn = () => {
-  //   if (selected.length === 0) {
-  //     return showNotification('Vui lòng chọn sản phẩm', 'warning');
-  //   }
-  //   const selectedItems = selected
-  //     .map((skuId) => cart?.items?.find((item) => item.modelid === skuId))
-  //     .filter((item): item is ICartItem => item !== undefined);
-  //   addProducts(selectedItems);
-  //   router.push(ROUTES.CHECKOUT);
-  // };
-
   const handleOkRemoveItemDialog = () => {
     if (subtractItem) {
       removeItem(subtractItem.skuId);
@@ -274,10 +320,6 @@ const Cart = () => {
 
   const handleCloseRemoveItemDialog = () => {
     setOpenRemoveItemDialog(false);
-  };
-
-  const handleOkOutOfStockDialog = () => {
-    setOpenOutOfStockDialog(false);
   };
 
   const handlePayBtn = () => {
@@ -302,6 +344,138 @@ const Cart = () => {
       timer = setTimeout(() => callback(...args), delay);
     };
   }
+
+  useEffect(() => {
+    if (!cartItems?.length) return;
+    setDraftQty((prev) => {
+      const next: Record<number, number | ''> = { ...prev };
+      for (const it of cartItems) {
+        // chỉ cập nhật nếu chưa có draft hoặc draft rỗng
+        if (next[it.skuId] === undefined || next[it.skuId] === '') {
+          next[it.skuId] = it.quantity;
+        }
+      }
+      return next;
+    });
+  }, [cartItems]);
+
+  const handleQtyInputClick = (_, row: ICartStoreItem) => {
+    console.log('row:', row);
+
+    setSelectedCartItem(row);
+    const slt = cartStock?.data?.find((c) => c.id === row.skuId);
+    setSelectedCartItemStock(slt?.quantity);
+    setQtyDraft((d) => ({ ...d, [row.skuId]: String(row.quantity) }));
+  };
+  console.log('slt:', selectedCartItem);
+
+  const getStockBySku = (skuId: number) =>
+    cartStock?.data?.find((i) => i.id === skuId)?.quantity ?? Infinity;
+
+  const handleQtyChange = (skuId: number, raw: string) => {
+    // cho phép rỗng tạm thời để user xóa rồi gõ lại
+    if (raw === '') return setDraftQty((s) => ({ ...s, [skuId]: '' }));
+    // chỉ nhận số nguyên dương
+    const n = Number(raw.replace(/[^\d]/g, ''));
+    if (Number.isNaN(n)) return;
+    setDraftQty((s) => ({ ...s, [skuId]: n }));
+  };
+
+  const commitQuantity = (opts: {
+    skuId: number;
+    cartItemId?: number;
+    name: string;
+  }) => {
+    const { skuId, cartItemId, name } = opts;
+    const item = cartItems?.find((i) => i.skuId === skuId);
+    if (!item) return;
+
+    const raw = draftQty[skuId];
+    // nếu user bỏ trống -> trả về số cũ
+    let next = typeof raw === 'number' ? raw : item.quantity;
+
+    // chuẩn hóa min/max
+    const max = getStockBySku(skuId);
+    if (next <= 0) {
+      // 0 => hỏi xóa
+      setOpenRemoveItemDialog(true);
+      setSubtractItem({ skuId, name });
+      // phục hồi hiển thị về số cũ
+      setDraftQty((s) => ({ ...s, [skuId]: item.quantity }));
+      return;
+    }
+    if (next > max && Number.isFinite(max)) {
+      next = max;
+    }
+
+    // không đổi thì chỉ sync lại hiển thị rồi thoát
+    if (next === item.quantity) {
+      setDraftQty((s) => ({ ...s, [skuId]: item.quantity }));
+      return;
+    }
+
+    const prev = item.quantity;
+
+    // optimistic update UI ngay
+    updateQuantity(skuId, next);
+    setDraftQty((s) => ({ ...s, [skuId]: next }));
+
+    // nếu chưa đăng nhập thì dừng tại đây
+    if (!userSession?.data || !cartItemId) return;
+
+    // đánh dấu pending cho item này
+    setPendingMap((m) => ({ ...m, [skuId]: true }));
+
+    // debounce gọi API
+    debouncedUpdateQuantity({
+      skuId,
+      cartItemId,
+      next,
+      prev,
+    });
+  };
+
+  const debouncedUpdateQuantity = useCallback(
+    debounce(
+      (p: {
+        skuId: number;
+        cartItemId: number;
+        next: number;
+        prev: number;
+      }) => {
+        onUpdateQuantity(
+          { id: p.cartItemId, quantity: p.next },
+          {
+            onError: () => {
+              // rollback
+              updateQuantity(p.skuId, p.prev);
+              setDraftQty((s) => ({ ...s, [p.skuId]: p.prev }));
+              showNotification('Cập nhật số lượng thất bại', 'error');
+            },
+            onSettled: () => {
+              setPendingMap((m) => ({ ...m, [p.skuId]: false }));
+            },
+          }
+        );
+      },
+      800
+    ),
+    [onUpdateQuantity]
+  );
+
+  const onQtyBlur = (row: ICartStoreItem) =>
+    commitQuantity({
+      skuId: row.skuId,
+      cartItemId: row.cartItemId,
+      name: row.productName,
+    });
+
+  const onQtyKeyDown = (e: React.KeyboardEvent, row: ICartStoreItem) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur(); // trigger blur để commit
+    }
+  };
+
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
       <LayoutContainer>
@@ -453,44 +627,82 @@ const Cart = () => {
                                   -
                                 </Button>
                                 <TextField
-                                  sx={{
-                                    width: '36px',
-                                    height: 28,
-                                    borderTop: '1px solid rgba(0,0,0,.09)',
-                                    borderBottom: '1px solid rgba(0,0,0,.09)',
-                                    '& .MuiOutlinedInput-root': {
-                                      height: 28,
-                                      '& fieldset': {
-                                        display: 'none',
-                                      },
-                                    },
-                                    '.MuiInputBase-root': {
-                                      height: 28,
-                                      borderRadius: 0,
-                                      fontSize: 14,
-                                      '.MuiInputBase-input': {
-                                        height: 24,
-                                        p: 0,
-                                        textAlign: 'center',
-                                        ':focus': {
-                                          border: '1px solid #000',
-                                        },
-                                        '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
-                                          {
-                                            display: 'none',
-                                          },
-                                      },
-                                      '& .Mui-disabled': {
-                                        color: '#000',
-                                        WebkitTextFillColor: 'inherit',
-                                      },
-                                    },
-                                  }}
+                                  sx={QtyInputStyle}
                                   variant='outlined'
-                                  type='number'
+                                  type='text'
                                   size='small'
-                                  value={row?.quantity}
-                                  disabled={true}
+                                  // value={count ?? row?.quantity}
+                                  // value={
+                                  //   qtyDraft[row.skuId] ?? String(row.quantity)
+                                  // }
+                                  // onChange={(e) => {
+                                  //   const value = e.target.value;
+                                  //   if (
+                                  //     selectedCartItemStock &&
+                                  //     +value > selectedCartItemStock
+                                  //   ) {
+                                  //     setCount(selectedCartItemStock);
+                                  //   } else {
+                                  //     setCount(
+                                  //       value ? parseInt(value, 10) : null
+                                  //     );
+                                  //   }
+                                  // }}
+                                  // onChange={(e) => {
+                                  //   const v = e.target.value;
+                                  //   // chỉ cho phép rỗng hoặc số
+                                  //   if (v === '' || /^\d+$/.test(v)) {
+                                  //     // clamp theo tồn kho nếu đã biết
+                                  //     if (v !== '' && selectedCartItemStock && +v > selectedCartItemStock) {
+                                  //       setQtyDraft((d) => ({ ...d, [row.skuId]: String(selectedCartItemStock) }));
+                                  //     } else {
+                                  //       setQtyDraft((d) => ({ ...d, [row.skuId]: v }));
+                                  //     }
+                                  //   }
+                                  // }}
+                                  // onClick={(e) => handleQtyInputClick(e, row)}
+                                  // onBlur={() => {
+                                  //   const draft = qtyDraft[row.skuId];
+                                  //   // chuẩn hóa: rỗng hoặc 0 -> 1
+                                  //   const next = Math.max(1, parseInt(draft || '1', 10));
+                                  //   const current = row.quantity;
+                                  //   if (next !== current) {
+                                  //     updateQuantity(row.skuId, next);
+                                  //     if (userSession?.data && row?.cartItemId) {
+                                  //       onUpdateQuantity({ id: row.cartItemId, quantity: next });
+                                  //     }
+                                  //   }
+                                  //   // đồng bộ draft lại với số cuối cùng
+                                  //   setQtyDraft((d) => ({ ...d, [row.skuId]: String(next) }));
+                                  // }}
+                                  // onKeyDown={(e) => {
+                                  //   if (e.key === '-') {
+                                  //     e.preventDefault();
+                                  //   }
+                                  //   if (
+                                  //     count === null &&
+                                  //     (e.key === '0' || e.key === 'Enter')
+                                  //   ) {
+                                  //     e.preventDefault();
+                                  //   }
+                                  // }}
+                                  // disabled={true}
+
+                                  value={getDisplayQty(row)}
+                                  onFocus={() =>
+                                    handleFocus(row.skuId, row.quantity)
+                                  }
+                                  onChange={(e) =>
+                                    handleChange(row.skuId, e.target.value)
+                                  }
+                                  onBlur={() => handleBlur(row)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter')
+                                      e.currentTarget.blur();
+                                  }}
+                                  inputRef={(el) => {
+                                    inputRefs.current[row.skuId] = el;
+                                  }}
                                 />
                                 <Button
                                   sx={{
@@ -657,3 +869,36 @@ const Cart = () => {
 };
 
 export default Cart;
+
+const QtyInputStyle: SxProps<Theme> = {
+  width: '36px',
+  height: 28,
+  borderTop: '1px solid rgba(0,0,0,.09)',
+  borderBottom: '1px solid rgba(0,0,0,.09)',
+  '& .MuiOutlinedInput-root': {
+    height: 28,
+    '& fieldset': {
+      display: 'none',
+    },
+  },
+  '.MuiInputBase-root': {
+    height: 28,
+    borderRadius: 0,
+    fontSize: 14,
+    '.MuiInputBase-input': {
+      height: 24,
+      p: 0,
+      textAlign: 'center',
+      ':focus': {
+        border: '1px solid #000',
+      },
+      '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+        display: 'none',
+      },
+    },
+    '& .Mui-disabled': {
+      color: '#000',
+      WebkitTextFillColor: 'inherit',
+    },
+  },
+};

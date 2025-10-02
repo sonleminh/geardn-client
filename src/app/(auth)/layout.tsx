@@ -1,3 +1,4 @@
+import { Notification } from '@/components/common/notification';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,5 +11,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return (
+    <>
+      {children}
+      <Notification />
+    </>
+  );
 }

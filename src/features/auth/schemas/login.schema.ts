@@ -9,5 +9,5 @@ export const loginSchema = z.object({
 password: z
   .string()
   .trim()
-  .min(6, { message: 'Tối thiểu 6 ký tự' })
+  .min(5, { message: 'Tối thiểu 6 ký tự' })
 });

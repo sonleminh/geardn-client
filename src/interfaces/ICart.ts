@@ -55,6 +55,12 @@ export interface ICartResponse {
     }
 }
 
+export interface IAddCartItemPayload {
+    productId: number;
+    skuId: number;
+    quantity: number;
+}
+
 export interface IUpdateQuantityPayload {
     id: number;
     quantity: number;
