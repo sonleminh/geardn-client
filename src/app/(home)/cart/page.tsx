@@ -70,19 +70,9 @@ const Cart = () => {
 
   const { showNotification } = useNotificationStore();
 
-  const [pendingMap, setPendingMap] = useState<Record<number, boolean>>({});
-
-  // draft số lượng khi user đang gõ
   const [draftQty, setDraftQty] = useState<Record<number, number | ''>>({});
   const [editing, setEditing] = useState<Record<number, boolean>>({});
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-
-  const [selectedCartItem, setSelectedCartItem] =
-    useState<ICartStoreItem | null>();
-  const [selectedCartItemStock, setSelectedCartItemStock] = useState<
-    number | null
-  >();
-
   const [openRemoveItemDialog, setOpenRemoveItemDialog] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [subtractItem, setSubtractItem] = useState<{
@@ -359,82 +349,6 @@ const Cart = () => {
     });
   }, [cartItems]);
 
-  const handleQtyInputClick = (_, row: ICartStoreItem) => {
-    console.log('row:', row);
-
-    setSelectedCartItem(row);
-    const slt = cartStock?.data?.find((c) => c.id === row.skuId);
-    setSelectedCartItemStock(slt?.quantity);
-    setQtyDraft((d) => ({ ...d, [row.skuId]: String(row.quantity) }));
-  };
-  console.log('slt:', selectedCartItem);
-
-  const getStockBySku = (skuId: number) =>
-    cartStock?.data?.find((i) => i.id === skuId)?.quantity ?? Infinity;
-
-  const handleQtyChange = (skuId: number, raw: string) => {
-    // cho phép rỗng tạm thời để user xóa rồi gõ lại
-    if (raw === '') return setDraftQty((s) => ({ ...s, [skuId]: '' }));
-    // chỉ nhận số nguyên dương
-    const n = Number(raw.replace(/[^\d]/g, ''));
-    if (Number.isNaN(n)) return;
-    setDraftQty((s) => ({ ...s, [skuId]: n }));
-  };
-
-  const commitQuantity = (opts: {
-    skuId: number;
-    cartItemId?: number;
-    name: string;
-  }) => {
-    const { skuId, cartItemId, name } = opts;
-    const item = cartItems?.find((i) => i.skuId === skuId);
-    if (!item) return;
-
-    const raw = draftQty[skuId];
-    // nếu user bỏ trống -> trả về số cũ
-    let next = typeof raw === 'number' ? raw : item.quantity;
-
-    // chuẩn hóa min/max
-    const max = getStockBySku(skuId);
-    if (next <= 0) {
-      // 0 => hỏi xóa
-      setOpenRemoveItemDialog(true);
-      setSubtractItem({ skuId, name });
-      // phục hồi hiển thị về số cũ
-      setDraftQty((s) => ({ ...s, [skuId]: item.quantity }));
-      return;
-    }
-    if (next > max && Number.isFinite(max)) {
-      next = max;
-    }
-
-    // không đổi thì chỉ sync lại hiển thị rồi thoát
-    if (next === item.quantity) {
-      setDraftQty((s) => ({ ...s, [skuId]: item.quantity }));
-      return;
-    }
-
-    const prev = item.quantity;
-
-    // optimistic update UI ngay
-    updateQuantity(skuId, next);
-    setDraftQty((s) => ({ ...s, [skuId]: next }));
-
-    // nếu chưa đăng nhập thì dừng tại đây
-    if (!userSession?.data || !cartItemId) return;
-
-    // đánh dấu pending cho item này
-    setPendingMap((m) => ({ ...m, [skuId]: true }));
-
-    // debounce gọi API
-    debouncedUpdateQuantity({
-      skuId,
-      cartItemId,
-      next,
-      prev,
-    });
-  };
-
   const debouncedUpdateQuantity = useCallback(
     debounce(
       (p: {
@@ -452,9 +366,6 @@ const Cart = () => {
               setDraftQty((s) => ({ ...s, [p.skuId]: p.prev }));
               showNotification('Cập nhật số lượng thất bại', 'error');
             },
-            onSettled: () => {
-              setPendingMap((m) => ({ ...m, [p.skuId]: false }));
-            },
           }
         );
       },
@@ -462,19 +373,6 @@ const Cart = () => {
     ),
     [onUpdateQuantity]
   );
-
-  const onQtyBlur = (row: ICartStoreItem) =>
-    commitQuantity({
-      skuId: row.skuId,
-      cartItemId: row.cartItemId,
-      name: row.productName,
-    });
-
-  const onQtyKeyDown = (e: React.KeyboardEvent, row: ICartStoreItem) => {
-    if (e.key === 'Enter') {
-      e.currentTarget.blur(); // trigger blur để commit
-    }
-  };
 
   return (
     <Box pt={2} pb={4} bgcolor={'#eee'}>
@@ -631,63 +529,6 @@ const Cart = () => {
                                   variant='outlined'
                                   type='text'
                                   size='small'
-                                  // value={count ?? row?.quantity}
-                                  // value={
-                                  //   qtyDraft[row.skuId] ?? String(row.quantity)
-                                  // }
-                                  // onChange={(e) => {
-                                  //   const value = e.target.value;
-                                  //   if (
-                                  //     selectedCartItemStock &&
-                                  //     +value > selectedCartItemStock
-                                  //   ) {
-                                  //     setCount(selectedCartItemStock);
-                                  //   } else {
-                                  //     setCount(
-                                  //       value ? parseInt(value, 10) : null
-                                  //     );
-                                  //   }
-                                  // }}
-                                  // onChange={(e) => {
-                                  //   const v = e.target.value;
-                                  //   // chỉ cho phép rỗng hoặc số
-                                  //   if (v === '' || /^\d+$/.test(v)) {
-                                  //     // clamp theo tồn kho nếu đã biết
-                                  //     if (v !== '' && selectedCartItemStock && +v > selectedCartItemStock) {
-                                  //       setQtyDraft((d) => ({ ...d, [row.skuId]: String(selectedCartItemStock) }));
-                                  //     } else {
-                                  //       setQtyDraft((d) => ({ ...d, [row.skuId]: v }));
-                                  //     }
-                                  //   }
-                                  // }}
-                                  // onClick={(e) => handleQtyInputClick(e, row)}
-                                  // onBlur={() => {
-                                  //   const draft = qtyDraft[row.skuId];
-                                  //   // chuẩn hóa: rỗng hoặc 0 -> 1
-                                  //   const next = Math.max(1, parseInt(draft || '1', 10));
-                                  //   const current = row.quantity;
-                                  //   if (next !== current) {
-                                  //     updateQuantity(row.skuId, next);
-                                  //     if (userSession?.data && row?.cartItemId) {
-                                  //       onUpdateQuantity({ id: row.cartItemId, quantity: next });
-                                  //     }
-                                  //   }
-                                  //   // đồng bộ draft lại với số cuối cùng
-                                  //   setQtyDraft((d) => ({ ...d, [row.skuId]: String(next) }));
-                                  // }}
-                                  // onKeyDown={(e) => {
-                                  //   if (e.key === '-') {
-                                  //     e.preventDefault();
-                                  //   }
-                                  //   if (
-                                  //     count === null &&
-                                  //     (e.key === '0' || e.key === 'Enter')
-                                  //   ) {
-                                  //     e.preventDefault();
-                                  //   }
-                                  // }}
-                                  // disabled={true}
-
                                   value={getDisplayQty(row)}
                                   onFocus={() =>
                                     handleFocus(row.skuId, row.quantity)

@@ -34,6 +34,7 @@ import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import { useSyncCart } from '@/queries/cart';
 import { loginSchema } from '@/features/auth/schemas/login.schema';
 import { useLoginWithEmailPwd } from '@/queries/auth';
+import { AppError } from '@/lib/errors/app-error';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -50,6 +51,7 @@ const LoginPage = () => {
     validateOnChange: false,
     onSubmit: async (values) => {
       try {
+        await onLoginWithEmailPwd(values);
         const syncPayload = cartItems?.map(
           ({ productId, skuId, quantity }) => ({
             productId,
@@ -86,53 +88,11 @@ const LoginPage = () => {
         router.push('/');
         showNotification('Đăng nhập thành công', 'success');
       } catch (error) {
-        // showNotification(error?.message, 'error');
+        const e = AppError.fromUnknown(error);
+        showNotification(e?.message, 'error');
       }
     },
   });
-  // try {
-  //   const userData = await loginWithEmailPwd({
-  //     email: values.email,
-  //     password: values.password,
-  //   });
-  // onSuccess: async () => {
-
-  //   if (userData?.data?.id) {
-  //     router.push('/');
-  //     // router.push('/tai-khoan');
-  //     showNotification('Đăng nhập thành công', 'success');
-  //   }
-  // },
-  // onError: (error) => {
-  //   let message = 'Đã xảy ra lỗi không xác định';
-  //   // Check nếu là AxiosError
-  //   if (error instanceof AxiosError) {
-  //     const status = error.response?.status;
-  //     const backendMsg = error.response?.data?.message;
-  //     if (status === 404) {
-  //       message =
-  //         'Không tìm thấy tài khoản hoặc địa chỉ API không tồn tại.';
-  //     } else if (status === 401) {
-  //       message = 'Sai mật khẩu. Vui lòng thử lại.';
-  //     } else if (status === 400) {
-  //       message =
-  //         typeof backendMsg === 'string'
-  //           ? backendMsg
-  //           : Array.isArray(backendMsg)
-  //           ? backendMsg.join(', ')
-  //           : 'Yêu cầu không hợp lệ.';
-  //     } else if (backendMsg) {
-  //       message = backendMsg;
-  //     }
-  //   }
-  //   console.log('error', message);
-  //   return showNotification(message, 'error');
-  // },
-  // });
-  // } catch (error) {
-  //   console.error('Unexpected error in onSubmit:', error);
-  //   showNotification('Hệ thống gặp lỗi. Vui lòng thử lại sau.', 'error');
-  // }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;

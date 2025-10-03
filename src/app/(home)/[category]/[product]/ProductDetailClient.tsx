@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useMemo, useRef, useState } from 'react';
 
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import StarRateIcon from '@mui/icons-material/StarRate';
 import {
   Box,
   Button,
@@ -13,43 +14,36 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import StarRateIcon from '@mui/icons-material/StarRate';
 import { SwiperClass } from 'swiper/react';
 
-import { useGetProduct } from '@/apis/product';
 // import { useAddToCart } from '@/apis/cart';
 
-import LayoutContainer from '@/components/layout-container';
-import Breadcrumbs from '@/components/common/Breadcrumbs';
 import AppLink from '@/components/common/AppLink';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import HtmlRenderBox from '@/components/common/HtmlRenderBox';
+import LayoutContainer from '@/components/layout-container';
 
 import MainSwiper from './components/main-swiper';
 import ThumbSwiper from './components/thumb-swiper';
 
-import { IProductSkuAttributes, ISku } from '@/interfaces/IProductSku';
-import { formatPrice } from '@/utils/format-price';
 import { attributeLabels } from '@/constants/attributeLabels';
+import { IProductSku, IProductSkuAttributes } from '@/interfaces/IProductSku';
+import { formatPrice } from '@/utils/format-price';
 
-import { useAuthStore } from '@/stores/auth-store';
-import { useCartStore } from '@/stores/cart-store';
-import { ATTRIBUTE_ORDER } from '@/constants/attributeOrder';
-import { useNotificationStore } from '@/stores/notification-store';
-import { IProduct } from '@/interfaces/IProduct';
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { ATTRIBUTE_ORDER } from '@/constants/attributeOrder';
 import { useSession } from '@/hooks/useSession';
-import { useAddCartItem, useUpdateQuantity } from '@/queries/cart';
+import { IProduct } from '@/interfaces/IProduct';
+import { AppError } from '@/lib/errors/app-error';
+import { useAddCartItem } from '@/queries/cart';
+import { useCartStore } from '@/stores/cart-store';
+import { useNotificationStore } from '@/stores/notification-store';
 
 const ProductDetailClient = ({ data }: { data: IProduct }) => {
-  // const params = useParams();
-  // const product = params.product as string;
   const { data: user } = useSession();
-  const { cartItems, addToCart, removeItem, updateQuantity } = useCartStore();
+  const { cartItems, addToCart, updateQuantity } = useCartStore();
   const { mutateAsync: onAddToCart } = useAddCartItem();
   const { showNotification } = useNotificationStore();
-  const { mutateAsync: onUpdateQuantity, isPending: isUpdateQuantityPending } =
-    useUpdateQuantity();
 
   const [count, setCount] = useState<number | null>(1);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -102,7 +96,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     return sortedOptions;
   }, [data]);
 
-  const selectedSku = useMemo<ISku | null>(() => {
+  const selectedSku = useMemo<IProductSku | null>(() => {
     const hasNullValue = Object.values(selectedAttributes).some(
       (value) => value === null
     );
@@ -239,19 +233,17 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       };
 
       addToCart(newItem);
-      onAddToCart(
-        {
+      try {
+        await onAddToCart({
           productId: selectedSku?.productId,
           skuId: selectedSku?.id,
           quantity: count ?? 1,
-        },
-        {
-          onError: () => {
-            showNotification('Đã có lỗi xảy ra', 'error');
-            updateQuantity(selectedSku?.id, itemAdded?.quantity);
-          },
-        }
-      );
+        });
+      } catch (error) {
+        const e = AppError.fromUnknown(error);
+        updateQuantity(selectedSku?.id, itemAdded?.quantity);
+        showNotification(e?.message, 'error');
+      }
     }
   };
 
@@ -447,7 +439,11 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
                         value={count ?? ''}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (selectedSku && +value > selectedSkuStock) {
+                          if (
+                            selectedSku &&
+                            selectedSkuStock &&
+                            +value > selectedSkuStock
+                          ) {
                             setCount(selectedSkuStock);
                           } else {
                             setCount(value ? parseInt(value, 10) : null);

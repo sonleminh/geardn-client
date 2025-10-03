@@ -25,6 +25,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 import { useSignup } from '@/queries/auth';
+import { AppError } from '@/lib/errors/app-error';
 
 export default function SignUp() {
   const router = useRouter();
@@ -38,12 +39,12 @@ export default function SignUp() {
     validateOnChange: false,
     onSubmit: async (values) => {
       try {
-        const data = await onSignup(values);
+        await onSignup(values);
         router.push(ROUTES.LOGIN);
         showNotification('Tạo tài khoản thành công', 'success');
-      } catch (err) {
-        console.log('err', err);
-        // showNotification(err, 'error');
+      } catch (error) {
+        const e = AppError.fromUnknown(error);
+        showNotification(e.message, 'error');
       }
     },
   });
