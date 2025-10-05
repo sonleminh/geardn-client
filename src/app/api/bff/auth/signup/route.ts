@@ -33,10 +33,16 @@ export async function POST(req: NextRequest) {
     if (setCookie) out.headers.set('set-cookie', setCookie);
 
     return out;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return NextResponse.json(
+        { message: err.message },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { message: err?.message ?? 'Internal error' },
-      { status: 500 },
+      { message: 'Internal error' },
+      { status: 500 }
     );
   }
 }

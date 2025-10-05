@@ -16,8 +16,6 @@ import {
 } from '@mui/material';
 import { SwiperClass } from 'swiper/react';
 
-// import { useAddToCart } from '@/apis/cart';
-
 import AppLink from '@/components/common/AppLink';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import HtmlRenderBox from '@/components/common/HtmlRenderBox';
@@ -59,7 +57,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         ? data?.skus.map((sku) => sku.imageUrl)
         : []),
     ];
-  }, [data?.images, data?.skus]);
+  }, [data]);
 
   const attributeOptions = useMemo(() => {
     if (!data) return {};
@@ -119,7 +117,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         )
       ) ?? null
     );
-  }, [selectedAttributes, data?.skus]);
+  }, [selectedAttributes, attributeOptions, data?.skus]);
 
   const availableCombinations = data?.skus?.map((sku) =>
     sku.productSkuAttributes.reduce(
@@ -149,37 +147,6 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     });
   };
 
-  const handleDisableAttribute = useMemo(() => {
-    return (type: string, value: string) => {
-      if (totalStock === 0) return true;
-      if (Object.keys(selectedAttributes).length === 0) return false;
-      // Tạo bản sao tránh mutate state gốc
-      const simulatedSelection = { ...selectedAttributes };
-
-      // Nếu đã chọn, loại bỏ thuộc tính khỏi danh sách chọn
-      if (simulatedSelection[type] === value) {
-        delete simulatedSelection[type]; // Xóa hẳn key
-      } else {
-        simulatedSelection[type] = value; // Chọn mới
-      }
-
-      const filteredSelection = Object.fromEntries(
-        Object.entries(simulatedSelection).filter(([_, val]) => val)
-      );
-
-      // Nếu không còn gì trong selectedAttributes, không disable gì cả
-      if (Object.keys(filteredSelection).length === 0) return false;
-
-      // Kiểm tra nếu tổ hợp mới này có hợp lệ
-      const isValid = availableCombinations?.some((combo) =>
-        Object.entries(filteredSelection).every(
-          ([key, val]) => combo[key] === val
-        )
-      );
-
-      return !isValid;
-    };
-  }, [selectedAttributes]);
   const handleAddCartItem = async () => {
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
@@ -268,6 +235,38 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       ) || 0),
     0
   );
+
+  const handleDisableAttribute = useMemo(() => {
+    return (type: string, value: string) => {
+      if (totalStock === 0) return true;
+      if (Object.keys(selectedAttributes).length === 0) return false;
+      // Tạo bản sao tránh mutate state gốc
+      const simulatedSelection = { ...selectedAttributes };
+
+      // Nếu đã chọn, loại bỏ thuộc tính khỏi danh sách chọn
+      if (simulatedSelection[type] === value) {
+        delete simulatedSelection[type]; // Xóa hẳn key
+      } else {
+        simulatedSelection[type] = value; // Chọn mới
+      }
+
+      const filteredSelection = Object.fromEntries(
+        Object.entries(simulatedSelection).filter(([_, val]) => val)
+      );
+
+      // Nếu không còn gì trong selectedAttributes, không disable gì cả
+      if (Object.keys(filteredSelection).length === 0) return false;
+
+      // Kiểm tra nếu tổ hợp mới này có hợp lệ
+      const isValid = availableCombinations?.some((combo) =>
+        Object.entries(filteredSelection).every(
+          ([key, val]) => combo[key] === val
+        )
+      );
+
+      return !isValid;
+    };
+  }, [availableCombinations, selectedAttributes, totalStock]);
 
   const selectedSkuStock = useMemo(() => {
     return selectedSku?.stocks?.reduce(

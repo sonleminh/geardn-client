@@ -25,7 +25,7 @@ const ThumbSwiper = ({ images, setThumbsSwiper }: IProps) => {
         modules={[FreeMode, Navigation, Thumbs]}
         navigation={true}
         className='thumbSwiper'>
-        {images?.map((item: any) => (
+        {images?.map((item: string) => (
           <SwiperSlide key={item}>
             <Box
               sx={{

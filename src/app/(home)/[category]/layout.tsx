@@ -1,9 +1,7 @@
-import React from 'react';
-import { Suspense } from 'react';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
-import Layout from '@/components/layout';
-import { Metadata } from 'next';
 import LayoutContainer from '@/components/layout-container';
+import { Metadata } from 'next';
+import React, { Suspense } from 'react';
 
 export async function generateMetadata({
   params,

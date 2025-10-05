@@ -1,14 +1,12 @@
 'use client';
 
-import { ChangeEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useState } from 'react';
 
-import { toFormikValidationSchema } from 'zod-formik-adapter';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { useFormik } from 'formik';
-import Cookies from 'js-cookie';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import LockIcon from '@mui/icons-material/Lock';
+import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import {
   Box,
   Button,
@@ -19,30 +17,30 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import LockIcon from '@mui/icons-material/Lock';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { ROUTES } from '@/constants/route';
+import { loginSchema } from '@/features/auth/schemas/login.schema';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
-import { useAuthStore } from '@/stores/auth-store';
+import { IProductSkuAttributes } from '@/interfaces/IProductSku';
+import { AppError } from '@/lib/errors/app-error';
+import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
+import { useSyncCart } from '@/queries/cart';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
-import { ROUTES } from '@/constants/route';
-import { loginWithEmailPwd } from '@/apis/auth';
-import { IProductSkuAttributes } from '@/interfaces/IProductSku';
-import { useSyncCart } from '@/queries/cart';
-import { loginSchema } from '@/features/auth/schemas/login.schema';
-import { useLoginWithEmailPwd } from '@/queries/auth';
-import { AppError } from '@/lib/errors/app-error';
 
 const LoginPage = () => {
   const router = useRouter();
   const { cartItems, syncCart } = useCartStore();
-  // const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
   const { mutateAsync: onSyncCart } = useSyncCart();
   const { mutateAsync: onLoginWithEmailPwd } = useLoginWithEmailPwd();
+  const { mutateAsync: onGoogleLogin } = useGoogleLogin();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
@@ -99,24 +97,15 @@ const LoginPage = () => {
     formik.setFieldValue(name, value);
   };
 
-  const handleGoogleLogin = (credentialResponse: CredentialResponse) => {
-    const credentialDecoded: ICustomJwtPayload = jwtDecode(
-      credentialResponse?.credential as string
-    );
-
-    console.log('cre:', credentialDecoded);
-
-    if (credentialResponse) {
-      Cookies.set('GC', credentialResponse?.credential as string, {
-        expires: credentialDecoded?.exp,
-      });
-      // login({
-      //   id: credentialDecoded?.sub,
-      //   email: credentialDecoded?.email as string,
-      //   name: credentialDecoded?.name as string,
-      //   picture: credentialDecoded?.picture,
-      // });
-      router.push('/');
+  const handleGoogleLogin = async (cred: CredentialResponse) => {
+    const idToken = cred.credential;
+    console.log('idToken:', idToken);
+    if (!idToken) return;
+    try {
+      await onGoogleLogin({ idToken });
+    } catch (error) {
+      const e = AppError.fromUnknown(error);
+      showNotification(e?.message, 'error');
     }
   };
   return (
@@ -269,8 +258,8 @@ const LoginPage = () => {
               </Box>
             </Box>
             <GoogleLogin
-              onSuccess={(credentialResponse: CredentialResponse) => {
-                handleGoogleLogin(credentialResponse);
+              onSuccess={(cred: CredentialResponse) => {
+                handleGoogleLogin(cred);
                 // const credentialDecoded = jwtDecode(
                 //   credentialResponse.credential as string
                 // );

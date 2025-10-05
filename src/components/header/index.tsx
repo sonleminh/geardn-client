@@ -1,12 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import {
   Box,
   Button,
@@ -19,18 +18,16 @@ import {
 } from '@mui/material';
 
 import SkeletonImage from '../common/SkeletonImage';
-// import { useLogout } from '@/apis/auth';
-
 import { useAuthStore } from '@/stores/auth-store';
 
+import { logoutAPI } from '@/apis/auth';
 import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
-import { HeaderStyle } from './style';
 import { useSession } from '@/hooks/useSession';
 import { IUser } from '@/interfaces/IUser';
-import { logoutAPI } from '@/apis/auth';
-import AppLink from '../common/AppLink';
 import { useCartStore } from '@/stores/cart-store';
+import AppLink from '../common/AppLink';
+import { HeaderStyle } from './style';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();

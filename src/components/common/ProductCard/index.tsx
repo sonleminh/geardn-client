@@ -1,11 +1,12 @@
-import { Box, Button, Typography } from '@mui/material';
-import React from 'react';
-import SkeletonImage from '../SkeletonImage';
 import StarRateIcon from '@mui/icons-material/StarRate';
-import AppLink from '../AppLink';
+import { Box, Typography } from '@mui/material';
+
 import { IProduct } from '@/interfaces/IProduct';
-import { formatPrice } from '@/utils/format-price';
 import { truncateTextByLine } from '@/utils/css-helper.util';
+import { formatPrice } from '@/utils/format-price';
+
+import AppLink from '../AppLink';
+import SkeletonImage from '../SkeletonImage';
 
 const ProductCard = ({ data }: { data: IProduct }) => {
   return (

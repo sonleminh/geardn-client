@@ -1,9 +1,9 @@
-// src/app/api/bff/auth/signup/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const beRes = await fetch(`${process.env.BACKEND_API_URL}/auth/logout`, {
+    const body = await req.json();
+    const beRes = await fetch(`${process.env.BACKEND_API_URL}/auth/google/verify-id-token`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
         // chuyển cookie client -> BE nếu BE cần (không luôn bắt buộc)
         cookie: req.headers.get('cookie') ?? '',
       },
+      body: JSON.stringify(body),
       cache: 'no-store',
     });
 
