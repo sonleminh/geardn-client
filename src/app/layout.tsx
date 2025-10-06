@@ -1,13 +1,11 @@
 import React from 'react';
-import { Inter } from 'next/font/google';
-import ColorModeProvider from '@/providers/color-mode-store-provider';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import CssBaseLineClient from '@/components/common/CssBaseLine';
-import { Providers } from '@/lib/utils/ProviderQuery';
-import CssBaseline from '@mui/material/CssBaseline';
+import { Inter } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import { ThemeProvider } from '@mui/material';
-import theme from '@/theme';
+import CssBaseline from '@mui/material/CssBaseline';
+
+import ColorModeProvider from '@/providers/color-mode-store-provider';
+import { Providers } from '@/lib/utils/ProviderQuery';
 
 const inter = Inter({
   weight: ['400', '500', '600', '700', '800', '900'],

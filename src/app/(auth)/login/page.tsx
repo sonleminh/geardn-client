@@ -1,14 +1,12 @@
 'use client';
 
-import { ChangeEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useState } from 'react';
 
-import { toFormikValidationSchema } from 'zod-formik-adapter';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { useFormik } from 'formik';
-import Cookies from 'js-cookie';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import LockIcon from '@mui/icons-material/Lock';
+import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import {
   Box,
   Button,
@@ -19,15 +17,23 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import LockIcon from '@mui/icons-material/Lock';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { ROUTES } from '@/constants/route';
+import { loginSchema } from '@/features/auth/schemas/login.schema';
 import { ICustomJwtPayload } from '@/interfaces/IAuth';
-import { useAuthStore } from '@/stores/auth-store';
+import { IProductSkuAttributes } from '@/interfaces/IProductSku';
+import { AppError } from '@/lib/errors/app-error';
+import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
+import { useSyncCart } from '@/queries/cart';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
+<<<<<<< HEAD
 import { ROUTES } from '@/constants/route';
 import { loginWithEmailPwd } from '@/apis/auth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
@@ -35,11 +41,12 @@ import { useSyncCart } from '@/queries/cart';
 import { loginSchema } from '@/features/auth/schemas/login.schema';
 import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
 import { AppError } from '@/lib/errors/app-error';
+=======
+>>>>>>> origin/feat/home-work
 
 const LoginPage = () => {
   const router = useRouter();
   const { cartItems, syncCart } = useCartStore();
-  // const { login } = useAuthStore((state) => state);
   const { showNotification } = useNotificationStore();
   const { mutateAsync: onSyncCart } = useSyncCart();
   const { mutateAsync: onLoginWithEmailPwd } = useLoginWithEmailPwd();
@@ -102,11 +109,18 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async (cred: CredentialResponse) => {
     const idToken = cred.credential;
+<<<<<<< HEAD
     if (!idToken) return;
     try {
       await onGoogleLogin({ idToken });
       router.push('/');
       showNotification('Đăng nhập thành công', 'success');
+=======
+    console.log('idToken:', idToken);
+    if (!idToken) return;
+    try {
+      await onGoogleLogin({ idToken });
+>>>>>>> origin/feat/home-work
     } catch (error) {
       const e = AppError.fromUnknown(error);
       showNotification(e?.message, 'error');

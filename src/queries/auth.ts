@@ -10,7 +10,11 @@ export function useLoginWithEmailPwd() {
 }
 
 export function useGoogleLogin() {
+<<<<<<< HEAD
   return useMutation<TBaseResponse<ILogInResponse>, Error, {idToken: string}>({
+=======
+  return useMutation({
+>>>>>>> origin/feat/home-work
     mutationFn: googleLogin,
   });
 }

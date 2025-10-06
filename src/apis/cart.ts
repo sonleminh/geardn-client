@@ -1,8 +1,8 @@
-import { IAddCartItemPayload, ICartResponse, ICartStockItem, ICartStockResponse, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from "@/interfaces/ICart";
+import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from "@/interfaces/ICart";
 import { TBaseResponse } from "@/types/response.type";
 import { bff } from "@/lib/api-fetch";
 
-export const getCart = () => bff<TBaseResponse<any>>('/api/bff/cart');
+export const getCart = () => bff<TBaseResponse<ICartResponse>>('/api/bff/cart');
 
 export const getCartStock = (skuIds: number[]) =>
   bff<TBaseResponse<ICartStockItem[]>>(`/api/bff/cart/stock?skuIds=${skuIds.join(',')}`);

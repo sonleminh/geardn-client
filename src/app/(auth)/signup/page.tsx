@@ -1,10 +1,10 @@
 'use client';
 
-import { signup } from '@/apis/auth';
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { ROUTES } from '@/constants/route';
 import { signUpSchema } from '@/features/auth/schemas/signup.schema';
-import { signUpAPI } from '@/services/auth/api';
+import { AppError } from '@/lib/errors/app-error';
+import { useSignup } from '@/queries/auth';
 import { useNotificationStore } from '@/stores/notification-store';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import LockIcon from '@mui/icons-material/Lock';
@@ -20,12 +20,10 @@ import {
   Typography,
 } from '@mui/material';
 import { useFormik } from 'formik';
-import { toFormikValidationSchema } from 'zod-formik-adapter';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
-import { useSignup } from '@/queries/auth';
-import { AppError } from '@/lib/errors/app-error';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 export default function SignUp() {
   const router = useRouter();
