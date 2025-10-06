@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
-import { useGetUserPurchases } from '@/apis/order';
+// import { useGetUserPurchases } from '@/apis/order';
 import PurchaseList from './components/PurchaseList';
+import { useGetUserPurchases } from '@/apis/order-old';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,7 +68,7 @@ const Purchase = () => {
             <Tab label='Trả hàng' {...a11yProps(5)} />
           </Tabs>
         </Box>
-        {[0, 1, 2, 3, 4, 5].map((index) => (
+        {/* {[0, 1, 2, 3, 4, 5].map((index) => (
           <CustomTabPanel key={index} value={type} index={index}>
             {isLoading ? (
               <div>Loading...</div>
@@ -75,7 +76,7 @@ const Purchase = () => {
               <PurchaseList orders={userPurchases?.data || []} />
             )}
           </CustomTabPanel>
-        ))}
+        ))} */}
         {/* <CustomTabPanel value={type} index={1}>
           Item Two
         </CustomTabPanel>

@@ -1,4 +1,6 @@
+import { OrderStatus } from "@/constants/orderStatus";
 import { ICreateOrderPayload, IOrder } from "@/interfaces/IOrder";
+import { IPaymentMethod } from "@/interfaces/IPayment";
 import { TBaseResponse } from "@/types/response.type";
 
 export async function createOrder(payload: ICreateOrderPayload) {
@@ -12,8 +14,19 @@ export async function createOrder(payload: ICreateOrderPayload) {
   return data as TBaseResponse<IOrder>;
 }
 
-export async function getOrder() {
+export async function getUserPurchases(params: { type?: OrderStatus | 'ALL' } = {}) {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== 'ALL') qs.set(k, String(v));
+  }
+  const url = `/api/bff/order/user-purchase${qs.toString() ? `?${qs}` : ''}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(String(r.status));
+  return r.json() as Promise<TBaseResponse<IOrder[]>>;
+}
+
+export async function getPaymentMethods() {
   const r = await fetch('/api/bff/payment-method', { cache: 'no-store' });
   if (!r.ok) throw new Error(String(r.status));
-  return r.json() as Promise<TBaseResponse<IOrder>>;
+  return r.json() as Promise<TBaseResponse<IPaymentMethod[]>>;
 }

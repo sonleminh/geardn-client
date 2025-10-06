@@ -59,11 +59,11 @@ const Account = () => {
                 <TableCell width={'30%'} align='right'>
                   Email
                 </TableCell>
-                <TableCell align='left'>{data?.email}</TableCell>
+                <TableCell align='left'>{data?.data?.email}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align='right'>Tên</TableCell>
-                <TableCell align='left'>{data?.name}</TableCell>
+                <TableCell align='left'>{data?.data?.name}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

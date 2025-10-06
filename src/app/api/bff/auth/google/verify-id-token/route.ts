@@ -2,6 +2,6 @@
 import { NextRequest } from 'next/server';
 import { proxyBE } from '@/lib/proxy';
 
-export async function GET(req: NextRequest) {
-  return proxyBE(req, '/payment-methods');
+export async function POST(req: NextRequest) {
+    return proxyBE(req, '/auth/google/verify-id-token');
 }

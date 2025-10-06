@@ -24,7 +24,8 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <AppRouterCacheProvider>
           <Providers>
-            <GoogleOAuthProvider clientId='74957006221-6mm4u0inm5drqgrt1hpoiagugbuhoav6.apps.googleusercontent.com'>
+            <GoogleOAuthProvider
+              clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
               {/* <ThemeProvider theme={theme}> */}
               <ColorModeProvider>
                 <CssBaseline />
