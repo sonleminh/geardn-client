@@ -33,7 +33,7 @@ import { loginWithEmailPwd } from '@/apis/auth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import { useSyncCart } from '@/queries/cart';
 import { loginSchema } from '@/features/auth/schemas/login.schema';
-import { useLoginWithEmailPwd } from '@/queries/auth';
+import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
 import { AppError } from '@/lib/errors/app-error';
 
 const LoginPage = () => {
@@ -43,6 +43,7 @@ const LoginPage = () => {
   const { showNotification } = useNotificationStore();
   const { mutateAsync: onSyncCart } = useSyncCart();
   const { mutateAsync: onLoginWithEmailPwd } = useLoginWithEmailPwd();
+  const { mutateAsync: onGoogleLogin } = useGoogleLogin();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const formik = useFormik({
@@ -99,24 +100,16 @@ const LoginPage = () => {
     formik.setFieldValue(name, value);
   };
 
-  const handleGoogleLogin = (credentialResponse: CredentialResponse) => {
-    const credentialDecoded: ICustomJwtPayload = jwtDecode(
-      credentialResponse?.credential as string
-    );
-
-    console.log('cre:', credentialDecoded);
-
-    if (credentialResponse) {
-      Cookies.set('GC', credentialResponse?.credential as string, {
-        expires: credentialDecoded?.exp,
-      });
-      // login({
-      //   id: credentialDecoded?.sub,
-      //   email: credentialDecoded?.email as string,
-      //   name: credentialDecoded?.name as string,
-      //   picture: credentialDecoded?.picture,
-      // });
+  const handleGoogleLogin = async (cred: CredentialResponse) => {
+    const idToken = cred.credential;
+    if (!idToken) return;
+    try {
+      await onGoogleLogin({ idToken });
       router.push('/');
+      showNotification('Đăng nhập thành công', 'success');
+    } catch (error) {
+      const e = AppError.fromUnknown(error);
+      showNotification(e?.message, 'error');
     }
   };
   return (
@@ -269,8 +262,8 @@ const LoginPage = () => {
               </Box>
             </Box>
             <GoogleLogin
-              onSuccess={(credentialResponse: CredentialResponse) => {
-                handleGoogleLogin(credentialResponse);
+              onSuccess={(cred: CredentialResponse) => {
+                handleGoogleLogin(cred);
                 // const credentialDecoded = jwtDecode(
                 //   credentialResponse.credential as string
                 // );
