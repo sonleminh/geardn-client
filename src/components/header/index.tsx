@@ -20,7 +20,6 @@ import {
 import SkeletonImage from '../common/SkeletonImage';
 import { useAuthStore } from '@/stores/auth-store';
 
-import { logoutAPI } from '@/apis/auth';
 import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
 import { useSession } from '@/hooks/useSession';
@@ -28,10 +27,14 @@ import { IUser } from '@/interfaces/IUser';
 import { useCartStore } from '@/stores/cart-store';
 import AppLink from '../common/AppLink';
 import { HeaderStyle } from './style';
+import { useLogout } from '@/queries/auth';
+import { AppError } from '@/lib/errors/app-error';
+import { useNotificationStore } from '@/stores/notification-store';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { showNotification } = useNotificationStore();
 
   const { user, logout } = useAuthStore((state) => state);
   const { cartItems } = useCartStore((state) => state);
@@ -44,6 +47,8 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const { mutateAsync: onLogout } = useLogout();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,10 +75,12 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   };
 
   const handleLogout = async () => {
-    const result = await logoutAPI();
-    if (result?.success === true) {
-      logout();
+    try {
+      await onLogout();
       router.push(ROUTES.LOGIN);
+    } catch (error) {
+      const e = AppError.fromUnknown(error);
+      showNotification(e?.message, 'error');
     }
   };
   const handleUserClick = (event: React.MouseEvent<HTMLButtonElement>) => {

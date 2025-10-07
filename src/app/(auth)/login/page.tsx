@@ -33,16 +33,6 @@ import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
 import { useSyncCart } from '@/queries/cart';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
-<<<<<<< HEAD
-import { ROUTES } from '@/constants/route';
-import { loginWithEmailPwd } from '@/apis/auth';
-import { IProductSkuAttributes } from '@/interfaces/IProductSku';
-import { useSyncCart } from '@/queries/cart';
-import { loginSchema } from '@/features/auth/schemas/login.schema';
-import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';
-import { AppError } from '@/lib/errors/app-error';
-=======
->>>>>>> origin/feat/home-work
 
 const LoginPage = () => {
   const router = useRouter();
@@ -109,18 +99,11 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async (cred: CredentialResponse) => {
     const idToken = cred.credential;
-<<<<<<< HEAD
     if (!idToken) return;
     try {
       await onGoogleLogin({ idToken });
       router.push('/');
       showNotification('Đăng nhập thành công', 'success');
-=======
-    console.log('idToken:', idToken);
-    if (!idToken) return;
-    try {
-      await onGoogleLogin({ idToken });
->>>>>>> origin/feat/home-work
     } catch (error) {
       const e = AppError.fromUnknown(error);
       showNotification(e?.message, 'error');
