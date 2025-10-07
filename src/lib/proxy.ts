@@ -9,19 +9,39 @@ export async function proxyBE<T = unknown>(
   path: string,
   init?: RequestInit
 ): Promise<NextResponse> {
-  const r = await fetch(`${BE}${path}`, {
-    method: init?.method ?? req.method,
-    body:
-      init?.body ??
-      (req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined),
-    headers: {
-      accept: 'application/json',
-      ...(init?.headers ?? {}),
-      cookie: req.headers.get('cookie') ?? '',
-    },
+  const method = init?.method ?? req.method;
+
+  let body: RequestInit['body'] | undefined = init?.body;
+  const shouldUseReqBody = body === undefined && method !== 'GET' && method !== 'HEAD';
+  if (shouldUseReqBody && req.body) body = req.body;
+
+  const headers: HeadersInit = {
+    accept: 'application/json',
+    ...(init?.headers ?? {}),
+    cookie: req.headers.get('cookie') ?? '',
+  };
+
+  const options: RequestInit = {
+    method,
+    headers,
     cache: 'no-store',
     redirect: 'manual',
-  });
+  };
+
+  if (body !== undefined) {
+    options.body = body;
+    // Thêm duplex nếu body là ReadableStream
+    const isStream =
+      typeof body === 'object' &&
+      body !== null &&
+      'getReader' in (body as object);
+    if (isStream) {
+      // @ts-expect-error: duplex là trường hợp đặc thù của undici
+      options.duplex = 'half';
+    }
+  }
+
+  const r = await fetch(`${BE}${path}`, options);
 
   if (r.status === 204) return new NextResponse(null, { status: 204 });
 

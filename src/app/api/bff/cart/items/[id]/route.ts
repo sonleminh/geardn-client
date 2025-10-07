@@ -27,6 +27,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id } = await params;               
     return proxyBE(req, `/carts/items/${id}`, {
     method: 'DELETE',
-    headers:{ 'content-type':'application/json' }
+    headers:{ 'content-type':'application/json' },
   });
 }

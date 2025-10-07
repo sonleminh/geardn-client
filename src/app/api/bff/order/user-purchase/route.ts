@@ -12,6 +12,6 @@ export async function GET(req: NextRequest) {
   const qs = new URLSearchParams();
   for (const [k, v] of u.searchParams) if (ALLOWED.has(k) && v !== '') qs.set(k, v);
 
-  const path = `/user-purchases${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const path = `/orders/user-purchases${qs.toString() ? `?${qs.toString()}` : ''}`;
   return proxyBE(req, path);
 }

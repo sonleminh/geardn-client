@@ -10,9 +10,10 @@ export function useCreateOrder() {
   });
 }
 
-export function useUserPurchases(p: { type?: OrderStatus | 'ALL'; }) {
+
+export function useUserPurchases(p :{type: number}) {
   return useQuery({
-    queryKey: ['user-purchases', p],
+    queryKey: ['user-purchases', p.type],
     queryFn: () => getUserPurchases(p),
   });
 }

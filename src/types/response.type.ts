@@ -9,8 +9,9 @@ export type TPaginatedResponse<T> = {
     message: string;
   };
 
-  export type TBaseResponse<T> = {
-    success: boolean;
-    message: string;
-    data: T;
-  };
+export type TBaseResponse<T, M = undefined> = {
+  success: boolean;
+  message: string;
+  data: T;
+  meta?: M;
+};

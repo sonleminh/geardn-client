@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 // import { useGetUserPurchases } from '@/apis/order';
 import PurchaseList from './components/PurchaseList';
-import { useGetUserPurchases } from '@/apis/order-old';
+import { useUserPurchases } from '@/queries/order';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -37,7 +37,7 @@ function CustomTabPanel(props: TabPanelProps) {
 const Purchase = () => {
   const [type, setType] = useState(0);
 
-  const { data: userPurchases, isLoading } = useGetUserPurchases(type);
+  const { data: userPurchases, isLoading } = useUserPurchases({ type });
   console.log('userPurchases', userPurchases);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setType(newValue);
@@ -61,6 +61,7 @@ const Purchase = () => {
               },
             }}>
             <Tab label='Tất cả' {...a11yProps(0)} />
+            <Tab label='Đang chờ' {...a11yProps(1)} />
             <Tab label='Đang xử lý' {...a11yProps(1)} />
             <Tab label='Đang giao' {...a11yProps(2)} />
             <Tab label='Hoàn tất' {...a11yProps(3)} />
@@ -68,7 +69,7 @@ const Purchase = () => {
             <Tab label='Trả hàng' {...a11yProps(5)} />
           </Tabs>
         </Box>
-        {/* {[0, 1, 2, 3, 4, 5].map((index) => (
+        {[0, 1, 2, 3, 4, 5].map((index) => (
           <CustomTabPanel key={index} value={type} index={index}>
             {isLoading ? (
               <div>Loading...</div>
@@ -76,7 +77,7 @@ const Purchase = () => {
               <PurchaseList orders={userPurchases?.data || []} />
             )}
           </CustomTabPanel>
-        ))} */}
+        ))}
         {/* <CustomTabPanel value={type} index={1}>
           Item Two
         </CustomTabPanel>

@@ -3,5 +3,7 @@ import { NextRequest } from 'next/server';
 import { proxyBE } from '@/lib/proxy';
 
 export async function POST(req: NextRequest) {
-  return proxyBE(req, '/orders');
+  const body = await req.json(); 
+  return proxyBE(req, '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify(body) });
 }

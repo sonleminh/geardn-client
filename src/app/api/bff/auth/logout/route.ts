@@ -3,5 +3,5 @@ import { NextRequest } from 'next/server';
 import { proxyBE } from '@/lib/proxy';
 
 export async function POST(req: NextRequest) {
-  return proxyBE(req, '/auth/logout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '' } );
+  return proxyBE(req, '/auth/logout', { method: 'POST', headers: { 'content-type': 'application/json' } } );
 }
