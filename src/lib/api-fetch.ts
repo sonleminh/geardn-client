@@ -2,7 +2,7 @@ import { AppError } from "./errors/app-error";
 
 let refreshing: Promise<Response>|null = null;
 const refreshOnce = () =>
-  (refreshing ??= fetch('/api/bff/auth/refresh', { method:'POST', cache:'no-store' })
+  (refreshing ??= fetch('/api/bff/auth/refresh-token', { method:'GET', cache:'no-store' })
     .finally(()=> (refreshing=null)));
 
 async function parseOk<T>(res: Response): Promise<T> {

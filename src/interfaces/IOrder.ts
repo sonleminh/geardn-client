@@ -1,4 +1,5 @@
-import { IModel } from "./IProduct";
+import { OrderStatus, UIOrderStatus } from "@/constants/orderStatus";
+import { IProduct } from "./IProduct";
 
 export interface ICartPayload {
     model: string;
@@ -15,6 +16,7 @@ export interface IOrderItem {
     skuAttributes: {attribute: string; value: string}[];
     skuCode: string;
     skuId: number;     
+    product: IProduct;
 }
 
 export interface IOrder {
@@ -22,7 +24,8 @@ export interface IOrder {
     userId: number;
     orderCode: string;
     totalPrice: number;
-    status: string;
+    status: OrderStatus;
+    uiStatus: UIOrderStatus;
     fullName: string;
     phoneNumber: string;
     email?: string;

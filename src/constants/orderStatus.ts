@@ -5,6 +5,13 @@ export enum OrderStatus {
     DELIVERED='DELIVERED',
     CANCELED='CANCELED',
   };
+
+  export type UIOrderStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'CANCELED';
   
 export const OrderStatusLabelMap: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'Đang chờ',

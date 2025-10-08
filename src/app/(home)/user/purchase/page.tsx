@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 // import { useGetUserPurchases } from '@/apis/order';
 import PurchaseList from './components/PurchaseList';
 import { useUserPurchases } from '@/queries/order';
@@ -72,7 +72,16 @@ const Purchase = () => {
         {[0, 1, 2, 3, 4, 5].map((index) => (
           <CustomTabPanel key={index} value={type} index={index}>
             {isLoading ? (
-              <div>Loading...</div>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: 400,
+                }}>
+                <CircularProgress />
+              </Box>
             ) : (
               <PurchaseList orders={userPurchases?.data || []} />
             )}

@@ -54,7 +54,9 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     return [
       ...(data?.images || []),
       ...(data && data?.skus?.length > 1
-        ? data?.skus.map((sku) => sku.imageUrl)
+        ? data?.skus
+            .map((sku) => sku.imageUrl !== null && sku.imageUrl)
+            .filter(Boolean)
         : []),
     ];
   }, [data]);
