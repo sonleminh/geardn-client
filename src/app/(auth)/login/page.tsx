@@ -19,14 +19,11 @@ import {
 } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { useFormik } from 'formik';
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 import SkeletonImage from '@/components/common/SkeletonImage';
 import { ROUTES } from '@/constants/route';
 import { loginSchema } from '@/features/auth/schemas/login.schema';
-import { ICustomJwtPayload } from '@/interfaces/IAuth';
 import { IProductSkuAttributes } from '@/interfaces/IProductSku';
 import { AppError } from '@/lib/errors/app-error';
 import { useGoogleLogin, useLoginWithEmailPwd } from '@/queries/auth';

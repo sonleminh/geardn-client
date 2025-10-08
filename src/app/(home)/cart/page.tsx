@@ -85,7 +85,7 @@ const Cart = () => {
 
   const handleFocus = (skuId: number, current: number) => {
     setEditing((s) => ({ ...s, [skuId]: true }));
-    setDraftQty((s) => ({ ...s, [skuId]: current })); // seed từ quantity hiện tại
+    setDraftQty((s) => ({ ...s, [skuId]: current }));
   };
 
   const handleChange = (skuId: number, raw: string) => {
@@ -111,7 +111,6 @@ const Cart = () => {
       if (Number.isFinite(stock) && next > stock) next = stock;
 
       if (next !== row.quantity) {
-        // optimistic
         updateQuantity(skuId, next);
         if (userSession?.data && cartItemId) {
           debouncedUpdateQuantity({
@@ -123,11 +122,11 @@ const Cart = () => {
         }
       }
     }
-    // kết thúc edit
     setEditing((s) => ({ ...s, [skuId]: false }));
     setDraftQty((s) => {
-      const { [skuId]: _, ...rest } = s;
-      return rest;
+      const next = { ...s };
+      delete next[skuId];
+      return next;
     });
   };
 
@@ -153,7 +152,7 @@ const Cart = () => {
         }))
       );
     }
-  }, [cartServer]);
+  }, [cartServer, userSession?.data, syncCart]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -323,15 +322,15 @@ const Cart = () => {
     router.push(ROUTES.CHECKOUT);
   };
 
-  function debounce<T extends (...args: any[]) => void>(
-    callback: T,
-    delay: number
-  ): (...args: Parameters<T>) => void {
-    let timer: NodeJS.Timeout;
+  function debounce<This, A extends unknown[]>(
+    callback: (this: This, ...args: A) => void,
+    delay = 300
+  ) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    return (...args: Parameters<T>) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => callback(...args), delay);
+    return function (this: This, ...args: A) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => callback.apply(this, args), delay);
     };
   }
 
