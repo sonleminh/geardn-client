@@ -1,14 +1,16 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { TBaseResponse } from '@/types/response.type';
-import { IAddCartItemPayload, ICartResponse, ICartStockItem, ICartStockResponse, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
 import { addCartItem, deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
+import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
 import { IUser } from '@/interfaces/IUser';
+import { TBaseResponse } from '@/types/response.type';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export function useGetCart(user: IUser | null) {
   return useQuery<TBaseResponse<ICartResponse>, Error>({
     queryKey: ['cart'],
     queryFn: getCart,
-    enabled: !!user
+    enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
   });
 }
 

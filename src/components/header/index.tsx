@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 
 import SkeletonImage from '../common/SkeletonImage';
-import { useAuthStore } from '@/stores/auth-store';
 
 import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
@@ -36,19 +35,14 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const pathname = usePathname();
   const { showNotification } = useNotificationStore();
 
-  const { user, logout } = useAuthStore((state) => state);
   const { cartItems } = useCartStore((state) => state);
-  console.log('cartItems:', cartItems);
 
-  // const { data: cartData, isLoading } = useGetCart(user);
-  // const { mutateAsync: onLogout } = useLogout();
-  const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
+  const { data } = useSession();
+  const { mutateAsync: onLogout } = useLogout();
   const userData = data?.data ?? initialUser;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const { mutateAsync: onLogout } = useLogout();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -211,7 +205,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                       />
                     </Box>
                     <Typography sx={{ fontSize: 14, textTransform: 'none' }}>
-                      {user?.name}
+                      {userData?.name}
                     </Typography>
                   </Button>
                 ) : (

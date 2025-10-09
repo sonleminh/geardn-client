@@ -25,7 +25,7 @@ const MainSwiper = ({ data, thumbsSwiper, setMainSwiper }: IProps) => {
         modules={[FreeMode, Navigation, Thumbs]}
         navigation={true}
         className='mainSwiper'>
-        {data?.map((item: any) => (
+        {data?.map((item: string) => (
           <SwiperSlide key={item}>
             <Box
               sx={{

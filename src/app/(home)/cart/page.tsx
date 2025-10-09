@@ -184,39 +184,33 @@ const Cart = () => {
     setSelected(newSelected);
   };
 
-  const debouncedIncreaseQuantity = useCallback(
-    debounce(
-      (payload: { skuId: number; cartItemId: number; quantity: number }) => {
-        onUpdateQuantity(
-          { id: payload.cartItemId, quantity: payload.quantity },
-          {
-            onError: () => {
-              showNotification('Đã có lỗi xảy ra', 'error');
-              updateQuantity(payload.skuId, payload.quantity - 1); // !!
-            },
-          }
-        );
-      },
-      1000
-    ),
-    []
+  const debouncedIncreaseQuantity = debounce(
+    (payload: { skuId: number; cartItemId: number; quantity: number }) => {
+      onUpdateQuantity(
+        { id: payload.cartItemId, quantity: payload.quantity },
+        {
+          onError: () => {
+            showNotification('Đã có lỗi xảy ra', 'error');
+            updateQuantity(payload.skuId, payload.quantity - 1); // !!
+          },
+        }
+      );
+    },
+    1000
   );
 
-  const debouncedReduceQuantity = useCallback(
-    debounce(
-      (payload: { skuId: number; cartItemId: number; quantity: number }) => {
-        onUpdateQuantity(
-          { id: payload.cartItemId, quantity: payload.quantity },
-          {
-            onError: () => {
-              updateQuantity(payload.skuId, payload.quantity - 1); // !!
-            },
-          }
-        );
-      },
-      1000
-    ),
-    []
+  const debouncedReduceQuantity = debounce(
+    (payload: { skuId: number; cartItemId: number; quantity: number }) => {
+      onUpdateQuantity(
+        { id: payload.cartItemId, quantity: payload.quantity },
+        {
+          onError: () => {
+            updateQuantity(payload.skuId, payload.quantity - 1); // !!
+          },
+        }
+      );
+    },
+    1000
   );
 
   const handleAddItem = async (skuId: number, cartItemId?: number) => {
@@ -348,29 +342,21 @@ const Cart = () => {
     });
   }, [cartItems]);
 
-  const debouncedUpdateQuantity = useCallback(
-    debounce(
-      (p: {
-        skuId: number;
-        cartItemId: number;
-        next: number;
-        prev: number;
-      }) => {
-        onUpdateQuantity(
-          { id: p.cartItemId, quantity: p.next },
-          {
-            onError: () => {
-              // rollback
-              updateQuantity(p.skuId, p.prev);
-              setDraftQty((s) => ({ ...s, [p.skuId]: p.prev }));
-              showNotification('Cập nhật số lượng thất bại', 'error');
-            },
-          }
-        );
-      },
-      800
-    ),
-    [onUpdateQuantity]
+  const debouncedUpdateQuantity = debounce(
+    (p: { skuId: number; cartItemId: number; next: number; prev: number }) => {
+      onUpdateQuantity(
+        { id: p.cartItemId, quantity: p.next },
+        {
+          onError: () => {
+            // rollback
+            updateQuantity(p.skuId, p.prev);
+            setDraftQty((s) => ({ ...s, [p.skuId]: p.prev }));
+            showNotification('Cập nhật số lượng thất bại', 'error');
+          },
+        }
+      );
+    },
+    800
   );
 
   return (

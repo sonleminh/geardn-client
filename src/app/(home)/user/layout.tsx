@@ -1,18 +1,11 @@
 import React, { Suspense } from 'react';
 
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import { Avatar, Box, Divider, Grid2, Typography } from '@mui/material';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
-import EditIcon from '@mui/icons-material/Edit';
+import { Box, Grid2 } from '@mui/material';
+
+import { getUserOnServer } from '@/data/profile.server';
 
 import { LoadingCircle } from '@/components/common/LoadingCircle';
 import LayoutContainer from '@/components/layout-container';
-import AppLink from '@/components/common/AppLink';
-
-import { useAuthStore } from '@/stores/auth-store';
-import { ROUTES } from '@/constants/route';
-import { getUserOnServer } from '@/data/profile.server';
 import Sidebar from './components/sidebar';
 
 export default async function UserLayout({

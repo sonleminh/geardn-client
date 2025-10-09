@@ -16,7 +16,7 @@ async function parseOk<T>(res: Response): Promise<T> {
 
 async function throwHttpError(res: Response): Promise<never> {
   const ct = res.headers.get('content-type') || '';
-  let body: any = null;
+  let body = null;
   try {
     body = ct.includes('application/json') ? await res.json() : await res.text();
   } catch {}

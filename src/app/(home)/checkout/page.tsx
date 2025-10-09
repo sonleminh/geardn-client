@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import SkeletonImage from '@/components/common/SkeletonImage';
@@ -26,7 +26,6 @@ import {
   Radio,
   RadioGroup,
   Select,
-  SelectChangeEvent,
   SxProps,
   TextField,
   Theme,
@@ -36,7 +35,6 @@ import { useFormik } from 'formik';
 import Link from 'next/link';
 // import { checkoutSchema } from './utils/schema/checkoutSchema';
 
-import { FullScreenLoader } from '@/components/common/FullScreenLoader';
 import LayoutContainer from '@/components/layout-container';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
@@ -47,30 +45,23 @@ import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { createOrder } from '@/apis/order';
 // Simplified location option matching our BFF responses
-import { useQuery } from '@tanstack/react-query';
-import { getDistricts, getProvinces, getWards } from '@/apis/location';
 import { ILocationOption } from '@/interfaces/ILocation';
 import { useDistricts, useProvinces, useWards } from '@/queries/location';
-import { usePaymentMethods } from '@/queries/payment';
 import { useCreateOrder } from '@/queries/order';
+import { usePaymentMethods } from '@/queries/payment';
 
 const Checkout = () => {
   const { user, checkoutCart } = useAuthStore();
   console.log('checkoutCart', checkoutCart);
   const { showNotification } = useNotificationStore();
-  const { cartItems, removeItem } = useCartStore();
+  const { removeItem } = useCartStore();
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: ROUTES.CHECKOUT, label: 'Thanh toán' },
   ];
 
   const router = useRouter();
-
-  // const { data: provinceList } = useGetProvinces();
-  // const { data: paymentMethods } = useGetPaymentMethods();
-  // const { data: orderData } = createOrder();
 
   const [province, setProvince] = useState<ILocationOption | null>(null);
   const [district, setDistrict] = useState<ILocationOption | null>(null);
@@ -85,7 +76,7 @@ const Checkout = () => {
   const { data: wards = [] } = useWards(district?.code);
   const { data: paymentMethods } = usePaymentMethods();
   const { mutate: onCreateOrder } = useCreateOrder();
-  // Reset dependent selections when parent changes
+
   useEffect(() => {
     setDistrict(null);
     setWard(null);
@@ -178,18 +169,6 @@ const Checkout = () => {
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    formik.setFieldValue(name, value);
-  };
-
-  const handlePaymentMethodChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    formik.setFieldValue(name, value);
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { value, name } = e.target;
     formik.setFieldValue(name, value);
   };
 

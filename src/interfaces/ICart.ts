@@ -67,8 +67,6 @@ export interface IUpdateQuantityPayload {
 }
 
 export interface IUpdateQuantityResponse {
-    success: boolean;
-    message: string;
     data: {
         id: number;
         userId: number;

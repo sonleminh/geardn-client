@@ -1,5 +1,4 @@
 import { keyframes, SxProps, Theme } from "@mui/material";
-import { usePathname } from 'next/navigation';
 
 export const HeaderStyle: ( isExpanded: boolean, pathname: string) => SxProps<Theme> = ( isExpanded: boolean, pathname: string) => ({
   position: 'fixed',

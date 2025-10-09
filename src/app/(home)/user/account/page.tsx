@@ -12,11 +12,10 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useAuthStore } from '@/stores/auth-store';
 import { useSession } from '@/hooks/useSession';
 
 const Account = () => {
-  const { data } = useSession(); // null lúc đầu, cập nhật sau login/logout
+  const { data } = useSession();
   return (
     <Box
       sx={{

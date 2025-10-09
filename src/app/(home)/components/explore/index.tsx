@@ -7,15 +7,12 @@ import { Box, Typography } from '@mui/material';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
-import { useQuery } from '@tanstack/react-query';
-
 import LayoutContainer from '@/components/layout-container';
 import ProductCard from '@/components/common/ProductCard';
 import { IProduct } from '@/interfaces/IProduct';
 
 const Explore = ({ exploreData }: { exploreData: IProduct[] }) => {
-  const page = 1;
-  // const { data: productsData } = useQuery(productsQueryOptions(page));
+  // const page = 1;
   return (
     <Box sx={{ mb: 10 }}>
       <LayoutContainer>

@@ -39,7 +39,7 @@ import { useNotificationStore } from '@/stores/notification-store';
 
 const ProductDetailClient = ({ data }: { data: IProduct }) => {
   const { data: user } = useSession();
-  const { cartItems, addToCart, updateQuantity } = useCartStore();
+  const { cartItems, addToCart, updateQuantity, syncCart } = useCartStore();
   const { mutateAsync: onAddToCart } = useAddCartItem();
   const { showNotification } = useNotificationStore();
 
@@ -54,9 +54,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     return [
       ...(data?.images || []),
       ...(data && data?.skus?.length > 1
-        ? data?.skus
-            .map((sku) => sku.imageUrl !== null && sku.imageUrl)
-            .filter(Boolean)
+        ? data?.skus.map((sku) => sku.imageUrl).filter(Boolean)
         : []),
     ];
   }, [data]);
@@ -150,11 +148,15 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
   };
 
   const handleAddCartItem = async () => {
+    console.log('selectedSku', selectedSku);
+    console.log('user', user);
+    console.log('data', data);
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
     }
-    const itemAdded = cartItems?.find((item) => item.skuId === selectedSku?.id);
+    const oldCartItems = [...cartItems];
     if (!user && data) {
+      console.log('1');
       if (
         itemAdded &&
         itemAdded?.quantity + (count ?? 1) > (selectedSkuStock ?? 0)
@@ -183,7 +185,8 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       });
     }
 
-    if (user && data && itemAdded) {
+    if (user && data) {
+      console.log('2');
       const newItem = {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
@@ -201,8 +204,8 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         ),
       };
 
-      addToCart(newItem);
       try {
+        addToCart(newItem);
         await onAddToCart({
           productId: selectedSku?.productId,
           skuId: selectedSku?.id,
@@ -210,7 +213,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         });
       } catch (error) {
         const e = AppError.fromUnknown(error);
-        updateQuantity(selectedSku?.id, itemAdded?.quantity);
+        syncCart(oldCartItems);
         showNotification(e?.message, 'error');
       }
     }
@@ -253,7 +256,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       }
 
       const filteredSelection = Object.fromEntries(
-        Object.entries(simulatedSelection).filter(([_, val]) => val)
+        Object.entries(simulatedSelection).filter(([, val]) => val)
       );
 
       // Nếu không còn gì trong selectedAttributes, không disable gì cả

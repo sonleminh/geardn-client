@@ -1,8 +1,7 @@
 import React from 'react';
+import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
-import Layout from '@/components/layout';
-import { Metadata } from 'next';
 import LayoutContainer from '@/components/layout-container';
 
 export async function generateMetadata({
