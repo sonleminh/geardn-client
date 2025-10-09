@@ -36,12 +36,21 @@ import { AppError } from '@/lib/errors/app-error';
 import { useAddCartItem } from '@/queries/cart';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
+import { useGetProduct } from '@/queries/product';
+import { TBaseResponse } from '@/types/response.type';
 
-const ProductDetailClient = ({ data }: { data: IProduct }) => {
+const ProductDetailClient = ({
+  initialProduct,
+}: {
+  initialProduct: TBaseResponse<IProduct>;
+}) => {
   const { data: user } = useSession();
-  const { cartItems, addToCart, updateQuantity, syncCart } = useCartStore();
+  const { cartItems, addToCart, syncCart } = useCartStore();
   const { mutateAsync: onAddToCart } = useAddCartItem();
   const { showNotification } = useNotificationStore();
+  const { data } = useGetProduct(initialProduct);
+
+  const product = data!.data;
 
   const [count, setCount] = useState<number | null>(1);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -52,18 +61,18 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
 
   const productImageList = useMemo(() => {
     return [
-      ...(data?.images || []),
-      ...(data && data?.skus?.length > 1
-        ? data?.skus.map((sku) => sku.imageUrl).filter(Boolean)
+      ...(product?.images || []),
+      ...(product && product?.skus?.length > 1
+        ? product?.skus.map((sku) => sku.imageUrl).filter(Boolean)
         : []),
     ];
-  }, [data]);
+  }, [product]);
 
   const attributeOptions = useMemo(() => {
-    if (!data) return {};
+    if (!product) return {};
 
     const options: Record<string, string[]> = {};
-    data?.skus?.forEach((sku) => {
+    product?.skus?.forEach((sku) => {
       sku?.productSkuAttributes?.forEach(
         (productSkuAttributes: IProductSkuAttributes) => {
           if (!options[productSkuAttributes?.attributeValue?.attribute?.name]) {
@@ -82,7 +91,8 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       );
     });
 
-    const order = ATTRIBUTE_ORDER[data?.category?.name] ?? Object.keys(options);
+    const order =
+      ATTRIBUTE_ORDER[product?.category?.name] ?? Object.keys(options);
 
     const sortedOptions: Record<string, string[]> = {};
     order.forEach((key) => {
@@ -92,7 +102,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
     });
 
     return sortedOptions;
-  }, [data]);
+  }, [product]);
 
   const selectedSku = useMemo<IProductSku | null>(() => {
     const hasNullValue = Object.values(selectedAttributes).some(
@@ -107,7 +117,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       return null;
 
     return (
-      data?.skus?.find((sku) =>
+      product?.skus?.find((sku) =>
         Object.entries(selectedAttributes).every(([key, value]) =>
           sku.productSkuAttributes.some(
             (productSkuAttributes: IProductSkuAttributes) =>
@@ -117,9 +127,9 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
         )
       ) ?? null
     );
-  }, [selectedAttributes, attributeOptions, data?.skus]);
+  }, [selectedAttributes, attributeOptions, product?.skus]);
 
-  const availableCombinations = data?.skus?.map((sku) =>
+  const availableCombinations = product?.skus?.map((sku) =>
     sku.productSkuAttributes.reduce(
       (
         acc: Record<string, string>,
@@ -148,15 +158,12 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
   };
 
   const handleAddCartItem = async () => {
-    console.log('selectedSku', selectedSku);
-    console.log('user', user);
-    console.log('data', data);
     if (selectedSku === null) {
       return showNotification('Vui lòng chọn phân loại hàng', 'error');
     }
+    const itemAdded = cartItems.find((item) => item.skuId === selectedSku?.id);
     const oldCartItems = [...cartItems];
-    if (!user && data) {
-      console.log('1');
+    if (!user && product) {
       if (
         itemAdded &&
         itemAdded?.quantity + (count ?? 1) > (selectedSkuStock ?? 0)
@@ -170,10 +177,10 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       return addToCart({
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
-        productName: data?.name,
+        productName: product?.name,
         imageUrl: selectedSku?.imageUrl
           ? selectedSku?.imageUrl
-          : data?.images?.[0],
+          : product?.images?.[0],
         sellingPrice: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
@@ -185,15 +192,15 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
       });
     }
 
-    if (user && data) {
+    if (user && product) {
       console.log('2');
       const newItem = {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
-        productName: data?.name,
+        productName: product?.name,
         imageUrl: selectedSku?.imageUrl
           ? selectedSku?.imageUrl
-          : data?.images?.[0],
+          : product?.images?.[0],
         sellingPrice: selectedSku?.sellingPrice,
         quantity: count ?? 1,
         attributes: selectedSku?.productSkuAttributes.map(
@@ -227,10 +234,10 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
 
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
-    { href: '', label: data?.name as string },
+    { href: '', label: product?.name as string },
   ];
 
-  const totalStock = data?.skus?.reduce(
+  const totalStock = product?.skus?.reduce(
     (acc, sku) =>
       acc +
       (sku.stocks?.reduce(
@@ -337,7 +344,7 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
             <Grid2 size={7} sx={{ pl: 3, borderLeft: '1px solid #eee' }}>
               <Box sx={{ pt: 3 }}>
                 <Typography sx={{ mb: 1, fontSize: 24, fontWeight: 600 }}>
-                  {data?.name}
+                  {product?.name}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Typography
@@ -349,9 +356,9 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
                   </AppLink>
                 </Box>
                 <Typography sx={{ mb: 2, fontSize: 24, fontWeight: 600 }}>
-                  {data?.skus?.length && selectedSku !== null
+                  {product?.skus?.length && selectedSku !== null
                     ? formatPrice(selectedSku?.sellingPrice ?? 0)
-                    : formatPrice(data?.priceMin ?? 0)}
+                    : formatPrice(product?.priceMin ?? 0)}
                 </Typography>
                 {Object.entries(attributeOptions).map(([type, values]) => (
                   <Box
@@ -528,19 +535,19 @@ const ProductDetailClient = ({ data }: { data: IProduct }) => {
           </Typography>
           <Grid2 container spacing={1.5} ml={2} mb={3}>
             <Grid2 size={2}>Danh mục</Grid2>
-            <Grid2 size={10}>{data?.category?.name}</Grid2>
+            <Grid2 size={10}>{product?.category?.name}</Grid2>
             <Grid2 size={2}>Thương hiệu</Grid2>
-            <Grid2 size={10}>{data?.brand}</Grid2>
+            <Grid2 size={10}>{product?.brand}</Grid2>
             <Grid2 size={2}>Bảo hành</Grid2>
-            <Grid2 size={10}>{data?.details?.guarantee}</Grid2>
+            <Grid2 size={10}>{product?.details?.guarantee}</Grid2>
             <Grid2 size={2}>Chất liệu</Grid2>
-            <Grid2 size={10}>{data?.details?.material}</Grid2>
+            <Grid2 size={10}>{product?.details?.material}</Grid2>
           </Grid2>
           <Typography
             sx={{ width: '100%', p: 2, mb: 3, bgcolor: 'rgba(0,0,0,0.02)' }}>
             Mô tả sản phẩm
           </Typography>
-          <HtmlRenderBox html={data?.description ?? ''} />
+          <HtmlRenderBox html={product?.description ?? ''} />
         </Box>
       </LayoutContainer>
     </Box>

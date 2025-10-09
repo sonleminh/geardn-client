@@ -7,7 +7,7 @@ import LayoutContainer from '@/components/layout-container';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string }>;
+  params: Promise<{ product: string }>;
 }): Promise<Metadata> {
   // const productData = await getProductBySlug(category);
   return {

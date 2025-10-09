@@ -29,10 +29,10 @@ import { ProductListStyle } from './style';
 
 const ProductCatalog = ({
   productsData,
-  categoriesData,
-}: {
-  productsData: TPaginatedResponse<IProduct>;
-  categoriesData: TPaginatedResponse<ICategory>;
+}: // categoriesData,
+{
+  productsData: TPaginatedResponse<IProduct> | null;
+  // categoriesData: TPaginatedResponse<ICategory>;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,7 +74,7 @@ const ProductCatalog = ({
                   Danh mục
                 </Typography>
                 <List>
-                  {categoriesData?.data?.map((item: ICategory) => (
+                  {/* {categoriesData?.data?.map((item: ICategory) => (
                     <AppLink
                       href={item?.slug}
                       key={item?.id}
@@ -124,7 +124,7 @@ const ProductCatalog = ({
                         />
                       </ListItem>
                     </AppLink>
-                  ))}
+                  ))} */}
                 </List>
               </Box>
             </Grid2>
@@ -132,7 +132,7 @@ const ProductCatalog = ({
               <Box sx={{ position: 'relative' }}>
                 <Heading total={total} />
                 <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                  {productsData.data.length === 0
+                  {productsData?.data.length === 0
                     ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <Card>

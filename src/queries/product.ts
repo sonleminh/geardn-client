@@ -1,14 +1,14 @@
 import { addCartItem, deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
+import { getProduct } from '@/apis/product';
 import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { IUser } from '@/interfaces/IUser';
+import { IProduct } from '@/interfaces/IProduct';
 import { TBaseResponse } from '@/types/response.type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export function useGetCart(enabled: boolean, initialData?: TBaseResponse<ICartResponse> | null) {
-  return useQuery<TBaseResponse<ICartResponse>, Error>({
-    queryKey: ['cart'],
-    queryFn: getCart,
-    enabled,
+export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
+  return useQuery<TBaseResponse<IProduct>, Error>({
+    queryKey: ['product', initialData?.data?.slug ?? ''],
+    queryFn: () => getProduct(initialData?.data.slug ?? ''),
     initialData: initialData ?? undefined, 
     staleTime: 0,
     gcTime: 0,

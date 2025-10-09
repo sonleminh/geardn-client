@@ -27,7 +27,7 @@ export async function proxyBE<T = unknown>(
     cache: 'no-store',
     redirect: 'manual',
   };
-
+  console.log('path:', path)
   if (body !== undefined) {
     options.body = body;
     // Thêm duplex nếu body là ReadableStream

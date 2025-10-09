@@ -5,27 +5,35 @@ import ProductCatalog from './components/product-catalog';
 import BANNER_BG from '@/assets/geardn.jpg';
 import Explore from './components/explore';
 import LayoutContainer from '@/components/layout-container';
-import { fetchProducts } from '@/data/product.server';
+// import { fetchProducts } from '@/data/product.server';
 import { fetchCategories } from '@/data/category.server';
+import { parseProductListParams } from '@/lib/search/productList.params';
+import { getProducts } from '@/data/product.server';
 
 export default async function Homepage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // console.log('searchParams', searchParams);
   const resolvedParams = await searchParams;
-  const pageParam = resolvedParams.page;
-  const sortParam = resolvedParams.sort;
-  const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1);
-  const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
-
-  const productsData = await fetchProducts({
-    q: '',
-    page,
-    sort,
-    revalidate: 60,
+  const parsed = parseProductListParams(resolvedParams);
+  // console.log('query', parsed.q);
+  // console.log('page', parsed.page);
+  console.log('sort', parsed.sort);
+  const qs = new URLSearchParams({
+    q: parsed.q,
+    page: String(parsed.page),
+    limit: String(parsed.limit),
+    sort: parsed.sort,
   });
-  const categoriesData = await fetchCategories({ revalidate: 60 });
+  console.log('qs', qs);
+  const productList = await getProducts(qs);
+  console.log('productList', productList);
+
+  // const categoriesData = await fetchCategories({ revalidate: 60 });
+
+  // console.log('params', parseProductListParams(resolvedParams));
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -61,12 +69,12 @@ export default async function Homepage({
 
       <section id='shop'>
         <ProductCatalog
-          productsData={productsData}
-          categoriesData={categoriesData}
+          productsData={productList}
+          // categoriesData={categoriesData}
         />
       </section>
 
-      <Explore exploreData={productsData.data} />
+      {/* <Explore exploreData={productsData.data} /> */}
 
       <LayoutContainer>
         <Box

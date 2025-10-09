@@ -1,6 +1,8 @@
-import { fetchProduct } from '@/data/product.server';
+// import { fetchProduct, getProductBySlug } from '@/data/product.server';
 import { Box } from '@mui/material';
 import ProductDetailPage from './ProductDetailClient';
+import { notFound } from 'next/navigation';
+import { getProductBySlug } from '@/data/product.server';
 
 export default async function ProductDetail({
   params,
@@ -8,11 +10,12 @@ export default async function ProductDetail({
   params: Promise<{ product: string }>;
 }) {
   const { product } = await params;
+  const res = await getProductBySlug(product);
+  if (!res) notFound();
 
-  const productsData = await fetchProduct({ slug: product, revalidate: 0 });
   return (
     <Box>
-      <ProductDetailPage data={productsData.data} />
+      <ProductDetailPage initialProduct={res} />
     </Box>
   );
 }
