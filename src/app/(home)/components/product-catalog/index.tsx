@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import {
   Box,
   Card,
@@ -10,28 +9,27 @@ import {
   CardMedia,
   Grid2,
   List,
-  ListItem,
   Pagination,
   Skeleton,
   Typography,
 } from '@mui/material';
 
-import AppLink from '@/components/common/AppLink';
 import ProductCard from '@/components/common/ProductCard';
-import SkeletonImage from '@/components/common/SkeletonImage';
-import Heading from '@/components/common/heading';
 import LayoutContainer from '@/components/layout-container';
 
-import { ICategory } from '@/interfaces/ICategory';
+import { ProductFilters } from '@/components/common/ProductFilters';
 import { IProduct } from '@/interfaces/IProduct';
 import { TPaginatedResponse } from '@/types/response.type';
 import { ProductListStyle } from './style';
+import { IQueryParams } from '@/interfaces/IQuery';
 
 const ProductCatalog = ({
   productsData,
+  params,
 }: // categoriesData,
 {
   productsData: TPaginatedResponse<IProduct> | null;
+  params: IQueryParams;
   // categoriesData: TPaginatedResponse<ICategory>;
 }) => {
   const router = useRouter();
@@ -130,7 +128,17 @@ const ProductCatalog = ({
             </Grid2>
             <Grid2 size={9}>
               <Box sx={{ position: 'relative' }}>
-                <Heading total={total} />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                  }}>
+                  <Typography sx={{ fontSize: 15 }}>
+                    Tìm thấy <b>{total} </b>kết quả
+                  </Typography>
+                  <ProductFilters initial={params} />
+                </Box>
                 <Grid2 container spacing={2} sx={{ mb: 3 }}>
                   {productsData?.data.length === 0
                     ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (

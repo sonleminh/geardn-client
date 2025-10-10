@@ -1,6 +1,6 @@
-export interface IQuery {
-  search?: string;
-  status?: string;
+export interface IQueryParams {
+  q?: string;
+  page?: number | undefined;
   limit?: number;
-  page?: number;
+  sort: '' | 'desc' | 'asc';
 }

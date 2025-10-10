@@ -1,12 +1,12 @@
 // src/lib/search/productList.params.ts
 import { z } from "zod";
 
-export const SortEnum = z.enum(["desc","asc"]);
+export const SortEnum = z.enum(["","desc","asc"]);
 export const productListParamsSchema = z.object({
   q: z.string().trim().max(200).optional().default(""),
-  page: z.coerce.number().int().min(1).max(200).optional().default(1),
-  limit: z.coerce.number().int().min(1).max(60).optional().default(12),
-  sort: SortEnum.optional().default("asc"),
+  page: z.coerce.number().int().min(1).max(200).optional(),
+  limit: z.coerce.number().int().min(1).max(60).optional().default(9),
+  sort: SortEnum.optional().default(''),
 });
 export type ProductListParams = z.infer<typeof productListParamsSchema>;
 

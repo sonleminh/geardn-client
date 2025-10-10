@@ -20,16 +20,16 @@ export default async function Homepage({
   const parsed = parseProductListParams(resolvedParams);
   // console.log('query', parsed.q);
   // console.log('page', parsed.page);
-  console.log('sort', parsed.sort);
+  // console.log('sort', parsed.sort);
   const qs = new URLSearchParams({
     q: parsed.q,
     page: String(parsed.page),
     limit: String(parsed.limit),
     sort: parsed.sort,
   });
-  console.log('qs', qs);
+  // console.log('qs', qs);
   const productList = await getProducts(qs);
-  console.log('productList', productList);
+  // console.log('productList', productList);
 
   // const categoriesData = await fetchCategories({ revalidate: 60 });
 
@@ -70,6 +70,7 @@ export default async function Homepage({
       <section id='shop'>
         <ProductCatalog
           productsData={productList}
+          params={parsed}
           // categoriesData={categoriesData}
         />
       </section>
