@@ -9,43 +9,45 @@ import {
   CardMedia,
   Grid2,
   List,
+  ListItem,
   Pagination,
   Skeleton,
   Typography,
 } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import ProductCard from '@/components/common/ProductCard';
 import LayoutContainer from '@/components/layout-container';
 
 import { ProductFilters } from '@/components/common/ProductFilters';
 import { IProduct } from '@/interfaces/IProduct';
-import { TPaginatedResponse } from '@/types/response.type';
+import { Pagigation } from '@/types/response.type';
 import { ProductListStyle } from './style';
 import { IQueryParams } from '@/interfaces/IQuery';
+import { ICategory } from '@/interfaces/ICategory';
+import AppLink from '@/components/common/AppLink';
+import SkeletonImage from '@/components/common/SkeletonImage';
 
 const ProductCatalog = ({
-  productsData,
+  products,
+  categories,
+  pagination,
   params,
-}: // categoriesData,
-{
-  productsData: TPaginatedResponse<IProduct> | null;
+}: {
+  products: IProduct[] | undefined;
+  categories: ICategory[] | undefined;
+  pagination: Pagigation | undefined;
   params: IQueryParams;
-  // categoriesData: TPaginatedResponse<ICategory>;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const page = Number(searchParams.get('page') || '1');
-  const sort = searchParams.get('sort') || '';
-  const total = productsData?.meta?.total ?? 0;
+  const page = Number(searchParams.get('page') ?? 1);
+  const total = pagination?.total ?? 0;
 
   const handlePageChange = (_: unknown, value: number) => {
-    const params = new URLSearchParams(window.location.search);
-    params.set('page', value.toString());
-    if (sort) {
-      params.set('sort', sort);
-    }
-    router.push(`/?${params.toString()}`, { scroll: false });
+    const next = new URLSearchParams(searchParams.toString());
+    next.set('page', String(value));
+    router.replace(`/?${next.toString()}`, { scroll: false });
   };
   return (
     <Box>
@@ -72,7 +74,7 @@ const ProductCatalog = ({
                   Danh mục
                 </Typography>
                 <List>
-                  {/* {categoriesData?.data?.map((item: ICategory) => (
+                  {categories?.map((item: ICategory) => (
                     <AppLink
                       href={item?.slug}
                       key={item?.id}
@@ -122,7 +124,7 @@ const ProductCatalog = ({
                         />
                       </ListItem>
                     </AppLink>
-                  ))} */}
+                  ))}
                 </List>
               </Box>
             </Grid2>
@@ -140,7 +142,7 @@ const ProductCatalog = ({
                   <ProductFilters initial={params} />
                 </Box>
                 <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                  {productsData?.data.length === 0
+                  {products?.length === 0
                     ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <Card>
@@ -188,7 +190,7 @@ const ProductCatalog = ({
                           </Card>
                         </Grid2>
                       ))
-                    : productsData?.data?.map((item, index) => (
+                    : products?.map((item, index) => (
                         <Grid2 key={index} size={4}>
                           <ProductCard data={item} />
                         </Grid2>
@@ -196,7 +198,7 @@ const ProductCatalog = ({
                 </Grid2>
                 <Pagination
                   sx={{ display: 'flex', justifyContent: 'center' }}
-                  count={Math.ceil((total ?? 0) / 9)}
+                  count={Math.ceil(total / 9)}
                   page={page ?? 1}
                   onChange={handlePageChange}
                   showFirstButton

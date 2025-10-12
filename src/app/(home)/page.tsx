@@ -6,7 +6,7 @@ import BANNER_BG from '@/assets/geardn.jpg';
 import Explore from './components/explore';
 import LayoutContainer from '@/components/layout-container';
 // import { fetchProducts } from '@/data/product.server';
-import { fetchCategories } from '@/data/category.server';
+import { fetchCategories, getCategories } from '@/data/category.server';
 import { parseProductListParams } from '@/lib/search/productList.params';
 import { getProducts } from '@/data/product.server';
 
@@ -15,12 +15,8 @@ export default async function Homepage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // console.log('searchParams', searchParams);
   const resolvedParams = await searchParams;
   const parsed = parseProductListParams(resolvedParams);
-  // console.log('query', parsed.q);
-  // console.log('page', parsed.page);
-  // console.log('sort', parsed.sort);
   const qs = new URLSearchParams({
     q: parsed.q,
     page: String(parsed.page),
@@ -28,12 +24,8 @@ export default async function Homepage({
     sort: parsed.sort,
   });
   // console.log('qs', qs);
-  const productList = await getProducts(qs);
-  // console.log('productList', productList);
-
-  // const categoriesData = await fetchCategories({ revalidate: 60 });
-
-  // console.log('params', parseProductListParams(resolvedParams));
+  const productPage = await getProducts(qs);
+  const categoryPage = await getCategories();
 
   return (
     <Box sx={{ pb: 10 }}>
@@ -69,9 +61,10 @@ export default async function Homepage({
 
       <section id='shop'>
         <ProductCatalog
-          productsData={productList}
+          products={productPage?.data}
+          categories={categoryPage?.data}
+          pagination={productPage?.meta}
           params={parsed}
-          // categoriesData={categoriesData}
         />
       </section>
 

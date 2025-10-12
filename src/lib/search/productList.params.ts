@@ -5,7 +5,7 @@ export const SortEnum = z.enum(["","desc","asc"]);
 export const productListParamsSchema = z.object({
   q: z.string().trim().max(200).optional().default(""),
   page: z.coerce.number().int().min(1).max(200).optional(),
-  limit: z.coerce.number().int().min(1).max(60).optional().default(9),
+  limit: z.coerce.number().int().min(1).max(60).optional(),
   sort: SortEnum.optional().default(''),
 });
 export type ProductListParams = z.infer<typeof productListParamsSchema>;

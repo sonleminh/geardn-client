@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 export function ProductFilters({ initial }: { initial: IQueryParams }) {
   const router = useRouter();
   const sp = useSearchParams();
-  const [sort, setSort] = useState(initial.sort);
+  const [sort, setSort] = useState<string>(initial.sort);
   console.log('initial', initial);
   const mk = useMemo(() => {
     return (patch: Record<string, string>) => {

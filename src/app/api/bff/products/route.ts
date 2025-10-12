@@ -8,6 +8,5 @@ export async function GET(req: NextRequest) {
     const limit = sp.get("limit") ?? "12";
     const sort = sp.get("sort") ?? "new";
     const qs = new URLSearchParams({ q, page, limit, sort });
-    console.log('qs', qs.toString());
   return proxyBE(req, `/products?${qs.toString()}`);      
 }

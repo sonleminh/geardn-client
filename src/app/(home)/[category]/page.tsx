@@ -1,9 +1,11 @@
 // import { fetchProductsByCategory } from '@/data/product.server';
 import { Box } from '@mui/material';
-import CategoryProductClient from './CategoryProductClient';
+import ProductByCategoryClient from './ProductByCategoryClient';
+import { getProductsByCategory } from '@/data/product.server';
+import { parseProductListParams } from '@/lib/search/productList.params';
 // import { fetchProductsByCategory } from '@/data/product.server';
 
-export default async function CategoryPage({
+export default async function ProductByCategoryPage({
   params,
   searchParams,
 }: {
@@ -12,28 +14,25 @@ export default async function CategoryPage({
 }) {
   const { category } = await params;
   const resolvedParams = await searchParams;
-  const sortParam = resolvedParams.sort;
+  const parsed = parseProductListParams(resolvedParams);
+  const qs = new URLSearchParams({
+    q: parsed.q,
+    page: String(parsed.page),
+    limit: '2',
+    // limit: String(parsed.limit),
+    sort: parsed.sort,
+  });
 
-  const sort = Array.isArray(sortParam) ? sortParam[0] : sortParam ?? '';
+  console.log('qs', qs);
 
-  // const firstPage = await fetchProductsByCategory({
-  //   category: category,
-  //   limit: 2,
-  //   sort,
-  //   revalidate: 0,
-  // });
-
+  const initial = await getProductsByCategory(category, qs);
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
-      {/* <CategoryProductClient
-        category={category}
-        sort={sort}
-        initialItems={firstPage.data?.items ?? []}
-        initialCursor={firstPage.data?.nextCursor ?? null}
-        initialHasMore={firstPage.data?.hasMore ?? false}
-        total={firstPage?.data?.total ?? 0}
-      /> */}
-      cc
+      <ProductByCategoryClient
+        slug={category}
+        initial={initial}
+        params={parsed}
+      />
     </Box>
   );
 }
