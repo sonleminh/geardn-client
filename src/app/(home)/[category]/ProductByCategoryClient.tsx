@@ -17,7 +17,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 type Props = {
   slug: string;
   initial: TCursorPaginatedResponse<IProduct> | null;
-  params: IQueryParams;
+  params: string;
 };
 
 export default function ProductByCategoryClient({
@@ -27,9 +27,14 @@ export default function ProductByCategoryClient({
 }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
-  const q = useProductsByCategoryInfinite(slug, initial, 4);
+  // console.log('sp', sp.toString());
+  // console.log('params(client)', params);
+  // console.log('initial(client)', initial);
+  const q = useProductsByCategoryInfinite(slug, initial, params);
   const total = q?.data?.meta?.total ?? 0;
-  const products = q?.data.items ?? [];
+  const products = q?.data?.items ?? [];
+  // console.log('initial', initial);
+  // console.log('products', products);
   const mk = useMemo(() => {
     return (patch: Record<string, string>) => {
       const next = new URLSearchParams(sp.toString());
@@ -41,43 +46,7 @@ export default function ProductByCategoryClient({
       router.replace(`?${next.toString()}`);
     };
   }, [sp, router]);
-  // const items = q.data.data.items?.flatMap((p) => p) ?? [];
-  // const [items, setItems] = useState<IProduct[]>(initialItems);
-  // const [cursor, setCursor] = useState<string | null>(initialCursor);
-  // const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
-  // const [isPending, startTransition] = useTransition();
 
-  // Reset state when props change (when sort changes and page re-renders)
-  // useEffect(() => {
-  //   setItems(initialItems);
-  //   setCursor(initialCursor);
-  //   setHasMore(initialHasMore);
-  // }, [initialItems, initialCursor, initialHasMore, sort]);
-
-  // const loadMore = () => {
-  //   if (!hasMore || !cursor) return;
-  //   startTransition(async () => {
-  //     try {
-  //       const page = await fetchProductsByCategory({
-  //         category,
-  //         nextCursor: cursor,
-  //         limit: 2,
-  //         sort,
-  //         revalidate: 0,
-  //       });
-  //       setItems((prev) => {
-  //         const map = new Map(prev.map((p) => [p.id, p]));
-  //         for (const it of page?.data?.items) map.set(it.id, it);
-  //         return Array.from(map.values());
-  //       });
-  //       setCursor(page.data.nextCursor);
-  //       setHasMore(page.data.hasMore);
-  //     } catch (e) {
-  //       // optional: toast
-  //       console.error(e);
-  //     }
-  //   });
-  // };
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: '', label: q?.data?.category?.name as string },

@@ -6,6 +6,12 @@ import { IProduct } from '@/interfaces/IProduct';
 import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from '@/types/response.type';
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 
+export interface IGetProductByCateParams {
+  limit?: number;
+  sort?: 'asc' | 'desc' | '';
+}
+
+
 export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
   return useQuery<TBaseResponse<IProduct>, Error>({
     queryKey: ['product', initialData?.data?.slug ?? ''],
@@ -18,20 +24,20 @@ export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
 
 type CatResult = { items: IProduct[]; meta: { nextCursor?: string|null; hasMore?: boolean; total?: number }; category: ICategory | null; };
 
-export function useProductsByCategoryInfinite(slug: string, initial?: TCursorPaginatedResponse<IProduct> | null, limit = 3) {
+export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, paramsStr: string, ) {
   return useInfiniteQuery<
   TCursorPaginatedResponse<IProduct>,      // TQueryFnData
     Error,                           // TError
     CatResult,
-    [string, string, number],        // TQueryKey
+    [string, string, string | undefined],        // TQueryKey
     string | undefined               // TPageParam
   >({
-    queryKey: ['cate-products', slug, limit],
+    queryKey: ['cate-products', slug, paramsStr],
     initialPageParam: undefined as string|undefined,
     initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
-    queryFn: ({ pageParam }) => getProductsByCategory(slug, pageParam, limit),
+    queryFn: ({ pageParam }) => getProductsByCategory(slug, pageParam , new URLSearchParams(paramsStr)),
     getNextPageParam: (last) => last?.meta.nextCursor ?? undefined,
-    staleTime: 60_000,
+    staleTime: 0,
     select: d => {
       const pages = d.pages;
       const items = pages.flatMap(p => p.data);

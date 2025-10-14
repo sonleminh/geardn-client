@@ -1,5 +1,6 @@
 import { IProduct } from "@/interfaces/IProduct";
 import { bff } from "@/lib/api-fetch";
+import { IGetProductByCateParams } from "@/queries/product";
 import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from "@/types/response.type";
 
 export type ProductPage = {
@@ -9,16 +10,16 @@ export type ProductPage = {
   total: number;
 };
 
-export const getProducts = (params: URLSearchParams) =>
-  bff<TPaginatedResponse<IProduct>>(`/api/bff/products?${params.toString()}`);
+// export const getProducts = (params: URLSearchParams) =>
+//   bff<TPaginatedResponse<IProduct>>(`/api/bff/products?${params.toString()}`);
 
-export const getProductsByCategory = (slug: string, cursor?: string, limit = 3) => {
-  const params = new URLSearchParams();
-  if (cursor) params.set('cursor', cursor);
-  params.set('limit', String(limit));
-
+export const getProductsByCategory = (slug: string,cursor: string | undefined, params: URLSearchParams, ) => {
+  // console.log('pr', pr); 
+  console.log('params', params); 
+  // if (cursor) params.set('cursor', cursor);
+  // pr.set('limit', String(2));
   return bff<TCursorPaginatedResponse<IProduct>>(
-    `/api/bff/products/category/${encodeURIComponent(slug)}?${params.toString()}`
+    `/api/bff/products/category/${encodeURIComponent(slug)}${params.size?`?${params}`:''}}`
   );
 }
 

@@ -12,6 +12,10 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
+export const metadata = {
+  icons: { icon: '/icon.png' }, // hoặc '/icon.png'
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

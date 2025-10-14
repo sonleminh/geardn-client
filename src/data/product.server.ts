@@ -4,9 +4,10 @@ import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from '@/t
 import { ProductPage } from '@/apis/product';
 
 export async function getProducts(qs: URLSearchParams) {
+  console.log('qs1', qs);
   const h = await headers();
   const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('x-forwarded-host') ?? h.get('host')}`;
-  const r = await fetch(`${origin}/api/bff/products?${qs.toString()}`, {
+  const r = await fetch(`${origin}/api/bff/products${qs.size?`?${qs}`:''}`, {
     headers: { cookie: h.get('cookie') ?? '', accept: 'application/json' },
     cache: 'no-store',                 // hoặc: next: { revalidate: 60 } nếu muốn ISR phía RSC
   });

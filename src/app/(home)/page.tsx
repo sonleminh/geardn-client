@@ -7,7 +7,10 @@ import Explore from './components/explore';
 import LayoutContainer from '@/components/layout-container';
 // import { fetchProducts } from '@/data/product.server';
 import { fetchCategories, getCategories } from '@/data/category.server';
-import { parseProductListParams } from '@/lib/search/productList.params';
+import {
+  parseProductListParams,
+  toURLSearchParams,
+} from '@/lib/search/productList.params';
 import { getProducts } from '@/data/product.server';
 
 export default async function Homepage({
@@ -17,13 +20,9 @@ export default async function Homepage({
 }) {
   const resolvedParams = await searchParams;
   const parsed = parseProductListParams(resolvedParams);
-  const qs = new URLSearchParams({
-    q: parsed.q,
-    page: String(parsed.page),
-    limit: String(parsed.limit),
-    sort: parsed.sort,
-  });
-  // console.log('qs', qs);
+  const qs = toURLSearchParams(parsed);
+  console.log('qs', qs);
+  console.log('qs2', qs.toString());
   const productPage = await getProducts(qs);
   const categoryPage = await getCategories();
 
@@ -60,12 +59,12 @@ export default async function Homepage({
       </Box>
 
       <section id='shop'>
-        <ProductCatalog
+        {/* <ProductCatalog
           products={productPage?.data}
           categories={categoryPage?.data}
           pagination={productPage?.meta}
           params={parsed}
-        />
+        /> */}
       </section>
 
       {/* <Explore exploreData={productsData.data} /> */}

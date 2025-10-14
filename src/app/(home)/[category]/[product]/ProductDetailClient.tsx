@@ -193,7 +193,6 @@ const ProductDetailClient = ({
     }
 
     if (user && product) {
-      console.log('2');
       const newItem = {
         productId: selectedSku?.productId,
         skuId: selectedSku?.id,
