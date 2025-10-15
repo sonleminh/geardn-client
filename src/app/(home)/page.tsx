@@ -21,8 +21,7 @@ export default async function Homepage({
   const resolvedParams = await searchParams;
   const parsed = parseProductListParams(resolvedParams);
   const qs = toURLSearchParams(parsed);
-  console.log('qs', qs);
-  console.log('qs2', qs.toString());
+  console.log('parsed', parsed.sort);
   const productPage = await getProducts(qs);
   const categoryPage = await getCategories();
 
@@ -59,12 +58,12 @@ export default async function Homepage({
       </Box>
 
       <section id='shop'>
-        {/* <ProductCatalog
+        <ProductCatalog
           products={productPage?.data}
           categories={categoryPage?.data}
           pagination={productPage?.meta}
           params={parsed}
-        /> */}
+        />
       </section>
 
       {/* <Explore exploreData={productsData.data} /> */}

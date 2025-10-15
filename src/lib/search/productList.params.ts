@@ -1,11 +1,10 @@
-// src/lib/search/productList.params.ts
 export type SortKey = 'newest' | 'price_asc' | 'price_desc';
 export interface ProductListParams {
   q?: string;
-  page?: number;      // 1-based
-  limit?: number;     // ví dụ 12
+  page?: number;     // 1-based
+  limit?: number;
   sort?: SortKey;
-  category?: string;  // optional
+  category?: string;
 }
 
 const SORT_WHITELIST: Record<string, SortKey> = {
@@ -14,18 +13,32 @@ const SORT_WHITELIST: Record<string, SortKey> = {
   price_desc: 'price_desc',
 };
 
-export function parseProductListParams(input: Record<string, string | string[] | undefined>): Required<ProductListParams> {
-  const pick = (k: string) => {
-    const v = input[k];
-    return Array.isArray(v) ? v[0] : v;
-  };
+function pick(input: Record<string, string | string[] | undefined>, k: string) {
+  const v = input[k];
+  return Array.isArray(v) ? v[0] : v;
+}
 
-  const q = (pick('q') ?? '').trim();
-  const page = Math.max(1, Number.parseInt(pick('page') ?? '1', 10) || 1);
-  const limit = Math.min(60, Math.max(1, Number.parseInt(pick('limit') ?? '12', 10) || 12));
-  const rawSort = (pick('sort') ?? 'newest').toLowerCase();
-  const sort: SortKey = SORT_WHITELIST[rawSort] ?? 'newest';
-  const category = (pick('category') ?? '').trim();
+function parseIntMaybe(v?: string): number | undefined {
+  if (v == null || v.trim() === '') return undefined;
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+export function parseProductListParams(
+  input: Record<string, string | string[] | undefined>
+): ProductListParams {
+  const q = (pick(input, 'q') ?? '').trim() || undefined;
+
+  const pageRaw = parseIntMaybe(pick(input, 'page'));
+  const page = pageRaw && pageRaw > 0 ? pageRaw : undefined;
+
+  const limitRaw = parseIntMaybe(pick(input, 'limit'));
+  const limit = limitRaw && limitRaw > 0 ? limitRaw : undefined;
+
+  const rawSort = (pick(input, 'sort') ?? '').toLowerCase();
+  const sort = (SORT_WHITELIST[rawSort] as SortKey | undefined) ?? undefined;
+
+  const category = (pick(input, 'category') ?? '').trim() || undefined;
 
   return { q, page, limit, sort, category };
 }
@@ -34,8 +47,8 @@ export function toURLSearchParams(p: ProductListParams) {
   const qs = new URLSearchParams();
   if (p.q) qs.set('q', p.q);
   if (p.category) qs.set('category', p.category);
-  qs.set('page', String(p.page ?? 1));
-  qs.set('limit', String(p.limit ?? 12));
-  qs.set('sort', String(p.sort ?? 'newest'));
+  if (p.sort) qs.set('sort', p.sort);
+  if (p.page && p.page > 1) qs.set('page', String(p.page));   // bỏ page=1 để dùng default BE
+  if (p.limit) qs.set('limit', String(p.limit));              // chỉ set khi user chọn cụ thể
   return qs;
 }
