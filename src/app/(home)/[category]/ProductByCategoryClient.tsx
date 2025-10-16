@@ -13,24 +13,28 @@ import { useProductsByCategoryInfinite } from '@/queries/product';
 import LayoutContainer from '@/components/layout-container';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ProductFilters } from '@/components/common/ProductFilters';
 
 type Props = {
   slug: string;
   initial: TCursorPaginatedResponse<IProduct> | null;
-  params: string;
+  params: IQueryParams;
+  qs: URLSearchParams;
 };
 
 export default function ProductByCategoryClient({
   slug,
   initial,
   params,
+  qs,
 }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
   // console.log('sp', sp.toString());
-  // console.log('params(client)', params);
+  console.log('params(client)', params);
+  console.log('qs(client)', qs);
   // console.log('initial(client)', initial);
-  const q = useProductsByCategoryInfinite(slug, initial, params);
+  const q = useProductsByCategoryInfinite(slug, initial, qs);
   const total = q?.data?.meta?.total ?? 0;
   const products = q?.data?.items ?? [];
   // console.log('initial', initial);
@@ -66,7 +70,8 @@ export default function ProductByCategoryClient({
       <Box sx={{ display: ' flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography>Tìm thấy {total} sản phẩm</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {filterList?.map((filter, index) => (
+          <ProductFilters initial={params} />
+          {/* {filterList?.map((filter, index) => (
             <Box key={filter?.value}>
               <Typography onClick={() => mk({ sort: filter.value })} sx={{}}>
                 {filter.label}
@@ -83,7 +88,7 @@ export default function ProductByCategoryClient({
                 />
               )}
             </Box>
-          ))}
+          ))} */}
         </Box>
       </Box>
       <Grid2 container spacing={2}>

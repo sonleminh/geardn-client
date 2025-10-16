@@ -2,26 +2,53 @@
 'use client';
 import { IQueryParams } from '@/interfaces/IQuery';
 import { Box, NativeSelect, Typography } from '@mui/material';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+type UIValue = '' | 'asc' | 'desc';
+
+function toUIValue(q: IQueryParams): UIValue {
+  if (q.sortBy === 'price') return q.order === 'asc' ? 'asc' : 'desc';
+  // coi các sort khác là "Mới nhất"
+  return '';
+}
+
+function fromUIValue(v: UIValue): { sortBy?: string; order?: 'asc' | 'desc' } {
+  if (v === '') return {}; // hoặc {} nếu BE có default
+  return { sortBy: 'price', order: v };
+}
 
 export function ProductFilters({ initial }: { initial: IQueryParams }) {
   const router = useRouter();
+  const pathname = usePathname();
   const sp = useSearchParams();
-  const [sort, setSort] = useState<string>(initial.sort);
+
+  const initialUI = useMemo(
+    () => toUIValue(initial),
+    [initial.sortBy, initial.order]
+  );
+  const [sort, setSort] = useState<UIValue>(initialUI);
+
   console.log('initial', initial);
-  const mk = useMemo(() => {
-    return (patch: Record<string, string>) => {
-      const next = new URLSearchParams(sp.toString());
-      Object.entries(patch).forEach(([k, v]) => {
-        if (v === '' || v == null) next.delete(k);
-        else next.set(k, v);
-      });
-      // khi đổi q/sort nên reset page=1
-      next.set('page', '1');
-      router.replace(`/?${next.toString()}`, { scroll: false });
+
+  useEffect(() => {
+    const cur: IQueryParams = {
+      sortBy: (sp.get('sortBy') as 'createdAt' | 'price') ?? undefined,
+      order: (sp.get('order') as 'asc' | 'desc') ?? undefined,
     };
-  }, [sp, router]);
+    setSort(toUIValue(cur));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp]);
+  const patchQuery = useMemo(() => {
+    return (patch: Record<string, string | undefined>) => {
+      const next = new URLSearchParams(sp.toString());
+      for (const [k, v] of Object.entries(patch)) {
+        if (v == null || v === '') next.delete(k);
+        else next.set(k, v);
+      }
+      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    };
+  }, [sp, router, pathname]);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -29,8 +56,15 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
       <NativeSelect
         value={sort}
         onChange={(e) => {
-          setSort(e.target.value);
-          mk({ sort: e.target.value });
+          const v = e.target.value as UIValue; // '', 'asc', 'desc'
+          setSort(v);
+          const mapped = fromUIValue(v);
+          patchQuery({
+            sort: '',
+            sortBy: mapped.sortBy,
+            order: mapped.order,
+            page: '1',
+          });
         }}
         disableUnderline
         sx={{

@@ -13,13 +13,13 @@ export type ProductPage = {
 // export const getProducts = (params: URLSearchParams) =>
 //   bff<TPaginatedResponse<IProduct>>(`/api/bff/products?${params.toString()}`);
 
-export const getProductsByCategory = (slug: string,cursor: string | undefined, params: URLSearchParams, ) => {
+export const getProductsByCategory = (slug: string,cursor: string | undefined, qs: URLSearchParams, ) => {
   // console.log('pr', pr); 
-  console.log('params', params); 
+  // console.log('params', params); 
   // if (cursor) params.set('cursor', cursor);
   // pr.set('limit', String(2));
   return bff<TCursorPaginatedResponse<IProduct>>(
-    `/api/bff/products/category/${encodeURIComponent(slug)}${params.size?`?${params}`:''}}`
+    `/api/bff/products/category/${encodeURIComponent(slug)}?${qs.toString()}}`
   );
 }
 

@@ -24,7 +24,7 @@ export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
 
 type CatResult = { items: IProduct[]; meta: { nextCursor?: string|null; hasMore?: boolean; total?: number }; category: ICategory | null; };
 
-export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, paramsStr: string, ) {
+export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, qs: URLSearchParams, ) {
   return useInfiniteQuery<
   TCursorPaginatedResponse<IProduct>,      // TQueryFnData
     Error,                           // TError
@@ -32,10 +32,10 @@ export function useProductsByCategoryInfinite(slug: string,initial: TCursorPagin
     [string, string, string | undefined],        // TQueryKey
     string | undefined               // TPageParam
   >({
-    queryKey: ['cate-products', slug, paramsStr],
+    queryKey: ['cate-products', slug, qs.toString()],
     initialPageParam: undefined as string|undefined,
     initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
-    queryFn: ({ pageParam }) => getProductsByCategory(slug, pageParam , new URLSearchParams(paramsStr)),
+    queryFn: ({ pageParam }) => getProductsByCategory(slug, pageParam , new URLSearchParams(qs)),
     getNextPageParam: (last) => last?.meta.nextCursor ?? undefined,
     staleTime: 0,
     select: d => {
