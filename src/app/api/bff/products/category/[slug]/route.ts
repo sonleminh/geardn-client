@@ -9,6 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     const qs = new URLSearchParams();
  
   for (const [k,v] of u.searchParams) if (ALLOWED.has(k) && v !== '') qs.set(k,v);
+  console.log('qs(bff):', qs);
   const path = `/products/category/slug/${encodeURIComponent(slug)}${qs.size?`?${qs}`:''}`;
   return proxyBE(req, path);
 }

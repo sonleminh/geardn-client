@@ -33,12 +33,12 @@ export default function ProductByCategoryClient({
   // console.log('sp', sp.toString());
   console.log('params(client)', params);
   console.log('qs(client)', qs);
-  // console.log('initial(client)', initial);
+  console.log('initial(client)', initial);
   const q = useProductsByCategoryInfinite(slug, initial, qs);
   const total = q?.data?.meta?.total ?? 0;
   const products = q?.data?.items ?? [];
   // console.log('initial', initial);
-  // console.log('products', products);
+  console.log('products', products);
   const mk = useMemo(() => {
     return (patch: Record<string, string>) => {
       const next = new URLSearchParams(sp.toString());
@@ -70,7 +70,7 @@ export default function ProductByCategoryClient({
       <Box sx={{ display: ' flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography>Tìm thấy {total} sản phẩm</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <ProductFilters initial={params} />
+          {/* <ProductFilters initial={params} /> */}
           {/* {filterList?.map((filter, index) => (
             <Box key={filter?.value}>
               <Typography onClick={() => mk({ sort: filter.value })} sx={{}}>

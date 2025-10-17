@@ -20,9 +20,9 @@ export default async function ProductByCategoryPage({
   const parsed = parseProductListParams(resolvedParams);
   const qs = toURLSearchParams(parsed);
   const initial = await getProductsByCategory(category, qs);
-
+  console.log('initial(server):', initial);
   console.log('parsed', parsed);
-  // console.log('qs', qs);
+  console.log('qs', qs);
 
   return (
     <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>

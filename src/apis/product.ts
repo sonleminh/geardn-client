@@ -19,7 +19,7 @@ export const getProductsByCategory = (slug: string,cursor: string | undefined, q
   // if (cursor) params.set('cursor', cursor);
   // pr.set('limit', String(2));
   return bff<TCursorPaginatedResponse<IProduct>>(
-    `/api/bff/products/category/${encodeURIComponent(slug)}?${qs.toString()}}`
+    `/api/bff/products/category/${encodeURIComponent(slug)}?${qs.toString()}`
   );
 }
 

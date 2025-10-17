@@ -29,7 +29,7 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
   );
   const [sort, setSort] = useState<UIValue>(initialUI);
 
-  console.log('initial', initial);
+  console.log('initial(ProductFilters)', initial);
 
   useEffect(() => {
     const cur: IQueryParams = {
