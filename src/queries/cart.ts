@@ -1,6 +1,5 @@
 import { addCartItem, deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
 import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { IUser } from '@/interfaces/IUser';
 import { TBaseResponse } from '@/types/response.type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -31,7 +30,7 @@ export function useSyncCart() {
 }
 
 export function useAddCartItem() {
-  return useMutation<TBaseResponse<any>, Error, IAddCartItemPayload>({
+  return useMutation<TBaseResponse<object>, Error, IAddCartItemPayload>({
     mutationFn: addCartItem,
   });
 }

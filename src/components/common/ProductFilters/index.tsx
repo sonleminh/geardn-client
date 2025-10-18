@@ -26,10 +26,7 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
   const pathname = usePathname();
   const sp = useSearchParams();
 
-  const initialUI = useMemo(
-    () => toUIValue(initial),
-    [initial.sortBy, initial.order]
-  );
+  const initialUI = useMemo(() => toUIValue(initial), [initial]);
   const [sort, setSort] = useState<UIValue>(initialUI);
 
   useEffect(() => {
@@ -38,7 +35,6 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
       order: (sp.get('order') as 'asc' | 'desc') ?? undefined,
     };
     setSort(toUIValue(cur));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sp]);
   const patchQuery = useMemo(() => {
     return (patch: Record<string, string | undefined>) => {
@@ -57,7 +53,7 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
       <NativeSelect
         value={sort}
         onChange={(e) => {
-          const v = e.target.value as UIValue; // '', 'asc', 'desc'
+          const v = e.target.value as UIValue;
           setSort(v);
           const mapped = fromUIValue(v);
           patchQuery({

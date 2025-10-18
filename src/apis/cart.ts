@@ -11,7 +11,7 @@ export const syncCart = (payload: ISyncCartPayload) =>
   bff<TBaseResponse<ICartResponse>>(`/api/bff/cart/sync`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
 
 export const addCartItem = (payload: IAddCartItemPayload) =>
-  bff<TBaseResponse<IUpdateQuantityResponse>>(`/api/bff/cart/items`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
+  bff<TBaseResponse<{message: string}>>(`/api/bff/cart/items`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
 
 export const updateQty = (payload: IUpdateQuantityPayload) =>
   bff<TBaseResponse<IUpdateQuantityResponse>>(`/api/bff/cart/items/${payload.id}`, { method:'PATCH', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });

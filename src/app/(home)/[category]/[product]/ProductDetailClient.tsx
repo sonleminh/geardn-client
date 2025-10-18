@@ -19,7 +19,6 @@ import { SwiperClass } from 'swiper/react';
 import AppLink from '@/components/common/AppLink';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import HtmlRenderBox from '@/components/common/HtmlRenderBox';
-import LayoutContainer from '@/components/layout-container';
 
 import MainSwiper from './components/main-swiper';
 import ThumbSwiper from './components/thumb-swiper';
@@ -289,211 +288,210 @@ const ProductDetailClient = ({
 
   return (
     <Box pt={2} pb={4}>
-      <LayoutContainer>
-        <Box sx={{ mb: 2 }}>
-          <Breadcrumbs options={breadcrumbsOptions} />
-        </Box>
-        <Box sx={{ px: 3, mb: 2, bgcolor: '#fff', borderRadius: 1 }}>
-          <Grid2 container columnSpacing={4}>
-            <Grid2 size={5} sx={{ py: 3 }}>
-              <Box sx={{ position: 'relative', height: '400px' }}>
-                <Box
-                  sx={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                  }}>
-                  {selectedSku?.imageUrl ? (
-                    <SkeletonImage
-                      src={selectedSku?.imageUrl}
-                      alt='Selected Option'
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  ) : null}
-                  <Box
-                    sx={{
+      <Box sx={{ mb: 2 }}>
+        <Breadcrumbs options={breadcrumbsOptions} />
+      </Box>
+      <Box sx={{ px: 3, mb: 2, bgcolor: '#fff', borderRadius: 1 }}>
+        <Grid2 container columnSpacing={4}>
+          <Grid2 size={5} sx={{ py: 3 }}>
+            <Box sx={{ position: 'relative', height: '400px' }}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                }}>
+                {selectedSku?.imageUrl ? (
+                  <SkeletonImage
+                    src={selectedSku?.imageUrl}
+                    alt='Selected Option'
+                    style={{
                       position: 'absolute',
                       top: 0,
                       width: '100%',
-                      height: '400px',
-                      display: selectedSku?.imageUrl ? 'none' : 'block',
-                    }}>
-                    <MainSwiper
-                      data={productImageList}
-                      thumbsSwiper={thumbsSwiper}
-                      setMainSwiper={mainSwiperRef}
-                    />
-                  </Box>
+                      height: '100%',
+                      objectFit: 'contain',
+                    }}
+                  />
+                ) : null}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    width: '100%',
+                    height: '400px',
+                    display: selectedSku?.imageUrl ? 'none' : 'block',
+                  }}>
+                  <MainSwiper
+                    data={productImageList}
+                    thumbsSwiper={thumbsSwiper}
+                    setMainSwiper={mainSwiperRef}
+                  />
                 </Box>
               </Box>
-              <Box mb={1} />
-              <Box>
-                <ThumbSwiper
-                  images={productImageList}
-                  setThumbsSwiper={setThumbsSwiper}
-                />
-              </Box>
-            </Grid2>
-            <Grid2 size={7} sx={{ pl: 3, borderLeft: '1px solid #eee' }}>
-              <Box sx={{ pt: 3 }}>
-                <Typography sx={{ mb: 1, fontSize: 24, fontWeight: 600 }}>
-                  {product?.name}
+            </Box>
+            <Box mb={1} />
+            <Box>
+              <ThumbSwiper
+                images={productImageList}
+                setThumbsSwiper={setThumbsSwiper}
+              />
+            </Box>
+          </Grid2>
+          <Grid2 size={7} sx={{ pl: 3, borderLeft: '1px solid #eee' }}>
+            <Box sx={{ pt: 3 }}>
+              <Typography sx={{ mb: 1, fontSize: 24, fontWeight: 600 }}>
+                {product?.name}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography
+                  sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                  5.0 <StarRateIcon sx={{ color: '#F19B4C', fontSize: 20 }} />
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AppLink href={'/'} sx={{ fontSize: 14 }}>
+                  Xem đánh giá
+                </AppLink>
+              </Box>
+              <Typography sx={{ mb: 2, fontSize: 24, fontWeight: 600 }}>
+                {product?.skus?.length && selectedSku !== null
+                  ? formatPrice(selectedSku?.sellingPrice ?? 0)
+                  : formatPrice(product?.priceMin ?? 0)}
+              </Typography>
+              {Object.entries(attributeOptions).map(([type, values]) => (
+                <Box
+                  key={type}
+                  sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
                   <Typography
-                    sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                    5.0 <StarRateIcon sx={{ color: '#F19B4C', fontSize: 20 }} />
+                    component={'h3'}
+                    sx={{
+                      width: 100,
+                      flexShrink: 0,
+                      fontSize: 14,
+                      color: '#757575',
+                    }}>
+                    {attributeLabels[type]}:
                   </Typography>
-                  <AppLink href={'/'} sx={{ fontSize: 14 }}>
-                    Xem đánh giá
-                  </AppLink>
-                </Box>
-                <Typography sx={{ mb: 2, fontSize: 24, fontWeight: 600 }}>
-                  {product?.skus?.length && selectedSku !== null
-                    ? formatPrice(selectedSku?.sellingPrice ?? 0)
-                    : formatPrice(product?.priceMin ?? 0)}
-                </Typography>
-                {Object.entries(attributeOptions).map(([type, values]) => (
-                  <Box
-                    key={type}
-                    sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
-                    <Typography
-                      component={'h3'}
-                      sx={{
-                        width: 100,
-                        flexShrink: 0,
-                        fontSize: 14,
-                        color: '#757575',
-                      }}>
-                      {attributeLabels[type]}:
-                    </Typography>
-                    <ToggleButtonGroup
-                      sx={{
-                        flexWrap: 'wrap',
-                        '& .MuiButtonBase-root': {
-                          border: '1px solid rgba(0, 0, 0, 0.12)',
-                          borderRadius: '2px',
-                        },
-                        '& .MuiToggleButton-root.Mui-disabled': {
-                          border: '1px solid rgba(0,0,0,.12)',
-                        },
-                      }}
-                      value={selectedAttributes[type]}
-                      exclusive
-                      rel=''
-                      onChange={(e, newValue) =>
-                        handleAttributeChange(type, newValue)
-                      }>
-                      {values.map((value) => (
-                        <ToggleButton
-                          sx={{
-                            minWidth: 69,
-                            px: 1.5,
-                            mt: 1,
-                            mr: 1.5,
-                            color: 'rgba(0,0,0,.8)',
-                            fontSize: '14px',
-                            textTransform: 'capitalize',
-                          }}
-                          size='small'
-                          key={value}
-                          value={value}
-                          disabled={handleDisableAttribute(type, value)}>
-                          {value}
-                        </ToggleButton>
-                      ))}
-                    </ToggleButtonGroup>
-                  </Box>
-                ))}
-
-                <Grid2 container mt={4} mb={3}>
-                  <Grid2 size={2}>Số lượng:</Grid2>
-                  <Grid2 size={10} display={'flex'}>
-                    <ButtonGroup
-                      variant='outlined'
-                      size='small'
-                      sx={{ mr: 2, height: 32 }}>
-                      <Button
-                        onClick={() => handleCountChange((count ?? 0) - 1)}
-                        disabled={!selectedSku || count === 1}>
-                        -
-                      </Button>
-                      <TextField
+                  <ToggleButtonGroup
+                    sx={{
+                      flexWrap: 'wrap',
+                      '& .MuiButtonBase-root': {
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                        borderRadius: '2px',
+                      },
+                      '& .MuiToggleButton-root.Mui-disabled': {
+                        border: '1px solid rgba(0,0,0,.12)',
+                      },
+                    }}
+                    value={selectedAttributes[type]}
+                    exclusive
+                    rel=''
+                    onChange={(e, newValue) =>
+                      handleAttributeChange(type, newValue)
+                    }>
+                    {values.map((value) => (
+                      <ToggleButton
                         sx={{
-                          width: '48px',
-                          '.MuiInputBase-root': {
-                            height: 32,
-                            borderRadius: 0,
-                            '.MuiInputBase-input': {
-                              p: 0,
-                              textAlign: 'center',
-                              '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
-                                {
-                                  display: 'none',
-                                },
-                            },
-                          },
-                        }}
-                        type='number'
-                        disabled={
-                          selectedSku === null ||
-                          selectedSkuStock === 0 ||
-                          totalStock === 0
-                        }
-                        value={count ?? ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (
-                            selectedSku &&
-                            selectedSkuStock &&
-                            +value > selectedSkuStock
-                          ) {
-                            setCount(selectedSkuStock);
-                          } else {
-                            setCount(value ? parseInt(value, 10) : null);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === '-') {
-                            e.preventDefault();
-                          }
-                          if (
-                            count === null &&
-                            (e.key === '0' || e.key === 'Enter')
-                          ) {
-                            e.preventDefault();
-                          }
+                          minWidth: 69,
+                          px: 1.5,
+                          mt: 1,
+                          mr: 1.5,
+                          color: 'rgba(0,0,0,.8)',
+                          fontSize: '14px',
+                          textTransform: 'capitalize',
                         }}
                         size='small'
-                      />
-                      <Button
-                        onClick={() => handleCountChange((count ?? 0) + 1)}
-                        disabled={!selectedSku || count === selectedSkuStock}>
-                        +
-                      </Button>
-                    </ButtonGroup>
-                    {totalStock > 0 && (
-                      <Typography sx={{ fontSize: 14, lineHeight: '32px' }}>
-                        {totalStock > 0 && selectedSku
-                          ? selectedSku?.stocks?.reduce(
-                              (
-                                acc: number,
-                                stock: { id: number; quantity: number }
-                              ) => acc + stock.quantity,
-                              0
-                            )
-                          : totalStock}{' '}
-                        sản phẩm có sẵn
-                      </Typography>
-                    )}
-                  </Grid2>
-                  {/* {addCartError && (
+                        key={value}
+                        value={value}
+                        disabled={handleDisableAttribute(type, value)}>
+                        {value}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                </Box>
+              ))}
+
+              <Grid2 container mt={4} mb={3}>
+                <Grid2 size={2}>Số lượng:</Grid2>
+                <Grid2 size={10} display={'flex'}>
+                  <ButtonGroup
+                    variant='outlined'
+                    size='small'
+                    sx={{ mr: 2, height: 32 }}>
+                    <Button
+                      onClick={() => handleCountChange((count ?? 0) - 1)}
+                      disabled={!selectedSku || count === 1}>
+                      -
+                    </Button>
+                    <TextField
+                      sx={{
+                        width: '48px',
+                        '.MuiInputBase-root': {
+                          height: 32,
+                          borderRadius: 0,
+                          '.MuiInputBase-input': {
+                            p: 0,
+                            textAlign: 'center',
+                            '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
+                              {
+                                display: 'none',
+                              },
+                          },
+                        },
+                      }}
+                      type='number'
+                      disabled={
+                        selectedSku === null ||
+                        selectedSkuStock === 0 ||
+                        totalStock === 0
+                      }
+                      value={count ?? ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (
+                          selectedSku &&
+                          selectedSkuStock &&
+                          +value > selectedSkuStock
+                        ) {
+                          setCount(selectedSkuStock);
+                        } else {
+                          setCount(value ? parseInt(value, 10) : null);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === '-') {
+                          e.preventDefault();
+                        }
+                        if (
+                          count === null &&
+                          (e.key === '0' || e.key === 'Enter')
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                      size='small'
+                    />
+                    <Button
+                      onClick={() => handleCountChange((count ?? 0) + 1)}
+                      disabled={!selectedSku || count === selectedSkuStock}>
+                      +
+                    </Button>
+                  </ButtonGroup>
+                  {totalStock > 0 && (
+                    <Typography sx={{ fontSize: 14, lineHeight: '32px' }}>
+                      {totalStock > 0 && selectedSku
+                        ? selectedSku?.stocks?.reduce(
+                            (
+                              acc: number,
+                              stock: { id: number; quantity: number }
+                            ) => acc + stock.quantity,
+                            0
+                          )
+                        : totalStock}{' '}
+                      sản phẩm có sẵn
+                    </Typography>
+                  )}
+                </Grid2>
+                {/* {addCartError && (
                       <Typography sx={{ mt: 1, fontSize: 14, color: 'red' }}>
                         Vui lòng chọn phân loại hàng
                       </Typography>
@@ -503,52 +501,51 @@ const ProductDetailClient = ({
                         Số lượng bạn chọn đã đạt mức tối đa của sản phẩm này
                       </Typography>
                     )} */}
-                </Grid2>
-                <Box>
-                  <Button
-                    sx={{ mr: 2, bgcolor: '#f0f0f0' }}
-                    variant='outlined'
-                    size='large'
-                    disabled={!selectedSku}
-                    onClick={handleAddCartItem}>
-                    <ShoppingCartOutlinedIcon />
-                  </Button>
-                  <Button
-                    sx={{ width: 200 }}
-                    variant='contained'
-                    size='large'
-                    disabled={!selectedSku}
-                    // onClick={handleBuyBtn}
-                  >
-                    {totalStock > 0 ? 'Mua ngay' : 'Hết hàng'}
-                  </Button>
-                </Box>
+              </Grid2>
+              <Box>
+                <Button
+                  sx={{ mr: 2, bgcolor: '#f0f0f0' }}
+                  variant='outlined'
+                  size='large'
+                  disabled={!selectedSku}
+                  onClick={handleAddCartItem}>
+                  <ShoppingCartOutlinedIcon />
+                </Button>
+                <Button
+                  sx={{ width: 200 }}
+                  variant='contained'
+                  size='large'
+                  disabled={!selectedSku}
+                  // onClick={handleBuyBtn}
+                >
+                  {totalStock > 0 ? 'Mua ngay' : 'Hết hàng'}
+                </Button>
               </Box>
-            </Grid2>
+            </Box>
           </Grid2>
-        </Box>
-        <Box sx={{ p: 2, mb: 2, bgcolor: '#fff' }}>
-          <Typography
-            sx={{ width: '100%', p: 2, mb: 3, bgcolor: 'rgba(0,0,0,0.02)' }}>
-            Chi tiết sản phẩm
-          </Typography>
-          <Grid2 container spacing={1.5} ml={2} mb={3}>
-            <Grid2 size={2}>Danh mục</Grid2>
-            <Grid2 size={10}>{product?.category?.name}</Grid2>
-            <Grid2 size={2}>Thương hiệu</Grid2>
-            <Grid2 size={10}>{product?.brand}</Grid2>
-            <Grid2 size={2}>Bảo hành</Grid2>
-            <Grid2 size={10}>{product?.details?.guarantee}</Grid2>
-            <Grid2 size={2}>Chất liệu</Grid2>
-            <Grid2 size={10}>{product?.details?.material}</Grid2>
-          </Grid2>
-          <Typography
-            sx={{ width: '100%', p: 2, mb: 3, bgcolor: 'rgba(0,0,0,0.02)' }}>
-            Mô tả sản phẩm
-          </Typography>
-          <HtmlRenderBox html={product?.description ?? ''} />
-        </Box>
-      </LayoutContainer>
+        </Grid2>
+      </Box>
+      <Box sx={{ p: 2, mb: 2, bgcolor: '#fff' }}>
+        <Typography
+          sx={{ width: '100%', p: 2, mb: 3, bgcolor: 'rgba(0,0,0,0.02)' }}>
+          Chi tiết sản phẩm
+        </Typography>
+        <Grid2 container spacing={1.5} ml={2} mb={3}>
+          <Grid2 size={2}>Danh mục</Grid2>
+          <Grid2 size={10}>{product?.category?.name}</Grid2>
+          <Grid2 size={2}>Thương hiệu</Grid2>
+          <Grid2 size={10}>{product?.brand}</Grid2>
+          <Grid2 size={2}>Bảo hành</Grid2>
+          <Grid2 size={10}>{product?.details?.guarantee}</Grid2>
+          <Grid2 size={2}>Chất liệu</Grid2>
+          <Grid2 size={10}>{product?.details?.material}</Grid2>
+        </Grid2>
+        <Typography
+          sx={{ width: '100%', p: 2, mb: 3, bgcolor: 'rgba(0,0,0,0.02)' }}>
+          Mô tả sản phẩm
+        </Typography>
+        <HtmlRenderBox html={product?.description ?? ''} />
+      </Box>
     </Box>
   );
 };

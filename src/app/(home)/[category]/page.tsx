@@ -20,7 +20,7 @@ export default async function ProductByCategoryPage({
   const qs = toURLSearchParams(parsed);
   const initial = await getProductsByCategory(category, qs);
   return (
-    <Box sx={{ py: 4, bgcolor: '#F3F4F6' }}>
+    <Box sx={{ pt: 2, pb: 4, bgcolor: '#F3F4F6' }}>
       <ProductByCategoryClient
         slug={category}
         initial={initial}

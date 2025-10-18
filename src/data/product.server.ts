@@ -15,11 +15,10 @@ export async function getProducts(qs: URLSearchParams) {
 }
 
 
-export async function getProductsByCategory(slug: string, qs: URLSearchParams) {
+export async function getProductsByCategory(slug: string, qs?: URLSearchParams) {
   const h = await headers();
   const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('x-forwarded-host') ?? h.get('host')}`;
-  qs.set('limit', '2');
-  const r = await fetch(`${origin}/api/bff/products/category/${encodeURIComponent(slug)}${qs.size?`?${qs}`:''}`, {
+  const r = await fetch(`${origin}/api/bff/products/category/${encodeURIComponent(slug)}${qs?.size?`?${qs}`:''}`, {
     headers: { cookie: h.get('cookie') ?? '', accept: 'application/json' },
     cache: 'no-store',
   });

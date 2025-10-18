@@ -1,7 +1,8 @@
+import React, { Suspense } from 'react';
+import { Metadata } from 'next';
 import { LoadingCircle } from '@/components/common/LoadingCircle';
 import LayoutContainer from '@/components/layout-container';
-import { Metadata } from 'next';
-import React, { Suspense } from 'react';
+import { getCategoryBySlug } from '@/data/category.server';
 
 export async function generateMetadata({
   params,
@@ -9,15 +10,40 @@ export async function generateMetadata({
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
   const { category } = await params;
-  // const productData = await getProductBySlug(category);
+  const res = await getCategoryBySlug(category).catch(() => null);
+  const categoryData = res?.data;
+
+  const fallbackTitle = 'Sản phẩm';
+  const title = categoryData?.name
+    ? `${categoryData.name} | GearDN`
+    : `${fallbackTitle} | GearDN`;
+  const description = 'Danh mục sản phẩm trên GearDN';
+
+  const path = `/c/${encodeURIComponent(category)}`;
+  const images = categoryData?.icon
+    ? [categoryData.icon]
+    : [
+        `/api/og?title=${encodeURIComponent(
+          categoryData?.name ?? fallbackTitle
+        )}`,
+      ];
+
+  const robots = categoryData
+    ? { index: true, follow: true }
+    : { index: false, follow: false };
+
   return {
-    // title: productData?.data?.name,
-    // description: productData?.data?.description,
-    // openGraph: {
-    //   title: product?.data,
-    //   description: product?.data,
-    //   images: [product?.data],
-    // },
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: 'website',
+      url: path,
+      title,
+      description,
+      images,
+    },
+    robots,
   };
 }
 

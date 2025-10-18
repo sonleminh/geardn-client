@@ -11,8 +11,7 @@ import LayoutContainer from '@/components/layout-container';
 import ProductCard from '@/components/common/ProductCard';
 import { IProduct } from '@/interfaces/IProduct';
 
-const Explore = ({ exploreData }: { exploreData: IProduct[] }) => {
-  // const page = 1;
+const Explore = ({ exploreData }: { exploreData: IProduct[] | undefined }) => {
   return (
     <Box sx={{ mb: 10 }}>
       <LayoutContainer>

@@ -1,17 +1,17 @@
-import { Box, Button, InputBase, Typography } from '@mui/material';
 import SkeletonImage from '@/components/common/SkeletonImage';
+import { Box, Button, InputBase, Typography } from '@mui/material';
 import ProductCatalog from './components/product-catalog';
 
 import BANNER_BG from '@/assets/geardn.jpg';
-import Explore from './components/explore';
 import LayoutContainer from '@/components/layout-container';
+import Explore from './components/explore';
 // import { fetchProducts } from '@/data/product.server';
-import { fetchCategories, getCategories } from '@/data/category.server';
+import { getCategories } from '@/data/category.server';
+import { getProducts } from '@/data/product.server';
 import {
   parseProductListParams,
   toURLSearchParams,
 } from '@/lib/search/productList.params';
-import { getProducts } from '@/data/product.server';
 
 export default async function Homepage({
   searchParams,
@@ -65,7 +65,7 @@ export default async function Homepage({
         />
       </section>
 
-      {/* <Explore exploreData={productsData.data} /> */}
+      <Explore exploreData={productPage?.data} />
 
       <LayoutContainer>
         <Box

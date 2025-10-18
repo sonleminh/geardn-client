@@ -1,7 +1,5 @@
-import { ILogInResponse } from '@/interfaces/IAuth';
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { IUser } from '@/interfaces/IUser';
-import { axiosInstance } from '@/lib/utils/axiosInstance';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 

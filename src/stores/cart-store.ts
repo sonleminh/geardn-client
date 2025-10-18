@@ -2,7 +2,6 @@
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useAuthStore } from './auth-store';
 
 export type CartState = {
   cartItems: ICartStoreItem[];

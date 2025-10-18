@@ -46,7 +46,7 @@ export default function ProductByCategoryClient({
 
   return (
     <LayoutContainer>
-      <Box sx={{ mb: 1 }}>
+      <Box sx={{ mb: 2 }}>
         <Breadcrumbs options={breadcrumbsOptions} />
       </Box>
       <Box sx={{ display: ' flex', justifyContent: 'space-between', mb: 2 }}>
