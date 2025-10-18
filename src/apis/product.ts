@@ -1,7 +1,15 @@
 import { IProduct } from "@/interfaces/IProduct";
 import { bff } from "@/lib/api-fetch";
-import { IGetProductByCateParams } from "@/queries/product";
-import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from "@/types/response.type";
+import { TBaseResponse, TCursorPaginatedResponse } from "@/types/response.type";
+
+function buildQS(params: Record<string, string | undefined | null>) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v != null && v !== '') sp.set(k, v);
+  }
+  const s = sp.toString();
+  return s ? `?${s}` : '';
+}
 
 export type ProductPage = {
   items: IProduct[];
@@ -9,17 +17,14 @@ export type ProductPage = {
   hasMore: boolean;
   total: number;
 };
-
-// export const getProducts = (params: URLSearchParams) =>
-//   bff<TPaginatedResponse<IProduct>>(`/api/bff/products?${params.toString()}`);
-
-export const getProductsByCategory = (slug: string,cursor: string | undefined, qs: URLSearchParams, ) => {
-  // console.log('pr', pr); 
-  // console.log('params', params); 
-  // if (cursor) params.set('cursor', cursor);
-  // pr.set('limit', String(2));
+export const getProductsByCategory = (slug: string, opts:{ sortBy:'createdAt'|'price' | ''; order:'asc'|'desc' | ''; cursor?:string;} ) => {
+  const qs = buildQS({
+    sortBy: opts.sortBy || undefined,
+    order: opts.order || undefined,
+    cursor: opts.cursor,
+  });
   return bff<TCursorPaginatedResponse<IProduct>>(
-    `/api/bff/products/category/${encodeURIComponent(slug)}?${qs.toString()}`
+    `/api/bff/products/category/${encodeURIComponent(slug)}${qs}`
   );
 }
 

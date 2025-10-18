@@ -1,10 +1,7 @@
-import { addCartItem, deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
-import { ProductPage, getProduct, getProductsByCategory } from '@/apis/product';
-import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { ICategory } from '@/interfaces/ICategory';
+import { getProduct, getProductsByCategory } from '@/apis/product';
 import { IProduct } from '@/interfaces/IProduct';
-import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from '@/types/response.type';
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
+import { TBaseResponse, TCursorPaginatedResponse } from '@/types/response.type';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 export interface IGetProductByCateParams {
   limit?: number;
@@ -22,21 +19,17 @@ export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
   });
 }
 
-type CatResult = { items: IProduct[]; meta: { nextCursor?: string|null; hasMore?: boolean; total?: number }; category: ICategory | null; };
+export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, sp: URLSearchParams, ) {
+  const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
+  const order = (sp.get('order') === 'asc' ? 'asc' : '');
 
-export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, qs: URLSearchParams, ) {
-  return useInfiniteQuery<
-  TCursorPaginatedResponse<IProduct>,      // TQueryFnData
-    Error,                           // TError
-    CatResult,
-    [string, string, string | undefined],        // TQueryKey
-    string | undefined               // TPageParam
-  >({
-    queryKey: ['cate-products', slug, qs.toString()],
+  return useInfiniteQuery
+  ({
+    queryKey: ['cate-products', slug, { sortBy, order }] as const,
+    queryFn: ({ pageParam }) => getProductsByCategory(slug, { sortBy, order, cursor: pageParam as string|undefined }),
     initialPageParam: undefined as string|undefined,
-    initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
-    queryFn: ({ pageParam }) => getProductsByCategory(slug, pageParam , new URLSearchParams(qs)),
     getNextPageParam: (last) => last?.meta.nextCursor ?? undefined,
+    initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
     staleTime: 0,
     select: d => {
       const pages = d.pages;
@@ -46,7 +39,6 @@ export function useProductsByCategoryInfinite(slug: string,initial: TCursorPagin
       return {
         items,
         meta: last?.meta ?? {},
-        // giữ category từ trang đầu nếu các trang sau không trả
         category: (last)?.category ?? (first)?.category ?? null,
       };
     },

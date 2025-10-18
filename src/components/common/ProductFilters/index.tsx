@@ -13,7 +13,10 @@ function toUIValue(q: IQueryParams): UIValue {
   return '';
 }
 
-function fromUIValue(v: UIValue): { sortBy?: string; order?: 'asc' | 'desc' } {
+function fromUIValue(v: UIValue): {
+  sortBy?: 'createdAt' | 'price';
+  order?: 'asc' | 'desc';
+} {
   if (v === '') return {}; // hoặc {} nếu BE có default
   return { sortBy: 'price', order: v };
 }
@@ -28,8 +31,6 @@ export function ProductFilters({ initial }: { initial: IQueryParams }) {
     [initial.sortBy, initial.order]
   );
   const [sort, setSort] = useState<UIValue>(initialUI);
-
-  console.log('initial(ProductFilters)', initial);
 
   useEffect(() => {
     const cur: IQueryParams = {

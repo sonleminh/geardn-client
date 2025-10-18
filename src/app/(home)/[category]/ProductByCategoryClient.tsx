@@ -1,19 +1,17 @@
 'use client';
 
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ProductCard from '@/components/common/ProductCard';
+import { ProductFilters } from '@/components/common/ProductFilters';
+import LayoutContainer from '@/components/layout-container';
 import { IProduct } from '@/interfaces/IProduct';
-import { Box, Button, Grid2, Typography } from '@mui/material';
-import { useState, useTransition, useEffect, useMemo } from 'react';
-import { getProductsByCategory } from '@/data/product.server';
-import { TBaseResponse, TCursorPaginatedResponse } from '@/types/response.type';
-import { ProductPage } from '@/apis/product';
 import { IQueryParams } from '@/interfaces/IQuery';
 import { useProductsByCategoryInfinite } from '@/queries/product';
-import LayoutContainer from '@/components/layout-container';
-import Breadcrumbs from '@/components/common/Breadcrumbs';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ProductFilters } from '@/components/common/ProductFilters';
+import { TCursorPaginatedResponse } from '@/types/response.type';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Button, Grid2, Typography } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 
 type Props = {
   slug: string;
@@ -26,40 +24,24 @@ export default function ProductByCategoryClient({
   slug,
   initial,
   params,
-  qs,
 }: Props) {
-  const router = useRouter();
   const sp = useSearchParams();
-  // console.log('sp', sp.toString());
-  console.log('params(client)', params);
-  console.log('qs(client)', qs);
-  console.log('initial(client)', initial);
-  const q = useProductsByCategoryInfinite(slug, initial, qs);
+  const q = useProductsByCategoryInfinite(slug, initial, sp);
   const total = q?.data?.meta?.total ?? 0;
-  const products = q?.data?.items ?? [];
-  // console.log('initial', initial);
-  console.log('products', products);
-  const mk = useMemo(() => {
-    return (patch: Record<string, string>) => {
-      const next = new URLSearchParams(sp.toString());
-      Object.entries(patch).forEach(([k, v]) => {
-        if (v === '' || v == null) next.delete(k);
-        else next.set(k, v);
-      });
-      // khi đổi q/sort nên reset page=1
-      router.replace(`?${next.toString()}`);
-    };
-  }, [sp, router]);
+  const products = useMemo(() => {
+    const seen = new Set<number>();
+    const out = [];
+    for (const it of q.data.items)
+      if (!seen.has(it.id)) {
+        seen.add(it.id);
+        out.push(it);
+      }
+    return out;
+  }, [q.data]);
 
   const breadcrumbsOptions = [
     { href: '/', label: 'Home' },
     { href: '', label: q?.data?.category?.name as string },
-  ];
-
-  const filterList = [
-    { label: 'Mới nhất', value: '' },
-    { label: 'Giá tăng dần', value: 'asc' },
-    { label: 'Giá giảm dần', value: 'desc' },
   ];
 
   return (
@@ -70,25 +52,7 @@ export default function ProductByCategoryClient({
       <Box sx={{ display: ' flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography>Tìm thấy {total} sản phẩm</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* <ProductFilters initial={params} /> */}
-          {/* {filterList?.map((filter, index) => (
-            <Box key={filter?.value}>
-              <Typography onClick={() => mk({ sort: filter.value })} sx={{}}>
-                {filter.label}
-              </Typography>
-              {filterList.length - 1 !== index && (
-                <Box
-                  sx={{
-                    width: '4px',
-                    height: '4px',
-                    mx: 2,
-                    borderRadius: '50%',
-                    backgroundColor: '#6b7280',
-                  }}
-                />
-              )}
-            </Box>
-          ))} */}
+          <ProductFilters initial={params} />
         </Box>
       </Box>
       <Grid2 container spacing={2}>

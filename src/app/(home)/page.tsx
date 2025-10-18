@@ -21,7 +21,6 @@ export default async function Homepage({
   const resolvedParams = await searchParams;
   const parsed = parseProductListParams(resolvedParams);
   const qs = toURLSearchParams(parsed);
-  console.log('parsed', parsed.sortBy + ' ' + parsed.order);
   const productPage = await getProducts(qs);
   const categoryPage = await getCategories();
 
