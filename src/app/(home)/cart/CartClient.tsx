@@ -59,7 +59,7 @@ const CartClient = ({
   const router = useRouter();
 
   const breadcrumbsOptions = [
-    { href: '/', label: 'Home' },
+    { href: '/', label: 'Trang chủ' },
     { href: ROUTES.CART, label: 'Giỏ hàng' },
   ];
 

@@ -231,7 +231,7 @@ const ProductDetailClient = ({
   };
 
   const breadcrumbsOptions = [
-    { href: '/', label: 'Home' },
+    { href: '/', label: 'Trang chủ' },
     { href: '', label: product?.name as string },
   ];
 

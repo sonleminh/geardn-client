@@ -58,7 +58,7 @@ const Checkout = () => {
   const { showNotification } = useNotificationStore();
   const { removeItem } = useCartStore();
   const breadcrumbsOptions = [
-    { href: '/', label: 'Home' },
+    { href: '/', label: 'Trang chủ' },
     { href: ROUTES.CHECKOUT, label: 'Thanh toán' },
   ];
 

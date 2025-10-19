@@ -7,23 +7,21 @@ import LayoutContainer from '@/components/layout-container';
 import { IProduct } from '@/interfaces/IProduct';
 import { IQueryParams } from '@/interfaces/IQuery';
 import { useProductsByCategoryInfinite } from '@/queries/product';
-import { TCursorPaginatedResponse } from '@/types/response.type';
+import {
+  TCursorPaginatedResponse,
+  TPaginatedResponse,
+} from '@/types/response.type';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Grid2, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 type Props = {
-  slug: string;
-  initial: TCursorPaginatedResponse<IProduct> | null;
+  initial: TPaginatedResponse<IProduct> | null;
   params: IQueryParams;
 };
 
-export default function ProductByCategoryClient({
-  slug,
-  initial,
-  params,
-}: Props) {
+export default function SearchClient({ slug, initial, params }: Props) {
   const sp = useSearchParams();
   const q = useProductsByCategoryInfinite(slug, initial, sp);
   const total = q?.data?.meta?.total ?? 0;
@@ -40,7 +38,7 @@ export default function ProductByCategoryClient({
 
   const breadcrumbsOptions = [
     { href: '/', label: 'Trang chủ' },
-    { href: '', label: q?.data?.category?.name as string },
+    { href: '', label: 'Tìm kiếm' },
   ];
 
   return (

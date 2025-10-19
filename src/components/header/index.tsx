@@ -29,6 +29,7 @@ import { HeaderStyle } from './style';
 import { useLogout } from '@/queries/auth';
 import { AppError } from '@/lib/errors/app-error';
 import { useNotificationStore } from '@/stores/notification-store';
+import SearchIconExpand from '../common/SearchIconExpand';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
@@ -89,7 +90,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
     <Box sx={HeaderStyle(isExpanded, pathname)}>
       <Box className='header-main'>
         <Grid2 container height={80}>
-          <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
+          <Grid2 size={4.5} sx={{ display: 'flex', alignItems: 'center' }}>
             <AppLink href={'/'}>
               <Box className='header-logo'>
                 <SkeletonImage
@@ -102,13 +103,14 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
               </Box>
             </AppLink>
           </Grid2>
-          <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
+          <Grid2 size={3} sx={{ display: 'flex', alignItems: 'center' }}>
             <List
               sx={{
                 display: 'flex',
                 width: '100%',
                 '> li': {
                   justifyContent: 'center',
+                  p: 0,
                   ':hover': {
                     ' p': {
                       ':before': {
@@ -145,7 +147,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
               </ListItem>
             </List>
           </Grid2>
-          <Grid2 size={4} sx={{ display: 'flex', alignItems: 'center' }}>
+          <Grid2 size={4.5} sx={{ display: 'flex', alignItems: 'center' }}>
             <Box
               sx={{
                 display: 'flex',
@@ -153,7 +155,12 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                 alignItems: 'center',
                 width: '100%',
               }}>
-              <SearchIcon />
+              <SearchIconExpand
+                onSearch={(q) => console.log('search:', q)}
+                placeholder='Tìm sản phẩm…'
+                maxWidth={150}
+                debounceMs={1000}
+              />
               <Button
                 sx={{ position: 'relative', minWidth: 40, height: 40, ml: 2 }}
                 onClick={() => router.push(ROUTES.CART)}>
