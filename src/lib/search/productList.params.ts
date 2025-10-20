@@ -1,7 +1,7 @@
 export type SortByKey = 'createdAt' | 'price';
 export type OrderKey = 'asc' | 'desc';
 export interface ProductListParams {
-  q?: string;
+  keyword?: string;
   page?: number;     // 1-based
   limit?: number;
   sortBy?: SortByKey;
@@ -33,7 +33,7 @@ function parseIntMaybe(v?: string): number | undefined {
 export function parseProductListParams(
   input: Record<string, string | string[] | undefined>
 ): ProductListParams {
-  const q = (pick(input, 'q') ?? '').trim() || undefined;
+  const keyword = (pick(input, 'keyword') ?? '').trim() || undefined;
 
   const pageRaw = parseIntMaybe(pick(input, 'page'));
   const page = pageRaw && pageRaw > 0 ? pageRaw : undefined;
@@ -49,12 +49,12 @@ export function parseProductListParams(
 
   const category = (pick(input, 'category') ?? '').trim() || undefined;
 
-  return { q, page, limit, sortBy, order, category };
+  return { keyword, page, limit, sortBy, order, category };
 }
 
 export function toURLSearchParams(p: ProductListParams) {
   const qs = new URLSearchParams();
-  if (p.q) qs.set('q', p.q);
+  if (p.keyword) qs.set('keyword', p.keyword);
   if (p.category) qs.set('category', p.category);
   if (p.sortBy) qs.set('sortBy', p.sortBy);
   if (p.order) qs.set('order', p.order);

@@ -6,7 +6,11 @@ import { ProductFilters } from '@/components/common/ProductFilters';
 import LayoutContainer from '@/components/layout-container';
 import { IProduct } from '@/interfaces/IProduct';
 import { IQueryParams } from '@/interfaces/IQuery';
-import { useProductsByCategoryInfinite } from '@/queries/product';
+import {
+  useGetProducts,
+  useProductsByCategoryInfinite,
+  useSearchProductsInfinite,
+} from '@/queries/product';
 import {
   TCursorPaginatedResponse,
   TPaginatedResponse,
@@ -17,18 +21,18 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 type Props = {
-  initial: TPaginatedResponse<IProduct> | null;
+  initial: TCursorPaginatedResponse<IProduct> | null;
   params: IQueryParams;
 };
 
-export default function SearchClient({ slug, initial, params }: Props) {
+export default function SearchClient({ initial, params }: Props) {
   const sp = useSearchParams();
-  const q = useProductsByCategoryInfinite(slug, initial, sp);
+  const q = useSearchProductsInfinite(initial, sp);
   const total = q?.data?.meta?.total ?? 0;
   const products = useMemo(() => {
     const seen = new Set<number>();
     const out = [];
-    for (const it of q.data.items)
+    for (const it of q.data?.data || [])
       if (!seen.has(it.id)) {
         seen.add(it.id);
         out.push(it);

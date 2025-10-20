@@ -14,6 +14,20 @@ export async function getProducts(qs: URLSearchParams) {
   return r.json() as Promise<TPaginatedResponse<IProduct>>; 
 }
 
+export async function searchProducts(qs: URLSearchParams) {
+  console.log('qs(fetch-server)', qs.toString());
+  const h = await headers();
+  const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('x-forwarded-host') ?? h.get('host')}`;
+  const r = await fetch(`${origin}/api/bff/products/search?${qs.toString()}`, {
+    headers: { cookie: h.get('cookie') ?? '', accept: 'application/json' },
+    cache: 'no-store',                 // hoặc: next: { revalidate: 60 } nếu muốn ISR phía RSC
+  });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`Search products fetch failed: ${r.status}`);
+  return r.json() as Promise<TCursorPaginatedResponse<IProduct>>; 
+}
+
+
 
 export async function getProductsByCategory(slug: string, qs?: URLSearchParams) {
   const h = await headers();
