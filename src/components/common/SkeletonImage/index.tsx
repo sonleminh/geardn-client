@@ -7,7 +7,6 @@ import { Box, Skeleton } from '@mui/material';
 const SkeletonImage: React.FC<ImageProps> = (props) => {
   const [isError, setIsError] = useState(false);
   const srcImg = props?.src;
-
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
       {isError ? (

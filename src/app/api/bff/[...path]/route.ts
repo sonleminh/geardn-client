@@ -48,7 +48,7 @@ let duplex: 'half' | undefined;
 
   // Optional allowlist for query keys. Keep empty to allow all.
   // Example: const ALLOWED = new Set(['limit','sort','q'])
-  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword'] as string[];
+  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword', 'cursor'] as string[];
   const ALLOWED: ReadonlySet<string> | null = new Set<string>(ALLOWED_VALUES);
 
 const qs = new URLSearchParams();

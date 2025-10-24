@@ -24,11 +24,12 @@ export interface IGetProductByCateParams {
 export function useSearchProductsInfinite(initial: TCursorPaginatedResponse<IProduct> | null, sp: URLSearchParams ) {
   const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
   const order = (sp.get('order') === 'asc' ? 'asc' : '');
+  const limit = '2';
 
   return useInfiniteQuery
   ({
-    queryKey: ['products', { sortBy, order }] as const,
-    queryFn: ({ pageParam }) => searchProducts({ sortBy, order, cursor: pageParam as string|undefined }),
+    queryKey: ['products', { sortBy, order, limit }] as const,
+    queryFn: ({ pageParam }) => searchProducts({ sortBy, order, limit, cursor: pageParam as string|undefined }),
     initialPageParam: undefined as string|undefined,
     getNextPageParam: (last) => last?.meta.nextCursor ?? undefined,
     initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
@@ -37,11 +38,9 @@ export function useSearchProductsInfinite(initial: TCursorPaginatedResponse<IPro
       const pages = d.pages;
       const items = pages.flatMap(p => p.data);
       const last = pages.at(-1);
-      const first = pages[0];
       return {
         items,
         meta: last?.meta ?? {},
-        category: (last)?.category ?? (first)?.category ?? null,
       };
     },
   });

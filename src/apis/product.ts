@@ -1,6 +1,6 @@
 import { IProduct } from "@/interfaces/IProduct";
 import { bff } from "@/lib/api-fetch";
-import { TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from "@/types/response.type";
+import { NormalizedResponse, TBaseResponse, TCursorPaginatedResponse, TPaginatedResponse } from "@/types/response.type";
 
 function buildQS(params: Record<string, string | undefined | null>) {
   const sp = new URLSearchParams();
@@ -18,13 +18,14 @@ export type ProductPage = {
   total: number;
 };
 
-export const searchProducts = ( opts:{ sortBy:'createdAt'|'price' | ''; order:'asc'|'desc' | ''; cursor?:string;} ) => {
+export const searchProducts = ( opts:{ sortBy:'createdAt'|'price' | ''; order:'asc'|'desc' | ''; limit?:string; cursor?:string;} ) => {
   const qs = buildQS({
     sortBy: opts.sortBy || undefined,
     order: opts.order || undefined,
+    limit: opts.limit || undefined,
     cursor: opts.cursor,
   });
-  return bff<TCursorPaginatedResponse<IProduct>>(
+  return bff<NormalizedResponse<IProduct>>(
     `/api/bff/products/search${qs}`
   );
 }
@@ -36,7 +37,7 @@ export const getProductsByCategory = (slug: string, opts:{ sortBy:'createdAt'|'p
     cursor: opts.cursor,
   });
   return bff<TCursorPaginatedResponse<IProduct>>(
-    `/api/bff/products/category/${encodeURIComponent(slug)}${qs}`
+    `/api/bff/products/category/slug/${encodeURIComponent(slug)}${qs}`
   );
 }
 

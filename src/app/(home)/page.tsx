@@ -22,8 +22,10 @@ export default async function Homepage({
   const parsed = parseProductListParams(resolvedParams);
   const qs = toURLSearchParams(parsed);
   const productPage = await getProducts(qs);
-  console.log('productPage', productPage);
   const categoryPage = await getCategories();
+  if (!productPage?.success && !categoryPage?.success) {
+    throw new Error('Không tải được dữ liệu trang chủ');
+  }
 
   return (
     <Box sx={{ pb: 10 }}>

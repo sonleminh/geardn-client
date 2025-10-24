@@ -24,7 +24,7 @@ export default async function ProductByCategoryPage({
   console.log('initial', initial);
   return (
     <Box sx={{ pt: 2, pb: 4, bgcolor: '#F3F4F6' }}>
-      {/* <SearchClient initial={initial} params={parsed} /> */}
+      <SearchClient initial={initial} params={parsed} />
     </Box>
   );
 }

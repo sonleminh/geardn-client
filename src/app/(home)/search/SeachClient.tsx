@@ -28,11 +28,12 @@ type Props = {
 export default function SearchClient({ initial, params }: Props) {
   const sp = useSearchParams();
   const q = useSearchProductsInfinite(initial, sp);
+  console.log('q', q);
   const total = q?.data?.meta?.total ?? 0;
   const products = useMemo(() => {
     const seen = new Set<number>();
     const out = [];
-    for (const it of q.data?.data || [])
+    for (const it of q.data?.items || [])
       if (!seen.has(it.id)) {
         seen.add(it.id);
         out.push(it);
