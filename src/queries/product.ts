@@ -1,6 +1,6 @@
 import { getProduct, getProductsByCategory, searchProducts } from '@/apis/product';
 import { IProduct } from '@/interfaces/IProduct';
-import { TBaseResponse, TCursorPaginatedResponse } from '@/types/response.type';
+import { BaseResponse, BaseResponse, TCursorPaginatedResponse } from '@/types/response.type';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 export interface IGetProductByCateParams {
@@ -8,7 +8,7 @@ export interface IGetProductByCateParams {
   sort?: 'asc' | 'desc' | '';
 }
 
-// export function useSearchProducts(initial: TPaginatedResponse<IProduct> | null, sp: URLSearchParams) {
+// export function useSearchProducts(initial: PageListResponse<IProduct> | null, sp: URLSearchParams) {
 //    const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
 //   const order = (sp.get('order') === 'asc' ? 'asc' : '');
 
@@ -46,8 +46,8 @@ export function useSearchProductsInfinite(initial: TCursorPaginatedResponse<IPro
   });
 }
 
-export function useGetProduct(initialData?: TBaseResponse<IProduct> | null) {
-  return useQuery<TBaseResponse<IProduct>, Error>({
+export function useGetProduct(initialData?: BaseResponse<IProduct> | null) {
+  return useQuery<BaseResponse<IProduct>, Error>({
     queryKey: ['product', initialData?.data?.slug ?? ''],
     queryFn: () => getProduct(initialData?.data.slug ?? ''),
     initialData: initialData ?? undefined, 

@@ -72,12 +72,12 @@ const Checkout = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [shipmentError, setShipmentError] = useState(false);
 
-  const { data: provinces = [] } = useProvinces();
+  const { data: provinces } = useProvinces();
   const { data: districts = [] } = useDistricts(province?.code);
   const { data: wards = [] } = useWards(district?.code);
   const { data: paymentMethods } = usePaymentMethods();
   const { mutate: onCreateOrder } = useCreateOrder();
-
+  console.log('provinces', provinces?.data);
   useEffect(() => {
     setDistrict(null);
     setWard(null);
@@ -434,7 +434,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={provinces ?? []}
+                            options={provinces?.data ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Tỉnh/Thành phố' />
                             )}

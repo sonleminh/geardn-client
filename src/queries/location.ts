@@ -2,9 +2,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProvinces, getDistricts, getWards } from '@/apis/location';
 import { ILocationOption } from '@/interfaces/ILocation';
+import { BaseResponse } from '@/types/response.type';
 
 export const useProvinces = () =>
-  useQuery<ILocationOption[]>({
+  useQuery<BaseResponse<ILocationOption[]>>({
     queryKey: ['prov'],
     queryFn: getProvinces,
     staleTime: 86_400_000, // 24h

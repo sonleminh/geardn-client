@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 const BE = process.env.BACKEND_API_URL!;
 const FETCH_TIMEOUT_MS = Number(process.env.FETCH_TIMEOUT_MS ?? 8000);
 
-const FORWARD_ALLOW = new Set(['authorization', 'user-agent', 'referer', 'accept-language']);
+const FORWARD_ALLOW = new Set(['authorization', 'user-agent', 'referer', 'accept-language', 'content-type']);
 
 function buildForwardHeaders(req: NextRequest, extra?: HeadersInit) {
   const h = new Headers(extra ?? {});
@@ -48,7 +48,7 @@ let duplex: 'half' | undefined;
 
   // Optional allowlist for query keys. Keep empty to allow all.
   // Example: const ALLOWED = new Set(['limit','sort','q'])
-  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword', 'cursor'] as string[];
+  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword', 'cursor', 'skuIds'] as string[];
   const ALLOWED: ReadonlySet<string> | null = new Set<string>(ALLOWED_VALUES);
 
 const qs = new URLSearchParams();

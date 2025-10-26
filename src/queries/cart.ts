@@ -1,10 +1,10 @@
 import { addCartItem, deleteCartItem, getCart, getCartStock, syncCart, updateQty } from '@/apis/cart';
 import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, IUpdateQuantityPayload, IUpdateQuantityResponse } from '@/interfaces/ICart';
-import { TBaseResponse } from '@/types/response.type';
+import { BaseResponse } from '@/types/response.type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export function useGetCart(enabled: boolean, initialData?: TBaseResponse<ICartResponse> | null) {
-  return useQuery<TBaseResponse<ICartResponse>, Error>({
+export function useGetCart(enabled: boolean, initialData?: BaseResponse<ICartResponse> | null) {
+  return useQuery<BaseResponse<ICartResponse>, Error>({
     queryKey: ['cart'],
     queryFn: getCart,
     enabled,
@@ -16,7 +16,7 @@ export function useGetCart(enabled: boolean, initialData?: TBaseResponse<ICartRe
 
 export function useGetCartStock(skuIds: number[]) {
   const key = ['cart-stock', skuIds.slice().sort((a,b)=>a-b).join(',')];
-  return useQuery<TBaseResponse<ICartStockItem[]>, Error>({
+  return useQuery<BaseResponse<ICartStockItem[]>, Error>({
     queryKey: [key],
     queryFn: () => getCartStock(skuIds), 
     enabled: skuIds.length > 0,
@@ -24,25 +24,25 @@ export function useGetCartStock(skuIds: number[]) {
 }
 
 export function useSyncCart() {
-  return useMutation<TBaseResponse<ICartResponse>, Error, ISyncCartPayload>({
+  return useMutation<BaseResponse<ICartResponse>, Error, ISyncCartPayload>({
     mutationFn: syncCart,
   });
 }
 
 export function useAddCartItem() {
-  return useMutation<TBaseResponse<object>, Error, IAddCartItemPayload>({
+  return useMutation<BaseResponse<object>, Error, IAddCartItemPayload>({
     mutationFn: addCartItem,
   });
 }
 
 export function useUpdateQuantity() {
-  return useMutation<TBaseResponse<IUpdateQuantityResponse>, Error, IUpdateQuantityPayload>({
+  return useMutation<BaseResponse<IUpdateQuantityResponse>, Error, IUpdateQuantityPayload>({
     mutationFn: updateQty,
   });
 }
 
 export function useDeleteCartItem() {
-  return useMutation<TBaseResponse<IUpdateQuantityResponse>, Error, number>({
+  return useMutation<BaseResponse<IUpdateQuantityResponse>, Error, number>({
     mutationFn: deleteCartItem,
   });
 }

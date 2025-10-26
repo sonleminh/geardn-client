@@ -1,7 +1,7 @@
 import { OrderStatus } from "@/constants/orderStatus";
 import { ICreateOrderPayload, IOrder } from "@/interfaces/IOrder";
 import { IPaymentMethod } from "@/interfaces/IPayment";
-import { TBaseResponse } from "@/types/response.type";
+import { BaseResponse } from "@/types/response.type";
 
 type OrdersMeta = {
   countsByStatus: Record<OrderStatus, number>;
@@ -18,7 +18,7 @@ export async function createOrder(payload: ICreateOrderPayload) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data?.message || 'Create order failed');
-  return data as TBaseResponse<IOrder>;
+  return data as BaseResponse<IOrder>;
 }
 
 export async function getUserPurchases(params: { type?: number } = {}) {
@@ -29,11 +29,11 @@ export async function getUserPurchases(params: { type?: number } = {}) {
   const url = `/api/bff/order/user-purchase${qs.toString() ? `?${qs}` : ''}`;
   const r = await fetch(url, { cache: 'no-store' });
   if (!r.ok) throw new Error(String(r.status));
-  return r.json() as Promise<TBaseResponse<IOrder[], OrdersMeta>>;
+  return r.json() as Promise<BaseResponse<IOrder[], OrdersMeta>>;
 }
 
 export async function getPaymentMethods() {
   const r = await fetch('/api/bff/payment-method', { cache: 'no-store' });
   if (!r.ok) throw new Error(String(r.status));
-  return r.json() as Promise<TBaseResponse<IPaymentMethod[]>>;
+  return r.json() as Promise<BaseResponse<IPaymentMethod[]>>;
 }

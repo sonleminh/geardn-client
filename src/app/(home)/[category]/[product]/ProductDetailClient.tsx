@@ -36,12 +36,12 @@ import { useAddCartItem } from '@/queries/cart';
 import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
 import { useGetProduct } from '@/queries/product';
-import { TBaseResponse } from '@/types/response.type';
+import { BaseResponse } from '@/types/response.type';
 
 const ProductDetailClient = ({
   initialProduct,
 }: {
-  initialProduct: TBaseResponse<IProduct>;
+  initialProduct: BaseResponse<IProduct>;
 }) => {
   const { data: user } = useSession();
   const { cartItems, addToCart, syncCart } = useCartStore();

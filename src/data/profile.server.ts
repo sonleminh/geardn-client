@@ -1,5 +1,5 @@
 import { IUser } from "@/interfaces/IUser";
-import { TBaseResponse } from "@/types/response.type";
+import { BaseResponse } from "@/types/response.type";
 import { headers } from "next/headers";
 
 export async function getUserOnServer() {
@@ -15,5 +15,5 @@ export async function getUserOnServer() {
   });
   
     if (!res.ok) return null;
-    return res.json() as Promise<TBaseResponse<IUser>>;
+    return res.json() as Promise<BaseResponse<IUser>>;
   }

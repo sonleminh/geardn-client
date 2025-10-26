@@ -13,7 +13,7 @@ import {
 } from '@/queries/product';
 import {
   TCursorPaginatedResponse,
-  TPaginatedResponse,
+  PageListResponse,
 } from '@/types/response.type';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Grid2, Typography } from '@mui/material';

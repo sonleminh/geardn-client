@@ -41,7 +41,6 @@ export type NormalizedResponse<T> = {
   message: string;
   data: T | T[];               // có thể là item hoặc list
   meta?: NormalizedMeta;       // CursorMeta hoặc Pagination hoặc undefined
-  // category?: ICategory;        // chỉ có khi BE trả kèm category
 };
 
 export type Ok<T> = { ok: true; data: T; status: number; meta?: unknown };
@@ -49,14 +48,14 @@ export type NotFound = { ok: false; notFound: true; status: 404; message?: strin
 export type Err = { ok: false; status: number; message: string };
 export type Result<T> = Ok<T> | Err | NotFound;
 
-// export type TPaginatedResponse<T> = {
+// export type PageListResponse<T> = {
 //     data: T[];
 //     meta: Pagination;
 //     status: boolean;
 //     message: string;
 //   };
 
-// export type TBaseResponse<T, M = undefined> = {
+// export type BaseResponse<T, M = undefined> = {
 //   success: boolean;
 //   message: string;
 //   data: T;

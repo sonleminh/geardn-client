@@ -7,7 +7,7 @@ import LayoutContainer from '@/components/layout-container';
 import { IProduct } from '@/interfaces/IProduct';
 import { IQueryParams } from '@/interfaces/IQuery';
 import { useProductsByCategoryInfinite } from '@/queries/product';
-import { TCursorPaginatedResponse } from '@/types/response.type';
+import { ProductsByCategoryResponse } from '@/types/response.type';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Grid2, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 
 type Props = {
   slug: string;
-  initial: TCursorPaginatedResponse<IProduct> | null;
+  initial: ProductsByCategoryResponse<IProduct> | null;
   params: IQueryParams;
 };
 

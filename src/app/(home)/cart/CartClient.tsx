@@ -47,12 +47,12 @@ import {
   useUpdateQuantity,
 } from '@/queries/cart';
 import { useSession } from '@/hooks/useSession';
-import { TBaseResponse } from '@/types/response.type';
+import { BaseResponse } from '@/types/response.type';
 
 const CartClient = ({
   initialCart,
 }: {
-  initialCart: TBaseResponse<ICartResponse>;
+  initialCart: BaseResponse<ICartResponse>;
 }) => {
   const { setCheckoutCart } = useAuthStore((state) => state);
   const { cartItems, updateQuantity, removeItem, syncCart } = useCartStore();

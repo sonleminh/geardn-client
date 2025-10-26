@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createOrder, getUserPurchases } from '@/apis/order';
-import { TBaseResponse } from '@/types/response.type';
+import { BaseResponse } from '@/types/response.type';
 import { ICreateOrderPayload, IOrder } from '@/interfaces/IOrder';
 
 export function useCreateOrder() {
-  return useMutation<TBaseResponse<IOrder>, Error, ICreateOrderPayload>({
+  return useMutation<BaseResponse<IOrder>, Error, ICreateOrderPayload>({
     mutationFn: createOrder,
   });
 }
