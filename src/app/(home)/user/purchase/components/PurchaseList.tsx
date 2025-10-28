@@ -24,6 +24,7 @@ const PurchaseList = ({ orders }: { orders: IOrder[] }) => {
       </Box>
     );
   }
+
   return (
     <Box>
       {orders.map((order) => (
@@ -46,7 +47,7 @@ const PurchaseList = ({ orders }: { orders: IOrder[] }) => {
               </Typography>
               <Box sx={DotStyle} />
               <Typography sx={{ fontSize: 14 }}>
-                {order?.shipment?.method === 1
+                {order?.shipment?.method !== 1
                   ? 'Nhận tại cửa hàng'
                   : 'Giao hàng tận nơi'}{' '}
               </Typography>

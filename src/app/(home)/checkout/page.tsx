@@ -1,8 +1,8 @@
 'use client';
 
-import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useFormik } from 'formik';
+import Link from 'next/link';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 
 import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -48,15 +48,19 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 // Simplified location option matching our BFF responses
 import { ILocationOption } from '@/interfaces/ILocation';
-import { useDistricts, useProvinces, useWards } from '@/queries/location';
 import { useCreateOrder } from '@/queries/order';
 import { usePaymentMethods } from '@/queries/payment';
+import { useProvince, useProvinces } from '@/queries/location';
+import { useSession } from '@/hooks/useSession';
+import { checkoutSchema } from '@/features/orders/schemas/create.schema';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 const Checkout = () => {
-  const { user, checkoutCart } = useAuthStore();
-  console.log('checkoutCart', checkoutCart);
+  const { checkoutCart } = useAuthStore();
   const { showNotification } = useNotificationStore();
+  const { data: userSession } = useSession();
   const { removeItem } = useCartStore();
+
   const breadcrumbsOptions = [
     { href: '/', label: 'Trang chủ' },
     { href: ROUTES.CHECKOUT, label: 'Thanh toán' },
@@ -65,7 +69,6 @@ const Checkout = () => {
   const router = useRouter();
 
   const [province, setProvince] = useState<ILocationOption | null>(null);
-  const [district, setDistrict] = useState<ILocationOption | null>(null);
   const [ward, setWard] = useState<ILocationOption | null>(null);
   const [detailAddress, setDetailAddress] = useState<string>('');
   const [shopAddress, setShopAddress] = useState<string>('');
@@ -73,25 +76,22 @@ const Checkout = () => {
   const [shipmentError, setShipmentError] = useState(false);
 
   const { data: provinces } = useProvinces();
-  const { data: districts = [] } = useDistricts(province?.code);
-  const { data: wards = [] } = useWards(district?.code);
+  const { data: provinceData } = useProvince(province?.code);
   const { data: paymentMethods } = usePaymentMethods();
   const { mutate: onCreateOrder } = useCreateOrder();
-  console.log('provinces', provinces?.data);
+
+  const provinceOptions = Object.values(provinces ?? {})
+    .filter((p) => p && typeof p === 'object' && p.code != null && p.name)
+    .filter((p, idx, arr) => arr.findIndex((x) => x.code === p.code) === idx);
   useEffect(() => {
-    setDistrict(null);
     setWard(null);
   }, [province?.code]);
-  useEffect(() => {
-    setWard(null);
-  }, [district?.code]);
 
   const handleModalOpen = () => setModalOpen(true);
   const handleModalClose = () => {
     setModalOpen(false);
     if (!detailAddress) {
       setProvince(null);
-      setDistrict(null);
       setWard(null);
       setDetailAddress('');
     }
@@ -114,7 +114,7 @@ const Checkout = () => {
       },
       paymentMethodId: 1,
     },
-    // validationSchema: checkoutSchema,
+    validationSchema: toFormikValidationSchema(checkoutSchema),
     validateOnChange: false,
     async onSubmit(values) {
       if (
@@ -136,10 +136,10 @@ const Checkout = () => {
           method: +values?.shipment?.method,
           address:
             values?.shipment?.method === 1
-              ? `${detailAddress}, ${ward?.name}, ${district?.name}, ${province?.name}`
+              ? `${detailAddress}, ${ward?.name}, ${province?.name}`
               : shopAddress,
         },
-        userId: user?.id ?? null,
+        userId: userSession?.data?.id ?? null,
       };
       onCreateOrder(payload, {
         onSuccess: (data) => {
@@ -161,6 +161,8 @@ const Checkout = () => {
       0
     );
   }, [checkoutCart]);
+
+  console.log('formik', formik);
 
   //   useEffect(() => {
   //     changeCustomer(customerData);
@@ -389,7 +391,7 @@ const Checkout = () => {
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 15, fontWeight: 600 }}>
-                                {ward?.name}, {district?.name}, {province?.name}
+                                {ward?.name}, {province?.name}
                               </Typography>
                               <Typography
                                 sx={{ fontSize: 14, fontWeight: 500 }}>
@@ -434,7 +436,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={provinces?.data ?? []}
+                            options={provinceOptions}
                             renderInput={(params) => (
                               <TextField {...params} label='Tỉnh/Thành phố' />
                             )}
@@ -450,23 +452,7 @@ const Checkout = () => {
                         <FormControl fullWidth margin='dense'>
                           <Autocomplete
                             disablePortal
-                            options={districts ?? []}
-                            renderInput={(params) => (
-                              <TextField {...params} label='Quận/Huyện' />
-                            )}
-                            onChange={(e, value) => setDistrict(value)}
-                            value={district}
-                            isOptionEqualToValue={(option, value) =>
-                              option?.code === value?.code
-                            }
-                            getOptionLabel={(option) => option?.name ?? ''}
-                            disabled={!province}
-                          />
-                        </FormControl>
-                        <FormControl fullWidth margin='dense'>
-                          <Autocomplete
-                            disablePortal
-                            options={wards ?? []}
+                            options={provinceData?.data.wards ?? []}
                             renderInput={(params) => (
                               <TextField {...params} label='Phường/Xã' />
                             )}
@@ -476,7 +462,7 @@ const Checkout = () => {
                               option?.code === value?.code
                             }
                             getOptionLabel={(option) => option?.name ?? ''}
-                            disabled={!district}
+                            disabled={!province}
                           />
                         </FormControl>
                         <FormControl
@@ -511,7 +497,6 @@ const Checkout = () => {
                           variant='contained'
                           disabled={
                             !province ||
-                            !district ||
                             !ward ||
                             !Boolean(detailAddress?.length > 3)
                           }

@@ -5,7 +5,6 @@ import ProductCatalog from './components/product-catalog';
 import BANNER_BG from '@/assets/geardn.jpg';
 import LayoutContainer from '@/components/layout-container';
 import Explore from './components/explore';
-// import { fetchProducts } from '@/data/product.server';
 import { getCategories } from '@/data/category.server';
 import { getProducts } from '@/data/product.server';
 import {

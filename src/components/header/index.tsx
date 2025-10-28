@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import {
   Box,
@@ -23,13 +22,13 @@ import LOGO from '@/assets/geardn-logo.png';
 import { ROUTES } from '@/constants/route';
 import { useSession } from '@/hooks/useSession';
 import { IUser } from '@/interfaces/IUser';
-import { useCartStore } from '@/stores/cart-store';
-import AppLink from '../common/AppLink';
-import { HeaderStyle } from './style';
-import { useLogout } from '@/queries/auth';
 import { AppError } from '@/lib/errors/app-error';
+import { useLogout } from '@/queries/auth';
+import { useCartStore } from '@/stores/cart-store';
 import { useNotificationStore } from '@/stores/notification-store';
+import AppLink from '../common/AppLink';
 import SearchIconExpand from '../common/SearchIconExpand';
+import { HeaderStyle } from './style';
 
 const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
   const router = useRouter();
@@ -137,7 +136,7 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                 },
               }}>
               <ListItem>
-                <Typography>Danh mục</Typography>
+                <Typography onClick={scrollToProductList}>Danh mục</Typography>
               </ListItem>
               <ListItem>
                 <Typography onClick={scrollToProductList}>Shop</Typography>
@@ -156,7 +155,9 @@ const Header = ({ initialUser }: { initialUser?: IUser | null }) => {
                 width: '100%',
               }}>
               <SearchIconExpand
-                onSearch={(q) => console.log('search:', q)}
+                onSearch={(q) =>
+                  router.replace(`search?keyword=${q.toString()}`)
+                }
                 placeholder='Tìm sản phẩm…'
                 maxWidth={150}
                 debounceMs={1000}

@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-
-// import { ColorModeProvider } from '@/contexts/ColorModeContext';
 import Layout from '@/components/layout';
 
 import 'swiper/css';

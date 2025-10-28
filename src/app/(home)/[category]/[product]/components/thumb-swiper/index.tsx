@@ -20,7 +20,6 @@ const ThumbSwiper = ({ images, setThumbsSwiper }: IProps) => {
         direction={'horizontal'}
         spaceBetween={20}
         slidesPerView={images?.length ?? 3}
-        // freeMode={true}
         watchSlidesProgress={true}
         modules={[FreeMode, Navigation, Thumbs]}
         navigation={true}

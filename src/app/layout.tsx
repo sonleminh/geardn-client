@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  icons: { icon: '/icon.png' }, // hoặc '/icon.png'
+  icons: { icon: '/icon.png' },
 };
 
 export default function RootLayout({

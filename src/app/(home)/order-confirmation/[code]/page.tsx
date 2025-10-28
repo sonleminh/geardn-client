@@ -1,6 +1,7 @@
+import { getOrderConfirm } from '@/data/order.server';
 import { Box } from '@mui/material';
-import { fetchOrder } from '@/data/order.server';
 import OrderConfirmationClient from './OrderComfirmationClient';
+import { notFound } from 'next/navigation';
 
 export default async function OrderConfirmation({
   params,
@@ -9,11 +10,12 @@ export default async function OrderConfirmation({
 }) {
   const { code } = await params;
 
-  const orderData = await fetchOrder({ code, revalidate: 0 });
+  const res = await getOrderConfirm(code);
+  if (!res) notFound();
 
   return (
     <Box>
-      <OrderConfirmationClient data={orderData.data} />
+      <OrderConfirmationClient data={res.data} />
     </Box>
   );
 }

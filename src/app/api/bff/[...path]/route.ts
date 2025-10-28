@@ -48,7 +48,7 @@ let duplex: 'half' | undefined;
 
   // Optional allowlist for query keys. Keep empty to allow all.
   // Example: const ALLOWED = new Set(['limit','sort','q'])
-  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword', 'cursor', 'skuIds'] as string[];
+  const ALLOWED_VALUES = ['page', 'limit', 'sortBy', 'order', 'keyword', 'cursor', 'skuIds', 'type'] as string[];
   const ALLOWED: ReadonlySet<string> | null = new Set<string>(ALLOWED_VALUES);
 
 const qs = new URLSearchParams();
@@ -58,7 +58,6 @@ if (ALLOWED !== null && !ALLOWED.has(k)) continue;
 qs.set(k, v);
 }
   const target = `${BE}/${path}${qs.size ? `?${qs}` : ''}`;
-
   const method = req.method;
   const headers = buildForwardHeaders(req);
 

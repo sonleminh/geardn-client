@@ -36,14 +36,11 @@ function CustomTabPanel(props: TabPanelProps) {
 
 const Purchase = () => {
   const [type, setType] = useState(0);
-
   const { data: userPurchases, isLoading } = useUserPurchases({ type });
-  console.log('userPurchases', userPurchases);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setType(newValue);
   };
 
-  console.log('type', type);
   return (
     <Box sx={{ bgcolor: '' }}>
       <Box sx={{ width: '100%' }}>

@@ -1,4 +1,3 @@
-// import { fetchProduct, getProductBySlug } from '@/data/product.server';
 import { Box } from '@mui/material';
 import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/data/product.server';

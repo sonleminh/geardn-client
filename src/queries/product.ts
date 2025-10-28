@@ -1,6 +1,6 @@
 import { getProduct, getProductsByCategory, searchProducts } from '@/apis/product';
 import { IProduct } from '@/interfaces/IProduct';
-import { BaseResponse, BaseResponse, TCursorPaginatedResponse } from '@/types/response.type';
+import { BaseResponse, ProductsByCategoryResponse, SearchProductsResponse } from '@/types/response.type';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 export interface IGetProductByCateParams {
@@ -8,30 +8,16 @@ export interface IGetProductByCateParams {
   sort?: 'asc' | 'desc' | '';
 }
 
-// export function useSearchProducts(initial: PageListResponse<IProduct> | null, sp: URLSearchParams) {
-//    const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
-//   const order = (sp.get('order') === 'asc' ? 'asc' : '');
-
-//   return useQuery<TCursorPaginatedResponse<IProduct>, Error>({
-//     queryKey: ['product', { sortBy, order }],
-//     queryFn: () => getProducts({ sortBy, order }),
-//     initialData: initial ?? undefined, 
-//     staleTime: 0,
-//     gcTime: 0,
-//   });
-// }
-
-export function useSearchProductsInfinite(initial: TCursorPaginatedResponse<IProduct> | null, sp: URLSearchParams ) {
+export function useSearchProductsInfinite(initial: SearchProductsResponse<IProduct> | null, sp: URLSearchParams ) {
   const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
   const order = (sp.get('order') === 'asc' ? 'asc' : '');
-  const limit = '2';
-
+  const keyword = (sp.get('keyword') ?? '').toString();
   return useInfiniteQuery
   ({
-    queryKey: ['products', { sortBy, order, limit }] as const,
-    queryFn: ({ pageParam }) => searchProducts({ sortBy, order, limit, cursor: pageParam as string|undefined }),
+    queryKey: ['products', { sortBy, order, keyword }] as const,
+    queryFn: ({ pageParam }) => searchProducts({ sortBy, order, keyword, cursor: pageParam as string|undefined }),
     initialPageParam: undefined as string|undefined,
-    getNextPageParam: (last) => last?.meta.nextCursor ?? undefined,
+    getNextPageParam: (last) => last?.meta?.nextCursor ?? undefined,
     initialData: initial ? { pages: [initial], pageParams: [undefined] } : undefined,
     staleTime: 0,
     select: d => {
@@ -56,7 +42,7 @@ export function useGetProduct(initialData?: BaseResponse<IProduct> | null) {
   });
 }
 
-export function useProductsByCategoryInfinite(slug: string,initial: TCursorPaginatedResponse<IProduct> | null, sp: URLSearchParams ) {
+export function useProductsByCategoryInfinite(slug: string,initial: ProductsByCategoryResponse<IProduct> | null, sp: URLSearchParams ) {
   const sortBy = (sp.get('sortBy') === 'price' ? 'price' : '') ;
   const order = (sp.get('order') === 'asc' ? 'asc' : '');
 

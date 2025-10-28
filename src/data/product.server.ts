@@ -1,8 +1,7 @@
-import { headers } from 'next/headers';
 import { IProduct } from '@/interfaces/IProduct';
+import { headers } from 'next/headers';
 // import { PaginatedResponse, ProductsByCategoryResponse, ApiResponse, SearchProductsResponse } from '@/types/response.type';
-import { safeJson, toErrorResult } from '@/lib/http';
-import { BaseResponse, NormalizedResponse, PageListResponse, ProductsByCategoryResponse } from '@/types/response.type';
+import { BaseResponse, PageListResponse, ProductsByCategoryResponse, SearchProductsResponse } from '@/types/response.type';
 
 export type PageMeta = { total: number; page: number; pageSize: number }
 
@@ -27,7 +26,7 @@ export async function searchProducts(qs: URLSearchParams) {
   });
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`Search products fetch failed: ${r.status}`);
-  return r.json() as Promise<NormalizedResponse<IProduct>>; 
+  return r.json() as Promise<SearchProductsResponse<IProduct>>; 
 }
 
 

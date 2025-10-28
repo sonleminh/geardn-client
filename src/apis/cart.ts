@@ -2,7 +2,7 @@ import { IAddCartItemPayload, ICartResponse, ICartStockItem, ISyncCartPayload, I
 import { BaseResponse } from "@/types/response.type";
 import { bff } from "@/lib/api-fetch";
 
-export const getCart = () => bff<BaseResponse<ICartResponse>>('/api/bff/cart');
+export const getCart = () => bff<BaseResponse<ICartResponse>>('/api/bff/carts');
 
 export const getCartStock = (skuIds: number[]) =>
   bff<BaseResponse<ICartStockItem[]>>(`/api/bff/carts/stocks?skuIds=${skuIds.join(',')}`);

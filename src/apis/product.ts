@@ -1,6 +1,6 @@
 import { IProduct } from "@/interfaces/IProduct";
 import { bff } from "@/lib/api-fetch";
-import { NormalizedResponse, BaseResponse } from "@/types/response.type";
+import { BaseResponse, ProductsByCategoryResponse, SearchProductsResponse } from "@/types/response.type";
 
 function buildQS(params: Record<string, string | undefined | null>) {
   const sp = new URLSearchParams();
@@ -18,14 +18,14 @@ export type ProductPage = {
   total: number;
 };
 
-export const searchProducts = ( opts:{ sortBy:'createdAt'|'price' | ''; order:'asc'|'desc' | ''; limit?:string; cursor?:string;} ) => {
+export const searchProducts = ( opts:{ sortBy:'createdAt'|'price' | ''; order:'asc'|'desc' | ''; keyword?:string; cursor?:string;} ) => {
   const qs = buildQS({
     sortBy: opts.sortBy || undefined,
     order: opts.order || undefined,
-    limit: opts.limit || undefined,
+    keyword: opts.keyword || undefined,
     cursor: opts.cursor,
   });
-  return bff<NormalizedResponse<IProduct>>(
+  return bff<SearchProductsResponse<IProduct>>(
     `/api/bff/products/search${qs}`
   );
 }
@@ -36,9 +36,9 @@ export const getProductsByCategory = (slug: string, opts:{ sortBy:'createdAt'|'p
     order: opts.order || undefined,
     cursor: opts.cursor,
   });
-  return bff<NormalizedResponse<IProduct>>(
+  return bff<ProductsByCategoryResponse<IProduct>>(
     `/api/bff/products/category/slug/${encodeURIComponent(slug)}${qs}`
   );
 }
 
-export const getProduct = (slug: string) => bff<BaseResponse<IProduct>>(`/api/bff/products/slug/${slug}`);
+export const getProduct = (slug: string) => bff<BaseResponse<IProduct>>(`/api/bff/products/${slug}`);

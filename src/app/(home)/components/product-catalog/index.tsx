@@ -21,7 +21,7 @@ import LayoutContainer from '@/components/layout-container';
 
 import { ProductFilters } from '@/components/common/ProductFilters';
 import { IProduct } from '@/interfaces/IProduct';
-import { Pagigation } from '@/types/response.type';
+import { Pagination as PaginationType } from '@/types/response.type';
 import { ProductListStyle } from './style';
 import { IQueryParams } from '@/interfaces/IQuery';
 import { ICategory } from '@/interfaces/ICategory';
@@ -36,7 +36,7 @@ const ProductCatalog = ({
 }: {
   products: IProduct[] | undefined;
   categories: ICategory[] | undefined;
-  pagination: Pagigation | undefined;
+  pagination: PaginationType | undefined;
   params: IQueryParams;
 }) => {
   const router = useRouter();

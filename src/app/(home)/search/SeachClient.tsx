@@ -6,29 +6,21 @@ import { ProductFilters } from '@/components/common/ProductFilters';
 import LayoutContainer from '@/components/layout-container';
 import { IProduct } from '@/interfaces/IProduct';
 import { IQueryParams } from '@/interfaces/IQuery';
-import {
-  useGetProducts,
-  useProductsByCategoryInfinite,
-  useSearchProductsInfinite,
-} from '@/queries/product';
-import {
-  TCursorPaginatedResponse,
-  PageListResponse,
-} from '@/types/response.type';
+import { useSearchProductsInfinite } from '@/queries/product';
+import { SearchProductsResponse } from '@/types/response.type';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Grid2, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 type Props = {
-  initial: TCursorPaginatedResponse<IProduct> | null;
+  initial: SearchProductsResponse<IProduct> | null;
   params: IQueryParams;
 };
 
 export default function SearchClient({ initial, params }: Props) {
   const sp = useSearchParams();
   const q = useSearchProductsInfinite(initial, sp);
-  console.log('q', q);
   const total = q?.data?.meta?.total ?? 0;
   const products = useMemo(() => {
     const seen = new Set<number>();

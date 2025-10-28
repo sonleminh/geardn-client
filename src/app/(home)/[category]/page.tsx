@@ -1,4 +1,3 @@
-// import { fetchProductsByCategory } from '@/data/product.server';
 import { Box } from '@mui/material';
 import ProductByCategoryClient from './ProductByCategoryClient';
 import { getProductsByCategory } from '@/data/product.server';

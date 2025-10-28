@@ -1,6 +1,5 @@
 import { OrderStatus } from "@/constants/orderStatus";
 import { ICreateOrderPayload, IOrder } from "@/interfaces/IOrder";
-import { IPaymentMethod } from "@/interfaces/IPayment";
 import { BaseResponse } from "@/types/response.type";
 
 type OrdersMeta = {
@@ -11,7 +10,7 @@ type OrdersMeta = {
 
 
 export async function createOrder(payload: ICreateOrderPayload) {
-  const res = await fetch('/api/bff/order/create', {
+  const res = await fetch('/api/bff/orders', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(payload),
@@ -26,14 +25,8 @@ export async function getUserPurchases(params: { type?: number } = {}) {
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null && v !== 0) qs.set(k, String(v));
   }
-  const url = `/api/bff/order/user-purchase${qs.toString() ? `?${qs}` : ''}`;
+  const url = `/api/bff/orders/user-purchases${qs.toString() ? `?${qs}` : ''}`;
   const r = await fetch(url, { cache: 'no-store' });
   if (!r.ok) throw new Error(String(r.status));
   return r.json() as Promise<BaseResponse<IOrder[], OrdersMeta>>;
-}
-
-export async function getPaymentMethods() {
-  const r = await fetch('/api/bff/payment-method', { cache: 'no-store' });
-  if (!r.ok) throw new Error(String(r.status));
-  return r.json() as Promise<BaseResponse<IPaymentMethod[]>>;
 }

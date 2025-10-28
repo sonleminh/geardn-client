@@ -74,12 +74,6 @@ const LoginPage = () => {
           cartItemId: item?.id,
         }));
         syncCart(syncCartData);
-        // login({
-        //   id: userData?.data?.id,
-        //   email: userData?.data?.email,
-        //   name: userData?.data?.name,
-        //   picture: userData?.data?.picture,
-        // });
         router.push('/');
         showNotification('Đăng nhập thành công', 'success');
       } catch (error) {
@@ -99,6 +93,30 @@ const LoginPage = () => {
     if (!idToken) return;
     try {
       await onGoogleLogin({ idToken });
+      const syncPayload = cartItems?.map(({ productId, skuId, quantity }) => ({
+        productId,
+        skuId,
+        quantity,
+      }));
+      const updatedCart = await onSyncCart({ items: syncPayload });
+      const syncCartData = updatedCart?.data?.items?.map((item) => ({
+        productId: item?.productId,
+        skuId: item?.sku?.id,
+        productName: item?.product?.name,
+        imageUrl: item?.sku?.imageUrl
+          ? item?.sku?.imageUrl
+          : item?.product?.images?.[0],
+        sellingPrice: item?.sku?.sellingPrice,
+        quantity: item?.quantity,
+        attributes: item?.sku?.productSkuAttributes.map(
+          (productSkuAttribute: IProductSkuAttributes) => ({
+            attribute: productSkuAttribute?.attributeValue?.attribute?.name,
+            attributeValue: productSkuAttribute?.attributeValue?.value,
+          })
+        ),
+        cartItemId: item?.id,
+      }));
+      syncCart(syncCartData);
       router.push('/');
       showNotification('Đăng nhập thành công', 'success');
     } catch (error) {
@@ -258,9 +276,6 @@ const LoginPage = () => {
             <GoogleLogin
               onSuccess={(cred: CredentialResponse) => {
                 handleGoogleLogin(cred);
-                // const credentialDecoded = jwtDecode(
-                //   credentialResponse.credential as string
-                // );
               }}
               onError={() => {
                 console.log('Login Failed');
