@@ -22,17 +22,6 @@ export type AuthState = {
 
 export type AuthStore = AuthState
 
-// export const useAuthStore = (
-// ) => {
-//   return createStore<AuthStore>()((devtools(persist((set) => ({
-//     user: null,
-//     login: (user) => set({ user }, false, "login"),
-//     logout: () => set(() => ({ user: null })),
-//   }), {
-//     name: 'store',
-//   }))))
-// }
-
 export const useAuthStore = create<AuthState>()(
  devtools( persist(
     (set) => ({

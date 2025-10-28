@@ -1,4 +1,3 @@
-// stores/useCartStore.ts
 import { ICartStoreItem } from '@/interfaces/ICart';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';

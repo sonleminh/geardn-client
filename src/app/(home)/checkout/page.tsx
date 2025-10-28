@@ -52,7 +52,7 @@ import { useCreateOrder } from '@/queries/order';
 import { usePaymentMethods } from '@/queries/payment';
 import { useProvince, useProvinces } from '@/queries/location';
 import { useSession } from '@/hooks/useSession';
-import { checkoutSchema } from '@/features/orders/schemas/create.schema';
+import { checkoutSchema } from '@/features/orders/schemas/checkout.schema';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 const Checkout = () => {
@@ -533,7 +533,7 @@ const Checkout = () => {
                         icon={<CalendarTodayOutlinedIcon />}
                         selected={formik?.values?.shipment?.deliveryDate}
                         onChange={(e) =>
-                          formik.setFieldValue('shipment.delivery_date', e)
+                          formik.setFieldValue('shipment.deliveryDate', e)
                         }
                         minTime={new Date(new Date().setHours(7, 0, 0, 0))}
                         maxTime={new Date(new Date().setHours(23, 30, 0, 0))}
@@ -662,7 +662,7 @@ const Checkout = () => {
                   Phương thức thanh toán
                 </Typography>
                 <RadioGroup
-                  name='payment.method'
+                  name='paymentMethodId'
                   onChange={handleChange}
                   value={formik?.values?.paymentMethodId}>
                   {paymentMethods?.data?.map((item) => (

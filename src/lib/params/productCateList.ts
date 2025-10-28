@@ -5,7 +5,7 @@ export type ProductListParams = {
   sortBy: SortBy;
   order: Order;
   limit: number;
-  cursor?: string | null; // optional
+  cursor?: string | null;
 };
 
 export function parseParams(

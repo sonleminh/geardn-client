@@ -2,7 +2,7 @@ export type SortByKey = 'createdAt' | 'price';
 export type OrderKey = 'asc' | 'desc';
 export interface ProductListParams {
   keyword?: string;
-  page?: number;     // 1-based
+  page?: number;
   limit?: number;
   sortBy?: SortByKey;
   order?: OrderKey;
@@ -58,7 +58,7 @@ export function toURLSearchParams(p: ProductListParams) {
   if (p.category) qs.set('category', p.category);
   if (p.sortBy) qs.set('sortBy', p.sortBy);
   if (p.order) qs.set('order', p.order);
-  if (p.page && p.page > 1) qs.set('page', String(p.page));   // bỏ page=1 để dùng default BE
-  if (p.limit) qs.set('limit', String(p.limit));              // chỉ set khi user chọn cụ thể
+  if (p.page && p.page > 1) qs.set('page', String(p.page));
+  if (p.limit) qs.set('limit', String(p.limit));              
   return qs;
 }

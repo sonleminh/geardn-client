@@ -14,6 +14,6 @@ export const useColorModeStore = create<ColorModeState>()(
           return { mode: state.mode === 'light' ? 'dark' : 'light' };
         }),
     }),
-    { name: 'color-mode-storage' } // 🛒 Persists cart for guest users
+    { name: 'color-mode-storage' }
   ))
 );
