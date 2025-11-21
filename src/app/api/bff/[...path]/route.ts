@@ -5,8 +5,22 @@ type NodeReadable = ReadableStream<Uint8Array>;
 
 export const runtime = 'nodejs';
 
-const BE = process.env.BACKEND_API_URL!;
+function getBackendBaseUrl() {
+  const envUrl = process.env.BACKEND_API_URL;
+  if (envUrl && envUrl.length > 0) return envUrl;
+
+  if (process.env.NODE_ENV === 'production') {
+    return 'http://geardn-server:8080/api'; // gọi service trong docker network
+  }
+  return 'http://localhost:8080/api';        // chạy dev ngoài docker
+}
+
 const FETCH_TIMEOUT_MS = Number(process.env.FETCH_TIMEOUT_MS ?? 8000);
+
+// const BE =   process.env.BACKEND_API_URL ??
+//   (process.env.NODE_ENV === 'production'
+//     ? 'http://geardn-server:8080/api'   // chạy trong Docker
+//     : 'http://localhost:8080/api'); 
 
 const FORWARD_ALLOW = new Set(['authorization', 'user-agent', 'referer', 'accept-language', 'content-type']);
 
@@ -57,7 +71,12 @@ if (v == null || v === '') continue;
 if (ALLOWED !== null && !ALLOWED.has(k)) continue;
 qs.set(k, v);
 }
+  const BE = getBackendBaseUrl();
+  console.log('BFF → target BE:', BE, 'NODE_ENV:', process.env.NODE_ENV, 'BACKEND_API_URL:', process.env.BACKEND_API_URL);
+
   const target = `${BE}/${path}${qs.size ? `?${qs}` : ''}`;
+
+  // const target = `${BE}/${path}${qs.size ? `?${qs}` : ''}`;
   const method = req.method;
   const headers = buildForwardHeaders(req);
 

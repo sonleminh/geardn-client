@@ -68,8 +68,6 @@ export default function SearchIconExpand({
           px: 0.5,
           py: 0.25,
           borderRadius: 2,
-          //   bgcolor: 'transparent',
-          //   '&:hover': { bgcolor: 'action.hover' },
           transition: (t) => t.transitions.create(['background-color']),
         }}>
         <IconButton size='small' aria-label='Search' onClick={open}>
